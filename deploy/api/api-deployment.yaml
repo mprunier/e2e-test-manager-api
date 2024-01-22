@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: e2e-testing-manager-api
+  namespace: test-e2e
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: e2e-testing-manager-api
+  template:
+    metadata:
+      labels:
+        app: e2e-testing-manager-api
+    spec:
+      imagePullSecrets:
+        - name: nexus-docker-registry-credentials
+      containers:
+        - name: e2e-testing-manager-api
+          image: nexus.itsf.io:5005/galaxion/e2e-testing-manager:0.5.0
+          imagePullPolicy: Always
+          livenessProbe:
+            httpGet:
+              path: /q/health/live
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /q/health/ready
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            limits:
+              cpu: "2"
+              memory: "2048Mi"
+            requests:
+              cpu: "1"
+              memory: "1024Mi"
+          env:
+            - name: JAVA_OPTS
+              value: -Xms1024m -Xmx1024m
+            - name: QUARKUS_HTTP_PORT
+              value: "8080"
+            - name: QUARKUS_DATASOURCE_JDBC_URL
+              value: "jdbc:postgresql://e2e-testing-manager-postgresql:5432/e2e-testing-manager"
+            - name: QUARKUS_DATASOURCE_USERNAME
+              value: "mprunier"
+            - name: QUARKUS_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: e2e-testing-manager-postgres-credentials
+                  key: password

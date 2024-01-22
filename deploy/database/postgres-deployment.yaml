@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: e2e-testing-manager-postgres-deployment
+  namespace: test-e2e
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: e2e-testing-manager-postgres
+  template:
+    metadata:
+      labels:
+        app: e2e-testing-manager-postgres
+    spec:
+      containers:
+        - name: e2e-testing-manager-postgres
+          image: postgres:16
+          env:
+            - name: POSTGRES_DB
+              value: e2e-testing-manager
+            - name: POSTGRES_USER
+              value: mprunier
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: e2e-testing-manager-postgres-credentials
+                  key: password
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: e2e-testing-manager-postgres-storage
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: e2e-testing-manager-postgres-storage
+          persistentVolumeClaim:
+            claimName: e2e-testing-manager-postgres-pvc
