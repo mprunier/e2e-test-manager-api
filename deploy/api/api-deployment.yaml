@@ -17,7 +17,7 @@ spec:
         - name: nexus-docker-registry-credentials
       containers:
         - name: e2e-testing-manager-api
-          image: nexus.itsf.io:5005/galaxion/e2e-testing-manager:0.5.0
+          image: nexus.itsf.io:5005/galaxion/e2e-testing-manager:0.6.0
           imagePullPolicy: Always
           livenessProbe:
             httpGet:

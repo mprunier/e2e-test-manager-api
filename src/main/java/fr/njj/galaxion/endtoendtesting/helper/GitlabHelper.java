@@ -121,7 +121,7 @@ public final class GitlabHelper {
                 }
             }
         } catch (Exception exception) {
-            throw new ConfigurationSynchronizationException("getChangedFilesAfterDate : " + exception.getMessage());
+            throw new ConfigurationSynchronizationException("Modified File Recovery Error : " + exception.getMessage());
         }
 
         return changedFiles;

@@ -87,7 +87,7 @@ public class GitlabService {
                .call();
             return tempDirectory;
         } catch (GitAPIException exception) {
-            throw new ConfigurationSynchronizationException("cloneRepo : " + exception.getMessage());
+            throw new ConfigurationSynchronizationException("Clone Repo Error : " + exception.getMessage());
         }
     }
 

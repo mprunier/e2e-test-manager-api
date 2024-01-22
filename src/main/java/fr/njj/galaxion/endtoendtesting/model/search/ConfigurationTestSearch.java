@@ -47,7 +47,7 @@ public final class ConfigurationTestSearch {
         }
 
         query.append(String.join(" AND ", conditions));
-        query.append(" ORDER BY configurationSuite.title, id asc");
+        query.append(" ORDER BY file, configurationSuite.title desc");
 
         return query.toString();
     }

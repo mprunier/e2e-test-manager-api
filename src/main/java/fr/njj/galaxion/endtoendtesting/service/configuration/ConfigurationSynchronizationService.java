@@ -69,6 +69,7 @@ public class ConfigurationSynchronizationService {
 
     @Transactional
     public List<String> synchronize(Long environmentId) throws IOException {
+        log.info("Synchronize Environment id [{}].", environmentId);
         var errors = new ArrayList<String>();
         testHelper.assertNotInProgressTestByEnvironmentId(environmentId);
         var now = ZonedDateTime.now();
@@ -181,7 +182,7 @@ public class ConfigurationSynchronizationService {
                     }
                 }
             } catch (IOException exception) {
-                throw new ConfigurationSynchronizationException("listAllTestFiles : " + exception.getMessage());
+                throw new ConfigurationSynchronizationException("List Files Error : " + exception.getMessage());
             }
         }
         return allTestFilePaths;

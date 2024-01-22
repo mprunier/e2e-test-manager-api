@@ -47,7 +47,7 @@ public final class ConfigurationIdentifierSearch {
         }
 
         query.append(String.join(" AND ", conditions));
-        query.append(" ORDER BY identifier desc");
+        query.append(" ORDER BY configurationTest.file desc");
 
         return query.toString();
     }

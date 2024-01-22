@@ -42,7 +42,7 @@ public final class ConfigurationSuiteSearch {
         }
 
         query.append(String.join(" AND ", conditions));
-        query.append(" ORDER BY title desc");
+        query.append(" ORDER BY file desc");
 
         return query.toString();
     }

@@ -8,7 +8,7 @@ public class ConfigurationSynchronizationException extends CustomException {
     public ConfigurationSynchronizationException(String description) {
         super(Response.Status.NOT_FOUND,
               "configuration-synchronization-error",
-              "Error during synchronization. Contact administrator.",
+              "Error during synchronization. Contact administrator. (" + description + ")",
               description);
     }
 }
