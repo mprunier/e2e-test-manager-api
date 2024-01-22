@@ -1,0 +1,22 @@
+# Java
+target
+
+# Maven
+# Ignore .mvn but keep maven-wrapper.properties
+.mvn/*
+!.mvn/wrapper
+.mvn/wrapper/*
+!.mvn/wrapper/maven-wrapper.properties
+
+# Editor IntelliJ
+/.idea
+*.iml
+
+# macOS
+.DS_Store
+.tomcat-root/
+
+.project
+.settings
+bin/
+/.env

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: e2e-testing-manager-api
+  namespace: test-e2e
+spec:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: e2e-testing-manager-api

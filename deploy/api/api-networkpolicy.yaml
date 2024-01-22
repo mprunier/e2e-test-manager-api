@@ -1,0 +1,14 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: e2e-testing-manager-api-allow-traffic
+  namespace: test-e2e
+spec:
+  podSelector: { }
+  ingress:
+    - { }
+  egress:
+    - { }
+  policyTypes:
+    - Egress
+    - Ingress

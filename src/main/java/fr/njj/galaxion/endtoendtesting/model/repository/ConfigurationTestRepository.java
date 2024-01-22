@@ -1,0 +1,41 @@
+package fr.njj.galaxion.endtoendtesting.model.repository;
+
+import fr.njj.galaxion.endtoendtesting.domain.enumeration.ConfigurationStatus;
+import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
+import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
+import jakarta.enterprise.context.ApplicationScoped;
+import java.util.List;
+import java.util.Optional;
+
+@ApplicationScoped
+public class ConfigurationTestRepository
+    implements PanacheRepositoryBase<ConfigurationTestEntity, Long> {
+
+  public void deleteByFileAndEnv(String file, long environmentId) {
+    delete("environment.id = ?1 AND file = ?2", environmentId, file);
+  }
+
+  public Optional<ConfigurationTestEntity> findBy(
+      String file, long environmentId, long suiteId, String title) {
+    return find(
+            "environment.id = ?1 AND file = ?2 AND configurationSuite.id = ?3 AND title = ?4",
+            environmentId,
+            file,
+            suiteId,
+            title)
+        .firstResultOptional();
+  }
+
+  public List<ConfigurationTestEntity> findAllBy(long environmentId) {
+    return list("environment.id = ?1 ORDER BY title", environmentId);
+  }
+
+  public List<ConfigurationTestEntity> findAllNewByEnvironment(long environmentId) {
+    return list("environment.id = ?1 AND status = ?2", environmentId, ConfigurationStatus.NEW);
+  }
+
+  public void deleteByEnvAndFileAndNotInTestIds(
+      long environmentId, String file, List<Long> testIds) {
+    delete("environment.id IN ?1 AND file = ?2 AND id NOT IN ?3", environmentId, file, testIds);
+  }
+}
