@@ -1,6 +1,5 @@
 package fr.njj.galaxion.endtoendtesting.service;
 
-import fr.njj.galaxion.endtoendtesting.domain.enumeration.ConfigurationStatus;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.JobType;
 import fr.njj.galaxion.endtoendtesting.domain.exception.RunParameterException;
 import fr.njj.galaxion.endtoendtesting.domain.request.RunTestOrSuiteRequest;
@@ -25,7 +24,6 @@ import java.util.List;
 
 import static fr.njj.galaxion.endtoendtesting.domain.constant.CommonConstant.NO_SUITE;
 import static fr.njj.galaxion.endtoendtesting.helper.EnvironmentHelper.buildVariablesEnvironment;
-import static fr.njj.galaxion.endtoendtesting.helper.TestHelper.checkOneFailed;
 
 @Slf4j
 @ApplicationScoped
@@ -58,7 +56,7 @@ public class RunSuiteOrTestService {
                 grep.append(" ");
             }
             grep.append(configurationTest.getTitle());
-            setStatus(configurationTest);
+//            setStatus(configurationTest);
         } else {
             var configurationSuite = configurationSuiteRetrievalService.get(request.getConfigurationSuiteId());
             environment = configurationSuite.getEnvironment();
@@ -106,8 +104,8 @@ public class RunSuiteOrTestService {
     private void addConfigurationTestsFromSuite(ConfigurationSuiteEntity configurationSuite,
                                                 List<ConfigurationTestEntity> configurationTests) {
         configurationTests.addAll(configurationSuite.getConfigurationTests());
-        configurationSuite.setStatus(ConfigurationStatus.IN_PROGRESS);
-        configurationSuite.getConfigurationTests().forEach(test -> test.setStatus(ConfigurationStatus.IN_PROGRESS));
+//        configurationSuite.setStatus(ConfigurationStatus.IN_PROGRESS);
+//        configurationSuite.getConfigurationTests().forEach(test -> test.setStatus(ConfigurationStatus.IN_PROGRESS));
         if (configurationSuite.getSubSuites() != null) {
             for (var subSuite : configurationSuite.getSubSuites()) {
                 addConfigurationTestsFromSuite(subSuite, configurationTests);
@@ -115,13 +113,13 @@ public class RunSuiteOrTestService {
         }
     }
 
-    private static void setStatus(ConfigurationTestEntity configurationTest) {
-        configurationTest.setStatus(ConfigurationStatus.IN_PROGRESS);
-        var hasOneFailed = checkOneFailed(configurationTest.getConfigurationSuite(), configurationTest);
-        if (!hasOneFailed.get()) {
-            configurationTest.getConfigurationSuite().setStatus(ConfigurationStatus.IN_PROGRESS);
-        }
-    }
+//    private static void setStatus(ConfigurationTestEntity configurationTest) {
+//        configurationTest.setStatus(ConfigurationStatus.IN_PROGRESS);
+//        var hasOneFailed = checkOneFailed(configurationTest.getConfigurationSuite(), configurationTest);
+//        if (!hasOneFailed.get()) {
+//            configurationTest.getConfigurationSuite().setStatus(ConfigurationStatus.IN_PROGRESS);
+//        }
+//    }
 
     private static void buildSuiteGrep(ConfigurationSuiteEntity configurationSuite, StringBuilder grep) {
         if (!NO_SUITE.equals(configurationSuite.getTitle())) {

@@ -34,7 +34,7 @@ public class ConfigurationSuiteRepository implements PanacheRepositoryBase<Confi
         delete("environment.id = ?1 AND file = ?2", environmentId, file);
     }
 
-    public void deleteBy(long environmentId, String file, List<Long> suiteIds) {
+    public void deleteByEnvAndFileAndNotInSuiteIds(long environmentId, String file, List<Long> suiteIds) {
         delete("environment.id IN ?1 AND file = ?2 AND id NOT IN ?3", environmentId, file, suiteIds);
     }
 

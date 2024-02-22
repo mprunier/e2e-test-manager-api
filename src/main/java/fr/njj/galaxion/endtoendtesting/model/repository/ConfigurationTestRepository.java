@@ -10,7 +10,7 @@ import java.util.Optional;
 @ApplicationScoped
 public class ConfigurationTestRepository implements PanacheRepositoryBase<ConfigurationTestEntity, Long> {
 
-    public void deleteBy(String file, long environmentId) {
+    public void deleteByFileAndEnv(String file, long environmentId) {
         delete("environment.id = ?1 AND file = ?2", environmentId, file);
     }
 
@@ -22,7 +22,7 @@ public class ConfigurationTestRepository implements PanacheRepositoryBase<Config
         return find("environment.id = ?1", environmentId).stream().toList();
     }
 
-    public void deleteBy(long environmentId, String file, List<Long> testIds) {
+    public void deleteByEnvAndFileAndNotInTestIds(long environmentId, String file, List<Long> testIds) {
         delete("environment.id IN ?1 AND file = ?2 AND id NOT IN ?3", environmentId, file, testIds);
     }
 }

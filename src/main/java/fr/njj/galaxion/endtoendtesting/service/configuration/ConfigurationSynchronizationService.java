@@ -158,6 +158,7 @@ public class ConfigurationSynchronizationService {
         }
     }
 
+    //  Supprime les tests qui ne sont plus dans le repo
     private void cleanConfigurations(File projectFolder, EnvironmentEntity environment) {
         var allTestFiles = listAllTestFiles(projectFolder);
         var allConfTestFiles = environment.getConfigurationSuites().stream().map(ConfigurationSuiteEntity::getFile).toList();

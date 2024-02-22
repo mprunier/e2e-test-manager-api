@@ -34,27 +34,27 @@ public class TestHelper {
     public static void updateStatus(TestEntity test, ConfigurationStatus status, boolean withSuite) {
         test.setStatus(status);
 
-        var configurationTest = test.getConfigurationTest();
-        configurationTest.setStatus(status);
-
-        if (withSuite) {
-            var configurationSuite = configurationTest.getConfigurationSuite();
-            if (ConfigurationStatus.NO_CORRESPONDING_TEST.equals(status)) {
-                configurationSuite.setStatus(ConfigurationStatus.FAILED);
-            } else if (ConfigurationStatus.SUCCESS.equals(status) || ConfigurationStatus.SKIPPED.equals(status)) {
-                var hasOneFailed = checkOneFailed(configurationSuite, configurationTest);
-                if (hasOneFailed.get()) {
-                    configurationSuite.setStatus(ConfigurationStatus.FAILED);
-                } else {
-                    var hasOneInProgress = checkOneInProgress(configurationSuite, configurationTest);
-                    if (!hasOneInProgress.get()) {
-                        configurationSuite.setStatus(ConfigurationStatus.SUCCESS);
-                    }
-                }
-            } else {
-                configurationSuite.setStatus(ConfigurationStatus.FAILED);
-            }
-        }
+//        var configurationTest = test.getConfigurationTest();
+//        configurationTest.setStatus(status);
+//
+//        if (withSuite) {
+//            var configurationSuite = configurationTest.getConfigurationSuite();
+//            if (ConfigurationStatus.NO_CORRESPONDING_TEST.equals(status)) {
+//                configurationSuite.setStatus(ConfigurationStatus.FAILED);
+//            } else if (ConfigurationStatus.SUCCESS.equals(status) || ConfigurationStatus.SKIPPED.equals(status)) {
+//                var hasOneFailed = checkOneFailed(configurationSuite, configurationTest);
+//                if (hasOneFailed.get()) {
+//                    configurationSuite.setStatus(ConfigurationStatus.FAILED);
+//                } else {
+//                    var hasOneInProgress = checkOneInProgress(configurationSuite, configurationTest);
+//                    if (!hasOneInProgress.get()) {
+//                        configurationSuite.setStatus(ConfigurationStatus.SUCCESS);
+//                    }
+//                }
+//            } else {
+//                configurationSuite.setStatus(ConfigurationStatus.FAILED);
+//            }
+//        }
     }
 
     public static AtomicBoolean checkOneFailed(ConfigurationSuiteEntity configurationSuite, ConfigurationTestEntity configurationTest) {

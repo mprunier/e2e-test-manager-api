@@ -36,7 +36,7 @@ public class ConfigurationService {
     @Transactional
     public void deleteConfigurationByFile(String file,
                                           long environmentId) {
-        configurationTestRepository.deleteBy(file, environmentId);
+        configurationTestRepository.deleteByFileAndEnv(file, environmentId);
         configurationSuiteRepository.deleteBy(file, environmentId);
     }
 
@@ -58,8 +58,8 @@ public class ConfigurationService {
                                  .forEach(suiteInternal -> updateOrCreateSuite(environment, file, suiteInternal, null, suiteIds, testIds));
         }
 
-        configurationTestRepository.deleteBy(environmentId, file, testIds);
-        configurationSuiteRepository.deleteBy(environmentId, file, suiteIds);
+        configurationTestRepository.deleteByEnvAndFileAndNotInTestIds(environmentId, file, testIds);
+        configurationSuiteRepository.deleteByEnvAndFileAndNotInSuiteIds(environmentId, file, suiteIds);
     }
 
     private void updateOrCreateTestWithoutSuite(EnvironmentEntity environment,
