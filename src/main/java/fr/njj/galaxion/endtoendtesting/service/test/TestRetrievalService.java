@@ -7,6 +7,7 @@ import fr.njj.galaxion.endtoendtesting.domain.response.TestResponse;
 import fr.njj.galaxion.endtoendtesting.model.entity.TestEntity;
 import fr.njj.galaxion.endtoendtesting.model.repository.TestRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,11 +24,13 @@ public class TestRetrievalService {
 
     private final TestRepository testRepository;
 
+    @Transactional
     public TestEntity get(Long id) {
         return testRepository.findByIdOptional(id)
                              .orElseThrow(() -> new TestNotFoundException(id));
     }
 
+    @Transactional
     public byte[] getVideo(Long id) {
         var video = get(id).getVideo();
         if (video == null) {
@@ -36,29 +39,35 @@ public class TestRetrievalService {
         return video;
     }
 
+    @Transactional
     public List<ScreenshotResponse> getScreenshots(Long id) {
         return buildScreenshotResponses(get(id));
     }
 
+    @Transactional
     public TestResponse getResponse(Long id) {
         var test = get(id);
         return buildTestResponseWithDetails(test);
     }
 
+    @Transactional
     public List<TestResponse> getResponses(Long configurationTestId) {
         var tests = testRepository.findAllByConfigurationTestId(configurationTestId);
         return buildTestResponses(tests);
     }
 
+    @Transactional
     public List<TestResponse> getErrorResponses(String pipelineId) {
         var tests = testRepository.findAllErrorByPipelineId(pipelineId);
         return buildTestResponses(tests);
     }
 
+    @Transactional
     public long countInProgressTestEntityByEnvironmentId(long environmentId) {
         return testRepository.countInProgressTestEntityByEnvironmentId(environmentId);
     }
 
+    @Transactional
     public List<TestEntity> getAll(List<Long> ids) {
         return testRepository.findAllBy(ids);
     }

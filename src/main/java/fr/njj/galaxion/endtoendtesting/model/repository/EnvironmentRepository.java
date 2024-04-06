@@ -17,4 +17,8 @@ public class EnvironmentRepository implements PanacheRepositoryBase<EnvironmentE
     public Optional<EnvironmentEntity> findByBranchAndProjectId(String branch, String projectId) {
         return find("branch = ?1 AND projectId = ?2", branch, projectId).firstResultOptional();
     }
+
+    public List<EnvironmentEntity> findAllByBranchAndProjectId(String branch, String projectId) {
+        return list("branch = ?1 AND projectId = ?2", branch, projectId);
+    }
 }

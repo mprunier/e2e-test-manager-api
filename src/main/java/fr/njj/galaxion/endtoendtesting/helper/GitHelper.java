@@ -3,6 +3,7 @@ package fr.njj.galaxion.endtoendtesting.helper;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.njj.galaxion.endtoendtesting.domain.exception.ConfigurationSynchronizationException;
+import fr.njj.galaxion.endtoendtesting.domain.exception.ZipDecompressionErrorException;
 import fr.njj.galaxion.endtoendtesting.domain.internal.ArtifactDataInternal;
 import fr.njj.galaxion.endtoendtesting.domain.internal.MochaReportInternal;
 import jakarta.ws.rs.core.Response;
@@ -10,6 +11,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import java.io.ByteArrayInputStream;
@@ -28,7 +30,9 @@ import static fr.njj.galaxion.endtoendtesting.domain.constant.CommonConstant.STA
 
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class GitlabHelper {
+public final class GitHelper {
+
+    public static final int DEFAULT_BUFFER_SIZE = 1024;
 
     public static void extractArtifact(ArtifactDataInternal artifactDataInternal, Response zipArtifacts) {
         var screenshots = new HashMap<String, byte[]>();
@@ -44,7 +48,7 @@ public final class GitlabHelper {
                 var filename = entry.getName();
                 if (!entry.isDirectory()) {
                     var baos = new ByteArrayOutputStream();
-                    byte[] buffer = new byte[1024];
+                    byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
                     int count;
 
                     while ((count = zis.read(buffer)) != -1) {
@@ -75,7 +79,8 @@ public final class GitlabHelper {
             artifactDataInternal.setScreenshots(screenshots);
             artifactDataInternal.setVideos(videos);
         } catch (IOException e) {
-            throw new RuntimeException("Error in zip decompression", e);
+            log.error("Error during artifact extraction", e);
+            throw new ZipDecompressionErrorException();
         }
     }
 
@@ -91,32 +96,10 @@ public final class GitlabHelper {
                     var parents = commit.getParents();
                     if (parents.length == 0) {
                         // C'est le premier commit; tous les fichiers sont considérés comme nouveaux
-                        try (var treeWalk = new TreeWalk(git.getRepository())) {
-                            treeWalk.addTree(commit.getTree());
-                            treeWalk.setRecursive(true);
-                            while (treeWalk.next()) {
-                                String path = treeWalk.getPathString();
-                                if (path.startsWith(START_PATH)) {
-                                    changedFiles.add(path);
-                                }
-                            }
-                        }
+                        firstCommit(commit, git, changedFiles);
                     } else {
                         // Comparez le commit actuel à son parent pour obtenir la liste des fichiers modifiés
-                        try (var treeWalk = new TreeWalk(git.getRepository())) {
-                            treeWalk.addTree(commit.getTree());
-                            treeWalk.addTree(parents[0].getTree()); // Prendre le premier parent; cela ne gérera pas les cas de merge commits
-                            treeWalk.setRecursive(true);
-
-                            while (treeWalk.next()) {
-                                if (!treeWalk.getObjectId(0).equals(treeWalk.getObjectId(1))) {
-                                    String path = treeWalk.getPathString();
-                                    if (path.startsWith(START_PATH)) {
-                                        changedFiles.add(path);
-                                    }
-                                }
-                            }
-                        }
+                        newCommit(commit, git, parents, changedFiles);
                     }
                 }
             }
@@ -125,5 +108,35 @@ public final class GitlabHelper {
         }
 
         return changedFiles;
+    }
+
+    private static void newCommit(RevCommit commit, Git git, RevCommit[] parents, HashSet<String> changedFiles) throws IOException {
+        try (var treeWalk = new TreeWalk(git.getRepository())) {
+            treeWalk.addTree(commit.getTree());
+            treeWalk.addTree(parents[0].getTree()); // Prendre le premier parent; cela ne gérera pas les cas de merge commits
+            treeWalk.setRecursive(true);
+
+            while (treeWalk.next()) {
+                if (!treeWalk.getObjectId(0).equals(treeWalk.getObjectId(1))) {
+                    String path = treeWalk.getPathString();
+                    if (path.startsWith(START_PATH)) {
+                        changedFiles.add(path);
+                    }
+                }
+            }
+        }
+    }
+
+    private static void firstCommit(RevCommit commit, Git git, HashSet<String> changedFiles) throws IOException {
+        try (var treeWalk = new TreeWalk(git.getRepository())) {
+            treeWalk.addTree(commit.getTree());
+            treeWalk.setRecursive(true);
+            while (treeWalk.next()) {
+                String path = treeWalk.getPathString();
+                if (path.startsWith(START_PATH)) {
+                    changedFiles.add(path);
+                }
+            }
+        }
     }
 }

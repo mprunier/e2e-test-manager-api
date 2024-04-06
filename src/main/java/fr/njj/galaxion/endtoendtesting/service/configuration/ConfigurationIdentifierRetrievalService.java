@@ -5,6 +5,7 @@ import fr.njj.galaxion.endtoendtesting.domain.response.SearchConfigurationIdenti
 import fr.njj.galaxion.endtoendtesting.mapper.ConfigurationIdentifierResponseMapper;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestIdentifierEntity;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,6 +22,7 @@ public class ConfigurationIdentifierRetrievalService {
 
     private final ConfigurationSuiteRetrievalService configurationSuiteRetrievalService;
 
+    @Transactional
     public SearchConfigurationIdentifierResponse search(
             Long environmentId,
             SearchConfigurationRequest request) {

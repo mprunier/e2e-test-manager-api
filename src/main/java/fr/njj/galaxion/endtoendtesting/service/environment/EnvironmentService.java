@@ -7,7 +7,7 @@ import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentVariableEntity;
 import fr.njj.galaxion.endtoendtesting.model.repository.EnvironmentVariableRepository;
 import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationSchedulerService;
-import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationSynchronizationService;
+import fr.njj.galaxion.endtoendtesting.service.configuration.EnvironmentSynchronizationService;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -23,7 +23,7 @@ public class EnvironmentService {
 
     private final EnvironmentRetrievalService environmentRetrievalService;
     private final SecurityIdentity identity;
-    private final ConfigurationSynchronizationService configurationSynchronizationService;
+    private final EnvironmentSynchronizationService environmentSynchronizationService;
     private final ConfigurationSchedulerService configurationSchedulerService;
     private final EnvironmentVariableRepository environmentVariableRepository;
 
@@ -40,7 +40,6 @@ public class EnvironmentService {
                                            .build();
         environment.persist();
         createVariables(request, environment);
-        configurationSynchronizationService.create(environment);
         configurationSchedulerService.create(environment);
         return environmentRetrievalService.getEnvironmentResponse(environment.getId());
     }

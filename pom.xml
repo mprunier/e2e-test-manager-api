@@ -9,20 +9,20 @@
     <name>${project.artifactId}</name>
 
     <properties>
-        <quarkus.version>3.2.7.Final</quarkus.version>
+        <quarkus.version>3.8.3</quarkus.version>
         <compiler-plugin.version>3.11.0</compiler-plugin.version>
 
-        <maven.compiler.target>17</maven.compiler.target>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.release>17</maven.compiler.release>
+        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.release>21</maven.compiler.release>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <lombok-version>1.18.26</lombok-version>
+        <lombok-version>1.18.32</lombok-version>
         <commons-lang3-version>3.12.0</commons-lang3-version>
         <commons-io-version>2.13.0</commons-io-version>
-        <org.eclipse.jgit-version>6.7.0.202309050840-r</org.eclipse.jgit-version>
+        <org.eclipse.jgit-version>6.9.0.202403050737-r</org.eclipse.jgit-version>
         <org.mozilla.rhino-version>1.7.14</org.mozilla.rhino-version>
 
         <surefire-plugin.version>3.0.0</surefire-plugin.version>

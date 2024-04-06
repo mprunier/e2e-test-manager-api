@@ -1,9 +1,7 @@
 package fr.njj.galaxion.endtoendtesting.controller.secured;
 
-import fr.njj.galaxion.endtoendtesting.domain.enumeration.SynchronizationStatus;
-import fr.njj.galaxion.endtoendtesting.lib.exception.CustomException;
-import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationSynchronizationService;
-import io.quarkus.cache.CacheManager;
+import fr.njj.galaxion.endtoendtesting.usecases.cache.CleanCacheByEnvironmentUseCase;
+import fr.njj.galaxion.endtoendtesting.usecases.synchronisation.GlobalEnvironmentSynchronizationUseCase;
 import io.quarkus.security.Authenticated;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.POST;
@@ -13,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 @Slf4j
 @Authenticated
@@ -20,30 +20,26 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 public class SecuredConfigurationSyncController {
 
-    private final ConfigurationSynchronizationService configurationSynchronizationService;
-    private final CacheManager cacheManager;
+    private final ConcurrentMap<String, Boolean> locks = new ConcurrentHashMap<>();
+
+    private final GlobalEnvironmentSynchronizationUseCase globalEnvironmentSynchronizationUseCase;
+    private final CleanCacheByEnvironmentUseCase cleanCacheByEnvironmentUseCase;
 
     @POST
     public void synchronize(@NotNull @QueryParam("environmentId") Long environmentId) {
-        configurationSynchronizationService.assertEnvironmentIsNotInSync(environmentId);
-        configurationSynchronizationService.updateSync(environmentId, SynchronizationStatus.IN_PROGRESS, null);
-        CompletableFuture.runAsync(() -> {
-            try {
-                configurationSynchronizationService.synchronize(environmentId);
-                cacheManager.getCache("suites").ifPresent(cache -> cache.invalidate(environmentId).await().indefinitely());
-                cacheManager.getCache("tests").ifPresent(cache -> cache.invalidate(environmentId).await().indefinitely());
-                cacheManager.getCache("files").ifPresent(cache -> cache.invalidate(environmentId).await().indefinitely());
-                cacheManager.getCache("identifiers").ifPresent(cache -> cache.invalidate(environmentId).await().indefinitely());
-            } catch (CustomException e) {
-                configurationSynchronizationService.updateSync(environmentId, SynchronizationStatus.FAILED, e.getDetail());
-                log.error("CustomException : ", e);
-                throw new RuntimeException(e);
-            } catch (Exception e) {
-                configurationSynchronizationService.updateSync(environmentId, SynchronizationStatus.FAILED, e.getMessage());
-                log.error("Exception : ", e);
-                throw new RuntimeException(e);
-            }
-        });
+        if (locks.putIfAbsent(environmentId.toString(), true) != null) {
+            log.info("Global synchronization is already in progress for Environment ID [{}].", environmentId);
+            return;
+        }
+        try {
+            log.info("Start Global synchronization for Environment ID [{}].", environmentId);
+            CompletableFuture.runAsync(() -> {
+                globalEnvironmentSynchronizationUseCase.execute(environmentId);
+                cleanCacheByEnvironmentUseCase.execute(environmentId);
+            });
+        } finally {
+            locks.remove(environmentId.toString());
+        }
     }
 }
 

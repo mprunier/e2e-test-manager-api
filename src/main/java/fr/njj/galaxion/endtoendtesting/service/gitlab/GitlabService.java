@@ -7,7 +7,6 @@ import fr.njj.galaxion.endtoendtesting.client.gitlab.response.GitlabResponse;
 import fr.njj.galaxion.endtoendtesting.domain.exception.ConfigurationSynchronizationException;
 import fr.njj.galaxion.endtoendtesting.domain.exception.MoreOneJobException;
 import fr.njj.galaxion.endtoendtesting.domain.internal.ArtifactDataInternal;
-import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +19,7 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 import java.io.File;
 
 import static fr.njj.galaxion.endtoendtesting.domain.constant.CommonConstant.START_PATH;
-import static fr.njj.galaxion.endtoendtesting.helper.GitlabHelper.extractArtifact;
+import static fr.njj.galaxion.endtoendtesting.helper.GitHelper.extractArtifact;
 
 @Slf4j
 @ApplicationScoped
@@ -53,7 +52,7 @@ public class GitlabService {
         if (jobs.size() > 1) {
             throw new MoreOneJobException(pipelineId);
         }
-        return jobs.get(0);
+        return jobs.getFirst();
     }
 
     public ArtifactDataInternal getArtifactData(String token, String projectId, String jobId) {
@@ -71,20 +70,21 @@ public class GitlabService {
         gitlabClient.cancelPipeline(token, projectId, pipelineId);
     }
 
-    public String getRepoUrl(String token, String projectId) {
+    private String getRepoUrl(String token, String projectId) {
         return gitlabClient.getProjectDetail(token, projectId).getRepoUrl();
     }
 
-    public File cloneRepo(EnvironmentEntity environment, String repoUrl) {
-        try {
-            var credentialsProvider = new UsernamePasswordCredentialsProvider("oauth2", environment.getToken());
-            var tempDirectory = new File("./tmp/config/sync/" + environment.getId());
-            Git.cloneRepository()
-               .setURI(repoUrl)
-               .setDirectory(tempDirectory)
-               .setBranch(environment.getBranch())
-               .setCredentialsProvider(credentialsProvider)
-               .call();
+    public File cloneRepo(String projectId, String uniqueId, String gitlabToken, String branch) {
+        var repoUrl = getRepoUrl(gitlabToken, projectId);
+        var credentialsProvider = new UsernamePasswordCredentialsProvider("oauth2", gitlabToken);
+        var tempDirectory = new File("./tmp/config/sync/" + uniqueId);
+        try (Git ignored = Git
+                .cloneRepository()
+                .setURI(repoUrl)
+                .setDirectory(tempDirectory)
+                .setBranch(branch)
+                .setCredentialsProvider(credentialsProvider)
+                .call()) {
             return tempDirectory;
         } catch (GitAPIException exception) {
             throw new ConfigurationSynchronizationException("Clone Repo Error : " + exception.getMessage());

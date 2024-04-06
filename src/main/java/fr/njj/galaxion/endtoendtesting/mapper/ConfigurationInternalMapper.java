@@ -24,7 +24,6 @@ import org.mozilla.javascript.ast.ObjectLiteral;
 import org.mozilla.javascript.ast.ObjectProperty;
 import org.mozilla.javascript.ast.StringLiteral;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 
@@ -32,12 +31,14 @@ import java.util.Comparator;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ConfigurationInternalMapper {
 
-    public static ConfigurationInternal build(String content, String fullPath) throws IOException {
+    public static ConfigurationInternal build(String content, String fullPath) {
         var configurationInternal = new ConfigurationInternal();
         try {
 
             content = content.replaceAll("(?m)^import .+;$", "");
             content = content.replaceAll("(?m)^[ \t]*\r?\n", "");
+            content = content.replaceAll("async function", "function");
+
             var env = new CompilerEnvirons();
             env.setRecordingComments(true);
             env.setRecordingLocalJsDocComments(true);
@@ -53,7 +54,7 @@ public final class ConfigurationInternalMapper {
             sortedComments.sort(Comparator.comparingInt(AstNode::getAbsolutePosition));
             processNode(astRoot, configurationInternal, null, fullPath);
         } catch (EvaluatorException e) {
-            throw new CustomException(Response.Status.INTERNAL_SERVER_ERROR, "synchronization-error", String.format("Error in file %s : %s on line : %s", fullPath, e.details(), e.lineSource()));
+            throw new CustomException(Response.Status.INTERNAL_SERVER_ERROR, "synchronization-error", String.format("Error in file %s : %s on line : %s. Please note that this application is currently only compatible with Cypress code written in ES6 or lower. If you use features from ES8 or newer, such as async or await, your file cannot be added.", fullPath, e.details(), e.lineSource()));
         }
         return configurationInternal;
     }

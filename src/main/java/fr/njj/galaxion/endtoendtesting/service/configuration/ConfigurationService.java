@@ -36,6 +36,7 @@ public class ConfigurationService {
     @Transactional
     public void deleteConfigurationByFile(String file,
                                           long environmentId) {
+        log.info("Environment id [{}] : Remove file [{}].", environmentId, file);
         configurationTestRepository.deleteByFileAndEnv(file, environmentId);
         configurationSuiteRepository.deleteBy(file, environmentId);
     }

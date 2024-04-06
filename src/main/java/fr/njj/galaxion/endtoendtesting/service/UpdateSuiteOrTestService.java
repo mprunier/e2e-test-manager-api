@@ -29,14 +29,14 @@ public class UpdateSuiteOrTestService {
         var title = testStrIds.size() > 1 ? "Suite Tests" : "Test";
 
         try {
-            var environment = testRetrievalService.get(testIds.get(0)).getConfigurationTest().getEnvironment();
+            var environment = testRetrievalService.get(testIds.getFirst()).getConfigurationTest().getEnvironment();
 
-            var gitlabJobLogsResponse = gitlabService.getJob(environment.getToken(), environment.getProjectId(), pipelineId);
+            var gitlabJobResponse = gitlabService.getJob(environment.getToken(), environment.getProjectId(), pipelineId);
 
-            if (GitlabJobStatus.success.name().equals(gitlabJobLogsResponse.getStatus()) ||
-                GitlabJobStatus.failed.name().equals(gitlabJobLogsResponse.getStatus())) {
-                log.info("Update {} on Job id [{}]. Status is [{}].", title, pipelineId, gitlabJobLogsResponse.getStatus());
-                var artifactData = gitlabService.getArtifactData(environment.getToken(), environment.getProjectId(), gitlabJobLogsResponse.getId());
+            if (GitlabJobStatus.success.name().equals(gitlabJobResponse.getStatus()) ||
+                GitlabJobStatus.failed.name().equals(gitlabJobResponse.getStatus())) {
+                log.info("Update {} on Job id [{}]. Status is [{}].", title, pipelineId, gitlabJobResponse.getStatus());
+                var artifactData = gitlabService.getArtifactData(environment.getToken(), environment.getProjectId(), gitlabJobResponse.getId());
                 var tests = testRetrievalService.getAll(testIds);
                 if (artifactData.getReport() != null) {
                     reportSuiteOrTestService.report(artifactData, tests);
@@ -45,9 +45,9 @@ public class UpdateSuiteOrTestService {
                 }
                 return true;
 
-            } else if (GitlabJobStatus.canceled.name().equals(gitlabJobLogsResponse.getStatus()) ||
-                       GitlabJobStatus.skipped.name().equals(gitlabJobLogsResponse.getStatus())) {
-                log.info("Update {} on Job id [{}]. Status is [{}].", title, pipelineId, gitlabJobLogsResponse.getStatus());
+            } else if (GitlabJobStatus.canceled.name().equals(gitlabJobResponse.getStatus()) ||
+                       GitlabJobStatus.skipped.name().equals(gitlabJobResponse.getStatus())) {
+                log.info("Update {} on Job id [{}]. Status is [{}].", title, pipelineId, gitlabJobResponse.getStatus());
                 var tests = testRetrievalService.getAll(testIds);
                 updateStatus(tests, ConfigurationStatus.CANCELED, false);
                 return true;

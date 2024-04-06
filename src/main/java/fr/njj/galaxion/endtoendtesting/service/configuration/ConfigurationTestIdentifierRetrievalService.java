@@ -4,6 +4,7 @@ import fr.njj.galaxion.endtoendtesting.domain.exception.ConfigurationTestIdentif
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestIdentifierEntity;
 import fr.njj.galaxion.endtoendtesting.model.repository.ConfigurationTestIdentifierRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,6 +19,7 @@ public class ConfigurationTestIdentifierRetrievalService {
 
     private final ConfigurationTestIdentifierRepository configurationTestIdentifierRepository;
 
+    @Transactional
     public Set<String> getAllIdentifier(Long environmentId) {
         return configurationTestIdentifierRepository.findAllByEnv(environmentId).stream().map(ConfigurationTestIdentifierEntity::getIdentifier).collect(Collectors.toSet());
     }

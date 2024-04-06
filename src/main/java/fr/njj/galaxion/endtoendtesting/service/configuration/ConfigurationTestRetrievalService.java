@@ -9,6 +9,7 @@ import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.repository.ConfigurationTestRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -30,6 +31,7 @@ public class ConfigurationTestRetrievalService {
     private final ConfigurationTestRepository configurationTestRepository;
     private final ConfigurationTestIdentifierRetrievalService configurationTestIdentifierRetrievalService;
 
+    @Transactional
     public SearchConfigurationTestResponse search(Long environmentId, SearchConfigurationRequest request) {
 
         var params = new HashMap<String, Object>();
@@ -53,21 +55,20 @@ public class ConfigurationTestRetrievalService {
                                                    total);
     }
 
+    @Transactional
     public ConfigurationTestEntity get(Long id) {
         return configurationTestRepository.findByIdOptional(id)
                                           .orElseThrow(() -> new ConfigurationTestNotFoundException(id));
     }
 
+    @Transactional
     public Optional<ConfigurationTestEntity> getBy(EnvironmentEntity environment, String file, String title, ConfigurationSuiteEntity configurationSuite) {
         return configurationTestRepository.findBy(file, environment.getId(), configurationSuite.getId(), title);
     }
 
-    public List<ConfigurationTestEntity> getAllBy(Long environmentId) {
-        return configurationTestRepository.findAllBy(environmentId);
-    }
-
+    @Transactional
     public List<ConfigurationTestResponse> getResponses(Long environmentId) {
-        var configurationTests = getAllBy(environmentId);
+        var configurationTests = configurationTestRepository.findAllBy(environmentId);
         return buildTitles(configurationTests);
     }
 }

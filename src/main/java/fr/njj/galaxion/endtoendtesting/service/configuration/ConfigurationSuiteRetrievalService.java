@@ -10,6 +10,7 @@ import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.repository.ConfigurationSuiteRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -32,6 +33,7 @@ public class ConfigurationSuiteRetrievalService {
     private final ConfigurationTestRetrievalService configurationTestRetrievalService;
     private final ConfigurationTestIdentifierRetrievalService configurationTestIdentifierRetrievalService;
 
+    @Transactional
     public SearchConfigurationSuiteResponse search(Long environmentId, SearchConfigurationRequest request) {
 
         var params = new HashMap<String, Object>();
@@ -60,11 +62,13 @@ public class ConfigurationSuiteRetrievalService {
                                                     total);
     }
 
+    @Transactional
     public ConfigurationSuiteEntity get(Long id) {
         return configurationSuiteRepository.findByIdOptional(id)
                                            .orElseThrow(() -> new ConfigurationSuiteNotFoundException(id));
     }
 
+    @Transactional
     public List<Long> getTestsIds(Long id) {
         var suiteOptional = configurationSuiteRepository.findByIdOptional(id);
         return suiteOptional
@@ -76,6 +80,7 @@ public class ConfigurationSuiteRetrievalService {
                 .orElse(Collections.emptyList());
     }
 
+    @Transactional
     public Optional<ConfigurationSuiteEntity> getBy(EnvironmentEntity environment, String file, String title, Long parentSuiteId) {
         return configurationSuiteRepository.findBy(file,
                                                    environment.getId(),
@@ -83,19 +88,18 @@ public class ConfigurationSuiteRetrievalService {
                                                    parentSuiteId);
     }
 
+    @Transactional
     public List<ConfigurationSuiteResponse> getResponses(long environmentId) {
         var configurationSuites = getAllBy(environmentId);
         return buildTitles(configurationSuites);
     }
 
+    @Transactional
     public List<ConfigurationSuiteEntity> getAllBy(long environmentId) {
         return configurationSuiteRepository.findAllBy(environmentId);
     }
 
-    public List<ConfigurationSuiteEntity> getAllBy(String file, long environmentId) {
-        return configurationSuiteRepository.findAllBy(file, environmentId);
-    }
-
+    @Transactional
     public List<String> getAllFiles(long environmentId) {
         return configurationSuiteRepository.findAllFilesBy(environmentId);
     }

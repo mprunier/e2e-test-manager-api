@@ -11,4 +11,5 @@ public final class CommonConstant {
     public static final String END_TEST_TS_PATH = ".cy.ts";
     public static final String SCREENSHOT_PATH = "cypress/screenshots/";
     public static final String NO_SUITE = "No Suite";
+    public static final String GLOBAL_ENVIRONMENT_ERROR = "Global error on this environment";
 }
