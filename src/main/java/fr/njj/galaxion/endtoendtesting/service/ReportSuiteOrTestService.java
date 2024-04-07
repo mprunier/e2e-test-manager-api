@@ -75,11 +75,11 @@ public class ReportSuiteOrTestService {
                     }
                 });
                 if (isNotFound.get()) {
-                    updateStatus(test, ConfigurationStatus.NO_CORRESPONDING_TEST, true);
+                    updateStatus(test, ConfigurationStatus.NO_CORRESPONDING_TEST);
                 }
             });
         } else {
-            updateStatus(tests, ConfigurationStatus.NO_REPORT_ERROR, true);
+            updateStatus(tests, ConfigurationStatus.NO_REPORT_ERROR);
         }
     }
 
@@ -105,7 +105,7 @@ public class ReportSuiteOrTestService {
                             MochaReportTestInternal mochaTest,
                             Map<String, byte[]> screenshots) {
         var status = getStatus(mochaTest);
-        updateStatus(test, status, true);
+        updateStatus(test, status);
         test.setErrorMessage(mochaTest.getErr() != null ? mochaTest.getErr().getMessage() : null);
         test.setErrorStacktrace(mochaTest.getErr() != null ? mochaTest.getErr().getEstack() : null);
         test.setCode(mochaTest.getCode());

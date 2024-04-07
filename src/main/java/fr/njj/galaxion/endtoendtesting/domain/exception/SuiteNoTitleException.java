@@ -7,9 +7,9 @@ import static fr.njj.galaxion.endtoendtesting.domain.constant.CommonConstant.NO_
 
 public class SuiteNoTitleException extends CustomException {
 
-    public SuiteNoTitleException(String file) {
+    public SuiteNoTitleException() {
         super(Response.Status.BAD_REQUEST,
               "suite-no-title",
-              String.format("Suite with title '%s' is forbidden in file %s", NO_SUITE, file));
+              String.format("Suite with title '%s' is forbidden.", NO_SUITE));
     }
 }

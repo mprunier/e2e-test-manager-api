@@ -1,10 +1,12 @@
 package fr.njj.galaxion.endtoendtesting.usecases.synchronisation;
 
+import fr.njj.galaxion.endtoendtesting.lib.logging.Monitored;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationService;
 import fr.njj.galaxion.endtoendtesting.service.configuration.EnvironmentSynchronizationService;
 import fr.njj.galaxion.endtoendtesting.service.environment.EnvironmentRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.GitlabService;
+import fr.njj.galaxion.endtoendtesting.usecases.cache.CleanCacheAfterSynchronizationUseCase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -21,12 +23,13 @@ import static fr.njj.galaxion.endtoendtesting.domain.constant.CommonConstant.GLO
 public class PartialEnvironmentSynchronizationUseCase {
 
     private final AddEnvironmentSynchronizationErrorUseCase addEnvironmentSynchronizationErrorUseCase;
-    private final CleanEnvironmentSynchronizationErrorUseCase cleanEnvironmentSynchronizationErrorUseCase;
     private final EnvironmentRetrievalService environmentRetrievalService;
     private final EnvironmentSynchronizationService environmentSynchronizationService;
     private final GitlabService gitlabService;
     private final ConfigurationService configurationService;
+    private final CleanCacheAfterSynchronizationUseCase cleanCacheAfterSynchronizationUseCase;
 
+    @Monitored
     @Transactional
     public void execute(
             String projectId,
@@ -37,9 +40,10 @@ public class PartialEnvironmentSynchronizationUseCase {
         var branch = extractRefName(refName);
         var environments = environmentRetrievalService.getEnvironmentsByBranchAndProjectId(branch, projectId);
         for (EnvironmentEntity environment : environments) {
-            cleanEnvironmentErrors(filesToSynchronize, environment);
+            cleanEnvironmentErrors(filesToSynchronize, filesToRemove, environment);
             cleanFilesToRemove(filesToRemove, environment);
             updateFilesToSynchronize(filesToSynchronize, environment);
+            cleanCacheAfterSynchronizationUseCase.execute(environment.getId());
         }
     }
 
@@ -55,21 +59,17 @@ public class PartialEnvironmentSynchronizationUseCase {
         }
 
         EnvironmentSynchronizationService.cleanRepo(environment, projectFolder, errors);
-        errors.forEach((file, error) -> addEnvironmentSynchronizationErrorUseCase.execute(environment, file, error));
+        errors.forEach((file, error) -> addEnvironmentSynchronizationErrorUseCase.execute(environment.getId(), file, error));
     }
 
-    private void cleanEnvironmentErrors(Set<String> filesToSynchronize, EnvironmentEntity environment) {
-        filesToSynchronize.forEach(file -> {
-            cleanEnvironmentSynchronizationErrorUseCase.execute(environment.getId(), file);
-            cleanEnvironmentSynchronizationErrorUseCase.execute(environment.getId(), GLOBAL_ENVIRONMENT_ERROR);
-        });
+    private void cleanEnvironmentErrors(Set<String> filesToSynchronize, Set<String> filesToRemove, EnvironmentEntity environment) {
+        filesToSynchronize.forEach(file -> environmentSynchronizationService.cleanErrors(environment.getId(), file));
+        filesToRemove.forEach(file -> environmentSynchronizationService.cleanErrors(environment.getId(), file));
+        environmentSynchronizationService.cleanErrors(environment.getId(), GLOBAL_ENVIRONMENT_ERROR);
     }
 
     private void cleanFilesToRemove(Set<String> filesToRemove, EnvironmentEntity environment) {
-        filesToRemove.forEach(file -> {
-            configurationService.deleteConfigurationByFile(file, environment.getId());
-            cleanEnvironmentSynchronizationErrorUseCase.execute(environment.getId(), file);
-        });
+        filesToRemove.forEach(file -> configurationService.deleteConfigurationByFile(file, environment.getId()));
     }
 
     private static String extractRefName(final String ref) {

@@ -1,6 +1,6 @@
 package fr.njj.galaxion.endtoendtesting.domain.enumeration;
 
-public enum JobType {
+public enum PipelineType {
     SUITE,
     TEST,
     ALL_TESTS

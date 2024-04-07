@@ -24,6 +24,7 @@ public final class EnvironmentResponseMapper {
                       .token(hideToken(entity.getToken()))
                       .branch(entity.getBranch())
                       .isEnabled(entity.getIsEnabled())
+                      .isLocked(entity.getIsLocked())
                       .variables(variables)
                       .createdAt(entity.getCreatedAt())
                       .updatedAt(entity.getUpdatedAt())

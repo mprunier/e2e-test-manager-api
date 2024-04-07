@@ -4,6 +4,7 @@ import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentSynchronizationEr
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
 
+import java.util.List;
 import java.util.Optional;
 
 @ApplicationScoped
@@ -26,5 +27,11 @@ public class EnvironmentSynchronizationErrorRepository implements PanacheReposit
     public void deleteByEnvironmentId(
             long environmentId) {
         delete("environment.id = ?1", environmentId);
+    }
+
+    public List<EnvironmentSynchronizationErrorEntity> findByEnvironmentId(
+            long environmentId) {
+        return find("environment.id = ?1", environmentId)
+                .stream().toList();
     }
 }

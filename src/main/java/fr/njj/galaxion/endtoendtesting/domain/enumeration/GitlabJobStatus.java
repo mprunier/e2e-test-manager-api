@@ -1,6 +1,6 @@
 package fr.njj.galaxion.endtoendtesting.domain.enumeration;
 
-import fr.njj.galaxion.endtoendtesting.domain.exception.GitlabWebHookStatusNotExistException;
+import fr.njj.galaxion.endtoendtesting.domain.exception.GitlabStatusNotExistException;
 
 public enum GitlabJobStatus {
     created,
@@ -17,6 +17,6 @@ public enum GitlabJobStatus {
                 return status;
             }
         }
-        throw new GitlabWebHookStatusNotExistException(headerValue);
+        throw new GitlabStatusNotExistException(headerValue);
     }
 }

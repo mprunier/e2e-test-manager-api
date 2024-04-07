@@ -12,7 +12,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,27 +23,42 @@ import java.time.ZonedDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "environment_synchronization_error")
-@EqualsAndHashCode(callSuper = true)
-public class EnvironmentSynchronizationErrorEntity extends PanacheEntityBase {
-    
+@Table(name = "metrics")
+public class MetricsEntity extends PanacheEntityBase {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "environment_id", foreignKey = @ForeignKey(name = "fk__environment_synchronization_error__environment_id"), nullable = false)
+    @JoinColumn(name = "environment_id", foreignKey = @ForeignKey(name = "fk__configuration__environment_id"))
     private EnvironmentEntity environment;
 
-    @Column(name = "file", nullable = false)
-    private String file;
+    @Setter
+    @Column(name = "suites")
+    private Integer suites;
 
     @Setter
-    @Column(name = "error", nullable = false)
-    private String error;
+    @Column(name = "tests")
+    private Integer tests;
 
     @Setter
+    @Column(name = "passes")
+    private Integer passes;
+
+    @Setter
+    @Column(name = "failures")
+    private Integer failures;
+
+    @Setter
+    @Column(name = "skipped")
+    private Integer skipped;
+
+    @Setter
+    @Column(name = "pass_percent")
+    private Integer passPercent;
+
     @Builder.Default
-    @Column(name = "error_at", nullable = false)
-    private ZonedDateTime at = ZonedDateTime.now();
+    @Column(name = "created_at", nullable = false)
+    private ZonedDateTime createdAt = ZonedDateTime.now();
 }

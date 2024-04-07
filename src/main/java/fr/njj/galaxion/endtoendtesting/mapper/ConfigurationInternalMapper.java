@@ -54,7 +54,7 @@ public final class ConfigurationInternalMapper {
             sortedComments.sort(Comparator.comparingInt(AstNode::getAbsolutePosition));
             processNode(astRoot, configurationInternal, null, fullPath);
         } catch (EvaluatorException e) {
-            throw new CustomException(Response.Status.INTERNAL_SERVER_ERROR, "synchronization-error", String.format("Error in file %s : %s on line : %s. Please note that this application is currently only compatible with Cypress code written in ES6 or lower. If you use features from ES8 or newer, such as async or await, your file cannot be added.", fullPath, e.details(), e.lineSource()));
+            throw new CustomException(Response.Status.INTERNAL_SERVER_ERROR, "synchronization-error", String.format("Error : %s on line : %s.", e.details(), e.lineSource()));
         }
         return configurationInternal;
     }

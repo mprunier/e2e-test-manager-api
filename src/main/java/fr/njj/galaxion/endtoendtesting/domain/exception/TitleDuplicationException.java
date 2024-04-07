@@ -5,9 +5,9 @@ import jakarta.ws.rs.core.Response;
 
 public class TitleDuplicationException extends CustomException {
 
-    public TitleDuplicationException(String file, String title) {
+    public TitleDuplicationException(String title) {
         super(Response.Status.BAD_REQUEST,
               "title-duplication",
-              String.format("You cannot have duplicate titles at the same level in the same file. Fix file '%s', title '%s'", file, title));
+              String.format("You cannot have duplicate titles at the same level in the same file. Fix title '%s.'", title));
     }
 }

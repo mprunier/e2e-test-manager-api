@@ -28,7 +28,7 @@ public class EnvironmentRetrievalService {
     }
 
     @Transactional
-    public List<EnvironmentResponse> getEnvironments() {
+    public List<EnvironmentResponse> getEnvironmentResponses() {
         return buildEnvironmentResponses(environmentRepository.findAllEnvironmentsEnabled(), false);
     }
 
@@ -36,6 +36,11 @@ public class EnvironmentRetrievalService {
     public EnvironmentEntity getEnvironment(long id) {
         return environmentRepository.findByIdOptional(id)
                                     .orElseThrow(() -> new EnvironmentNotFoundException(id));
+    }
+
+    @Transactional
+    public List<EnvironmentEntity> getEnvironments() {
+        return environmentRepository.findAll().stream().toList();
     }
 
     @Transactional

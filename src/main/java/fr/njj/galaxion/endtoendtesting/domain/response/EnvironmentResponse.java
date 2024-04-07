@@ -28,4 +28,5 @@ public class EnvironmentResponse {
     private List<EnvironmentVariableResponse> variables;
     private ZonedDateTime createdAt;
     private ZonedDateTime updatedAt;
+    private Boolean isLocked;
 }

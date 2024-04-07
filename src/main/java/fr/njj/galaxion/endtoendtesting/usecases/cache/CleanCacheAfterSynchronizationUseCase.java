@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor
-public class CleanCacheByEnvironmentUseCase {
+public class CleanCacheAfterSynchronizationUseCase {
 
     private final CacheManager cacheManager;
 

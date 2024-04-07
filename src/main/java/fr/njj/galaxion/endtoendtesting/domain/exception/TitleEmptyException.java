@@ -5,9 +5,9 @@ import jakarta.ws.rs.core.Response;
 
 public class TitleEmptyException extends CustomException {
 
-    public TitleEmptyException(String file) {
+    public TitleEmptyException() {
         super(Response.Status.BAD_REQUEST,
               "title-empty",
-              String.format("You cannot have empty title. Fix file '%s'", file));
+              "You cannot have empty title.");
     }
 }

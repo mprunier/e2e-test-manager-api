@@ -11,6 +11,7 @@ import fr.njj.galaxion.endtoendtesting.domain.internal.MochaReportTestInternal;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
+import fr.njj.galaxion.endtoendtesting.model.entity.MetricsEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.SchedulerEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.TestEntity;
 import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationSuiteRetrievalService;
@@ -170,6 +171,18 @@ public class ReportSchedulerService {
             scheduler.setSkipped(skipped);
             scheduler.setPassPercent(stats.getPassPercent());
             scheduler.setStatus(stats.getFailures() != 0 ? SchedulerStatus.FAILED : SchedulerStatus.SUCCESS);
+
+            MetricsEntity
+                    .builder()
+                    .environment(scheduler.getEnvironment())
+                    .suites(stats.getSuites())
+                    .tests(stats.getTests())
+                    .passes(stats.getPasses())
+                    .failures(stats.getFailures())
+                    .skipped(skipped)
+                    .passPercent(stats.getPassPercent())
+                    .build()
+                    .persist();
         }
     }
 }

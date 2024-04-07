@@ -1,5 +1,6 @@
 package fr.njj.galaxion.endtoendtesting.configuration;
 
+import fr.njj.galaxion.endtoendtesting.usecases.environment.UnLockAllEnvironmentSynchronizationUseCase;
 import io.quarkus.runtime.StartupEvent;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
@@ -21,14 +22,20 @@ public class StartupConfiguration {
     @ConfigProperty(name = "quarkus.application.name")
     String application;
 
+    private final UnLockAllEnvironmentSynchronizationUseCase unLockAllEnvironmentSynchronizationUseCase;
+
     void onStart(@Observes StartupEvent e) {
         var baseUrl = "http://localhost:" + serverPort;
-        log.info(String.format("\n================================================================================"
-                               + "\n    Microservice: %s:%s"
-                               + "\n    Base Url: %s"
-                               + "\n    Swagger Url: %s/q/swagger-ui"
-                               + "\n    Health Url: %s/q/health"
-                               + "\n================================================================================",
+        log.info(String.format("""
+                                                                              \s
+                                        ================================================================================
+                                            Microservice: %s:%s
+                                            Base Url: %s
+                                            Swagger Url: %s/q/swagger-ui
+                                            Health Url: %s/q/health
+                                        ================================================================================
+                                       \s""",
                                application, version, baseUrl, baseUrl, baseUrl));
+        unLockAllEnvironmentSynchronizationUseCase.execute();
     }
 }

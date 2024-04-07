@@ -1,6 +1,5 @@
 package fr.njj.galaxion.endtoendtesting.domain.response;
 
-import fr.njj.galaxion.endtoendtesting.domain.enumeration.SynchronizationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,11 +13,9 @@ import java.time.ZonedDateTime;
 @NoArgsConstructor
 @Getter
 @Builder
-public class ConfigurationSynchronizationResponse {
-
-    private SynchronizationStatus status;
+public class EnvironmentErrorResponse {
 
     private String error;
 
-    private ZonedDateTime syncDate;
+    private ZonedDateTime at;
 }

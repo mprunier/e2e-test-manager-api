@@ -79,4 +79,9 @@ public class EnvironmentEntity extends PanacheEntityBase {
     @Setter
     @Column(name = "updated_by")
     private String updatedBy;
+
+    @Builder.Default
+    @Setter
+    @Column(name = "is_locked", nullable = false)
+    private Boolean isLocked = false;
 }

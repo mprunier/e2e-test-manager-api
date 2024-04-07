@@ -1,6 +1,6 @@
 package fr.njj.galaxion.endtoendtesting.service;
 
-import fr.njj.galaxion.endtoendtesting.domain.enumeration.JobType;
+import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineType;
 import fr.njj.galaxion.endtoendtesting.domain.exception.RunParameterException;
 import fr.njj.galaxion.endtoendtesting.domain.request.RunTestOrSuiteRequest;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
@@ -34,11 +34,11 @@ public class RunSuiteOrTestService {
     private final ConfigurationSuiteRetrievalService configurationSuiteRetrievalService;
     private final GitlabService gitlabService;
     private final SecurityIdentity identity;
-    private final JobService jobService;
+    private final PipelineService pipelineService;
 
     @Transactional
     public void run(RunTestOrSuiteRequest request) {
-        jobService.assertNotConcurrentJobsReached();
+        pipelineService.assertNotConcurrentJobsReached();
         assertOnlyOneParameterInRequest(request);
 
         String file;
@@ -56,7 +56,6 @@ public class RunSuiteOrTestService {
                 grep.append(" ");
             }
             grep.append(configurationTest.getTitle());
-//            setStatus(configurationTest);
         } else {
             var configurationSuite = configurationSuiteRetrievalService.get(request.getConfigurationSuiteId());
             environment = configurationSuite.getEnvironment();
@@ -69,13 +68,14 @@ public class RunSuiteOrTestService {
         var variablesWithValueMap = new HashMap<String, String>();
         buildVariables(request, variablesBuilder, variablesWithValueMap);
         buildVariablesEnvironment(environment.getVariables(), variablesBuilder);
+        var isVideo = configurationTests.size() == 1;
         var gitlabResponse = gitlabService.runJob(environment.getBranch(),
                                                   environment.getToken(),
                                                   environment.getProjectId(),
                                                   file,
                                                   variablesBuilder.toString(),
                                                   grep.toString(),
-                                                  configurationTests.size() == 1);
+                                                  isVideo);
 
         var testIds = new ArrayList<String>();
         configurationTests.forEach(configurationTest -> {
@@ -90,7 +90,7 @@ public class RunSuiteOrTestService {
             testIds.add(String.valueOf(test.getId()));
         });
         if (!testIds.isEmpty()) {
-            jobService.create(request.getConfigurationTestId() != null ? JobType.TEST : JobType.SUITE, gitlabResponse.getId(), testIds);
+            pipelineService.create(environment, request.getConfigurationTestId() != null ? PipelineType.TEST : PipelineType.SUITE, gitlabResponse.getId(), testIds);
         }
     }
 
@@ -104,22 +104,12 @@ public class RunSuiteOrTestService {
     private void addConfigurationTestsFromSuite(ConfigurationSuiteEntity configurationSuite,
                                                 List<ConfigurationTestEntity> configurationTests) {
         configurationTests.addAll(configurationSuite.getConfigurationTests());
-//        configurationSuite.setStatus(ConfigurationStatus.IN_PROGRESS);
-//        configurationSuite.getConfigurationTests().forEach(test -> test.setStatus(ConfigurationStatus.IN_PROGRESS));
         if (configurationSuite.getSubSuites() != null) {
             for (var subSuite : configurationSuite.getSubSuites()) {
                 addConfigurationTestsFromSuite(subSuite, configurationTests);
             }
         }
     }
-
-//    private static void setStatus(ConfigurationTestEntity configurationTest) {
-//        configurationTest.setStatus(ConfigurationStatus.IN_PROGRESS);
-//        var hasOneFailed = checkOneFailed(configurationTest.getConfigurationSuite(), configurationTest);
-//        if (!hasOneFailed.get()) {
-//            configurationTest.getConfigurationSuite().setStatus(ConfigurationStatus.IN_PROGRESS);
-//        }
-//    }
 
     private static void buildSuiteGrep(ConfigurationSuiteEntity configurationSuite, StringBuilder grep) {
         if (!NO_SUITE.equals(configurationSuite.getTitle())) {

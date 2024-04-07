@@ -27,7 +27,7 @@ public class CancelSuiteOrTestService {
         var tests = testRetrievalService.getAll(testIds);
         var environment = tests.get(0).getConfigurationTest().getEnvironment();
         gitlabService.cancelPipeline(environment.getToken(), environment.getProjectId(), pipelineId);
-        updateStatus(tests, ConfigurationStatus.CANCELED, false);
+        updateStatus(tests, ConfigurationStatus.CANCELED);
     }
 
     @Transactional
@@ -36,7 +36,7 @@ public class CancelSuiteOrTestService {
 
         var environment = test.getConfigurationTest().getEnvironment();
         gitlabService.cancelPipeline(environment.getToken(), environment.getProjectId(), test.getPipelineId());
-        updateStatus(test, ConfigurationStatus.CANCELED, false);
+        updateStatus(test, ConfigurationStatus.CANCELED);
     }
 }
 

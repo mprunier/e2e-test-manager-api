@@ -8,6 +8,8 @@ import jakarta.ws.rs.Path;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.concurrent.CompletableFuture;
+
 @Slf4j
 @Path("/gitlab-webhook")
 @RequiredArgsConstructor
@@ -18,7 +20,7 @@ public class GitlabWebHookController {
     @POST
     public void getResponses(@HeaderParam("X-Gitlab-Event") String gitlabEvent,
                              GitlabWebHookRequest request) {
-        gitlabWebHookService.gitlabCallback(gitlabEvent, request);
+        CompletableFuture.runAsync(() -> gitlabWebHookService.gitlabCallback(gitlabEvent, request));
     }
 
 }

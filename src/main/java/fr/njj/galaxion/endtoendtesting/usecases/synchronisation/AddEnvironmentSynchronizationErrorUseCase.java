@@ -3,6 +3,7 @@ package fr.njj.galaxion.endtoendtesting.usecases.synchronisation;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentSynchronizationErrorEntity;
 import fr.njj.galaxion.endtoendtesting.model.repository.EnvironmentSynchronizationErrorRepository;
+import fr.njj.galaxion.endtoendtesting.service.environment.EnvironmentRetrievalService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -16,12 +17,15 @@ import java.time.ZonedDateTime;
 public class AddEnvironmentSynchronizationErrorUseCase {
 
     private final EnvironmentSynchronizationErrorRepository environmentSynchronizationErrorRepository;
+    private final EnvironmentRetrievalService environmentRetrievalService;
 
     @Transactional
     public void execute(
-            EnvironmentEntity environment,
+            long environmentId,
             String file,
             String error) {
+
+        var environment = environmentRetrievalService.getEnvironment(environmentId);
 
         var optionalEntity = environmentSynchronizationErrorRepository.findByEnvironmentIdAndFile(environment.getId(), file);
         if (optionalEntity.isPresent()) {

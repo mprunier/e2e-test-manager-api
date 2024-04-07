@@ -36,12 +36,12 @@ public class LoggingInterceptor {
         var logger = Logger.getLogger(context.getMethod().getDeclaringClass());
 
         var sw = new StopWatch();
-        logger.debugf("[%s] INPUT --> %s", context.getMethod().getName(), getArgumentsMessage(context));
+        logger.debugf("[%s] --> %s", context.getMethod().getName(), getArgumentsMessage(context));
         try {
             sw.start();
             var result = context.proceed();
             sw.stop();
-            logger.debugf("[%s] OUTPUT <-- %s", context.getMethod().getName(), result != null ? result : "Nothing");
+            logger.debugf("[%s] <-- %s", context.getMethod().getName(), result != null ? result : "Nothing");
             return result;
         } catch (CustomException exception) {
             sw.stop();

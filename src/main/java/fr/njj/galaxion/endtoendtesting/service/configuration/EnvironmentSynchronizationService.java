@@ -10,7 +10,9 @@ import fr.njj.galaxion.endtoendtesting.domain.internal.ConfigurationSuiteInterna
 import fr.njj.galaxion.endtoendtesting.domain.internal.ConfigurationTestInternal;
 import fr.njj.galaxion.endtoendtesting.lib.exception.CustomException;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
+import fr.njj.galaxion.endtoendtesting.model.repository.EnvironmentSynchronizationErrorRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -39,6 +41,7 @@ import static fr.njj.galaxion.endtoendtesting.mapper.ConfigurationInternalMapper
 public class EnvironmentSynchronizationService {
 
     private final ConfigurationService configurationService;
+    private final EnvironmentSynchronizationErrorRepository environmentSynchronizationErrorRepository;
 
     @RestClient
     private TsToJsConverterClient tsToJsConverterClient;
@@ -55,55 +58,54 @@ public class EnvironmentSynchronizationService {
                     if (fullPath.contains(END_TEST_TS_PATH)) {
                         content = tsToJsConverterClient.convert(content);
                     }
-                    assertAndBuild(environment.getId(), content, relativePathString, errors);
+                    assertAndBuild(environment.getId(), content, relativePathString, errors, filePath);
                 }
             }
         }
     }
 
-    private void assertAndBuild(Long environmentId, String content, String relativePathString, HashMap<String, String> errors) {
+    private void assertAndBuild(Long environmentId, String content, String relativePathString, HashMap<String, String> errors, String filePath) {
         try {
-            log.info("Environment id [{}] : Create or update file [{}].", environmentId, relativePathString);
             var configurationInternal = build(content, relativePathString);
-            assertUniqueTitles(relativePathString, configurationInternal);
+            assertUniqueTitles(configurationInternal);
             configurationService.updateOrCreate(environmentId, relativePathString, configurationInternal);
         } catch (CustomException exception) {
             log.error(exception.getDetail());
-            errors.put(relativePathString, exception.getDetail());
+            errors.put(filePath, exception.getDetail());
         }
     }
 
-    private static void assertUniqueTitles(String path, ConfigurationInternal config) {
-        checkTitles(path, config.getTests(), config.getSuites());
+    private static void assertUniqueTitles(ConfigurationInternal config) {
+        checkTitles(config.getTests(), config.getSuites());
     }
 
-    private static void checkTitles(String path, List<ConfigurationTestInternal> tests, List<ConfigurationSuiteInternal> suites) {
+    private static void checkTitles(List<ConfigurationTestInternal> tests, List<ConfigurationSuiteInternal> suites) {
         var titles = new HashSet<String>();
         for (var test : tests) {
             if (StringUtils.isBlank(test.getTitle())) {
-                throw new TitleEmptyException(path);
+                throw new TitleEmptyException();
             }
             if (!titles.add(test.getTitle())) {
-                throw new TitleDuplicationException(path, test.getTitle());
+                throw new TitleDuplicationException(test.getTitle());
             }
             if (test.getTitle().contains("|") || test.getTitle().contains(";")) {
-                throw new CharactersForbiddenException(path);
+                throw new CharactersForbiddenException();
             }
         }
         for (var suite : suites) {
             if (StringUtils.isBlank(suite.getTitle())) {
-                throw new TitleEmptyException(path);
+                throw new TitleEmptyException();
             }
             if (NO_SUITE.equals(suite.getTitle())) {
-                throw new SuiteNoTitleException(path);
+                throw new SuiteNoTitleException();
             }
             if (!titles.add(suite.getTitle())) {
-                throw new TitleDuplicationException(path, suite.getTitle());
+                throw new TitleDuplicationException(suite.getTitle());
             }
             if (suite.getTitle().contains("|") || suite.getTitle().contains(";")) {
-                throw new CharactersForbiddenException(path);
+                throw new CharactersForbiddenException();
             }
-            checkTitles(path, suite.getTests(), suite.getSuites());
+            checkTitles(suite.getTests(), suite.getSuites());
         }
     }
 
@@ -116,5 +118,16 @@ public class EnvironmentSynchronizationService {
         }
     }
 
+    @Transactional
+    public void cleanErrors(
+            long environmentId,
+            String file) {
+
+        if (file != null) {
+            environmentSynchronizationErrorRepository.deleteByEnvironmentIdAndFile(environmentId, file);
+        } else {
+            environmentSynchronizationErrorRepository.deleteByEnvironmentId(environmentId);
+        }
+    }
 }
 

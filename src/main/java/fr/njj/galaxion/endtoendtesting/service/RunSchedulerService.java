@@ -1,6 +1,6 @@
 package fr.njj.galaxion.endtoendtesting.service;
 
-import fr.njj.galaxion.endtoendtesting.domain.enumeration.JobType;
+import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineType;
 import fr.njj.galaxion.endtoendtesting.service.environment.EnvironmentRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.GitlabService;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -18,12 +18,12 @@ public class RunSchedulerService {
     private final EnvironmentRetrievalService environmentRetrievalService;
     private final SchedulerRetrievalService schedulerRetrievalService;
     private final GitlabService gitlabService;
-    private final JobService jobService;
+    private final PipelineService pipelineService;
     private final SchedulerService schedulerService;
 
     @Transactional
     public void runFromUser(Long environmentId, String createdBy) {
-        jobService.assertNotConcurrentJobsReached();
+        pipelineService.assertNotConcurrentJobsReached();
         run(environmentId, createdBy);
     }
 
@@ -45,7 +45,7 @@ public class RunSchedulerService {
                                                   false);
 
         schedulerService.create(environment, createdBy, gitlabResponse.getId());
-        jobService.create(JobType.ALL_TESTS, gitlabResponse.getId(), null);
+        pipelineService.create(environment, PipelineType.ALL_TESTS, gitlabResponse.getId(), null);
     }
 }
 

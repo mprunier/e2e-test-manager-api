@@ -3,7 +3,8 @@
 
 CREATE TABLE environment_synchronization_error
 (
-    environment_id BIGINT PRIMARY KEY,
+    id             BIGSERIAL PRIMARY KEY,
+    environment_id BIGINT        NOT NULL,
     file           VARCHAR(1000) NOT NULL,
     error          VARCHAR(1000),
     error_at       TIMESTAMP WITH TIME ZONE,

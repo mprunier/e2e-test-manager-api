@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor
-public class RunScheduler {
+public class RunPipelineScheduler {
 
     private final RunSchedulerService runSchedulerService;
     private final ConfigurationSchedulerService configurationSchedulerService;
@@ -24,7 +24,7 @@ public class RunScheduler {
 
     @Scheduled(every = "1m")
     @ActivateRequestContext
-    public void runScheduler() {
+    public void execute() {
         if (inProgress.compareAndSet(false, true)) {
             try {
                 var configurationSchedulers = configurationSchedulerService.getAllEnabled();

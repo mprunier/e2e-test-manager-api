@@ -3,7 +3,7 @@ package fr.njj.galaxion.endtoendtesting.service.gitlab;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.GitLabWebhookEvent;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.GitlabJobStatus;
 import fr.njj.galaxion.endtoendtesting.domain.request.webhook.GitlabWebHookRequest;
-import fr.njj.galaxion.endtoendtesting.service.JobService;
+import fr.njj.galaxion.endtoendtesting.usecases.pipeline.RecordResultPipelineUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.synchronisation.PartialEnvironmentSynchronizationUseCase;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
@@ -21,11 +21,9 @@ public class GitlabWebHookService {
     private final ConcurrentMap<String, Boolean> locks = new ConcurrentHashMap<>();
 
     private final PartialEnvironmentSynchronizationUseCase partialEnvironmentSynchronizationUseCase;
-    private final JobService jobService;
+    private final RecordResultPipelineUseCase recordResultPipelineUseCase;
 
     public void gitlabCallback(String gitlabEvent, GitlabWebHookRequest request) {
-        log.trace(request.toString()); // TODO : to removed
-
         var event = GitLabWebhookEvent.fromHeaderValue(gitlabEvent);
         if (GitLabWebhookEvent.JOB_HOOK.equals(event)) {
             jobHook(request);
@@ -48,11 +46,8 @@ public class GitlabWebHookService {
 
         var projectId = request.getProjectId();
         var branch = request.getRef();
-        var pipelineId = request.getPipelineId();
-        var jobId = request.getJobId();
 
-        //                    updateSuiteOrTestService.update(pipelineId, job.getTestIds());
-        jobService.finish(Long.parseLong(jobId));
+        recordResultPipelineUseCase.execute(projectId, branch, status);
     }
 
     private void pushHook(GitlabWebHookRequest request) {
@@ -61,11 +56,10 @@ public class GitlabWebHookService {
 
         var lockKey = projectId + ":" + branch;
         if (locks.putIfAbsent(lockKey, true) != null) {
-            log.info("Gitlab WebHook - Synchronization is already in progress for Project id [{}] and Branch name [{}].", projectId, branch);
+            log.trace("Gitlab WebHook - Synchronization is already in progress for Project id [{}] and Branch name [{}].", projectId, branch);
             return;
         }
         try {
-            log.info("Gitlab WebHook - Synchronize Project id [{}] and Branch name [{}].", projectId, branch);
             var filesToRemove = new HashSet<String>();
             var filesToSynchronize = new HashSet<String>();
 
