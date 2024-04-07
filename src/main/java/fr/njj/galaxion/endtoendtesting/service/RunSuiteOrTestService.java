@@ -7,6 +7,7 @@ import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.TestEntity;
+import fr.njj.galaxion.endtoendtesting.model.repository.SchedulerRepository;
 import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationSuiteRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationTestRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.GitlabService;
@@ -35,9 +36,11 @@ public class RunSuiteOrTestService {
     private final GitlabService gitlabService;
     private final SecurityIdentity identity;
     private final PipelineService pipelineService;
+    private final SchedulerRepository schedulerRepository;
 
     @Transactional
-    public void run(RunTestOrSuiteRequest request) {
+    public void run(long environmentId, RunTestOrSuiteRequest request) {
+        schedulerRepository.assertExistInProgressByEnvironment(environmentId);
         pipelineService.assertNotConcurrentJobsReached();
         assertOnlyOneParameterInRequest(request);
 

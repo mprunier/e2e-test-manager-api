@@ -14,6 +14,6 @@ public class ConfigurationSchedulerRepository implements PanacheRepositoryBase<C
     }
 
     public List<ConfigurationSchedulerEntity> findAllEnabled() {
-        return find("enabled = true").list();
+        return list("enabled = true");
     }
 }

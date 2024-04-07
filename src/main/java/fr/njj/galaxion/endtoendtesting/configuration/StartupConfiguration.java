@@ -26,15 +26,14 @@ public class StartupConfiguration {
 
     void onStart(@Observes StartupEvent e) {
         var baseUrl = "http://localhost:" + serverPort;
-        log.info(String.format("""
-                                                                              \s
-                                        ================================================================================
-                                            Microservice: %s:%s
-                                            Base Url: %s
-                                            Swagger Url: %s/q/swagger-ui
-                                            Health Url: %s/q/health
-                                        ================================================================================
-                                       \s""",
+        log.info(String.format(""" 
+                                       \s
+                                       ================================================================================
+                                           Microservice: %s:%s
+                                           Base Url: %s
+                                           Swagger Url: %s/q/swagger-ui
+                                           Health Url: %s/q/health
+                                       ================================================================================""",
                                application, version, baseUrl, baseUrl, baseUrl));
         unLockAllEnvironmentSynchronizationUseCase.execute();
     }

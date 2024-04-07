@@ -7,7 +7,9 @@ import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentVariableEntity;
 import fr.njj.galaxion.endtoendtesting.model.repository.EnvironmentVariableRepository;
 import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationSchedulerService;
-import fr.njj.galaxion.endtoendtesting.service.configuration.EnvironmentSynchronizationService;
+import fr.njj.galaxion.endtoendtesting.usecases.environment.LockEnvironmentSynchronizationUseCase;
+import fr.njj.galaxion.endtoendtesting.usecases.environment.UnLockEnvironmentSynchronizationUseCase;
+import fr.njj.galaxion.endtoendtesting.usecases.synchronisation.GlobalEnvironmentSynchronizationUseCase;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -15,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.ZonedDateTime;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @ApplicationScoped
@@ -23,9 +26,11 @@ public class EnvironmentService {
 
     private final EnvironmentRetrievalService environmentRetrievalService;
     private final SecurityIdentity identity;
-    private final EnvironmentSynchronizationService environmentSynchronizationService;
+    private final GlobalEnvironmentSynchronizationUseCase globalEnvironmentSynchronizationUseCase;
     private final ConfigurationSchedulerService configurationSchedulerService;
     private final EnvironmentVariableRepository environmentVariableRepository;
+    private final LockEnvironmentSynchronizationUseCase lockEnvironmentSynchronizationUseCase;
+    private final UnLockEnvironmentSynchronizationUseCase unLockEnvironmentSynchronizationUseCase;
 
     @Transactional
     public EnvironmentResponse create(CreateUpdateEnvironmentRequest request) {
@@ -36,12 +41,24 @@ public class EnvironmentService {
                                            .branch(request.getBranch())
                                            .token(request.getToken())
                                            .projectId(request.getProjectId())
+                                           .isLocked(true)
                                            .createdBy(username)
                                            .build();
         environment.persist();
         createVariables(request, environment);
         configurationSchedulerService.create(environment);
+        synchronize(environment);
         return environmentRetrievalService.getEnvironmentResponse(environment.getId());
+    }
+
+    private void synchronize(EnvironmentEntity environment) {
+        CompletableFuture.runAsync(() -> {
+            try {
+                globalEnvironmentSynchronizationUseCase.execute(environment.getId());
+            } finally {
+                unLockEnvironmentSynchronizationUseCase.execute(environment.getId());
+            }
+        });
     }
 
     private static void createVariables(CreateUpdateEnvironmentRequest request, EnvironmentEntity environment) {

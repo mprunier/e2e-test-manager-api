@@ -8,14 +8,15 @@ import fr.njj.galaxion.endtoendtesting.domain.internal.MochaReportResultInternal
 import fr.njj.galaxion.endtoendtesting.domain.internal.MochaReportStatsInternal;
 import fr.njj.galaxion.endtoendtesting.domain.internal.MochaReportSuiteInternal;
 import fr.njj.galaxion.endtoendtesting.domain.internal.MochaReportTestInternal;
+import fr.njj.galaxion.endtoendtesting.domain.record.Metrics;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
-import fr.njj.galaxion.endtoendtesting.model.entity.MetricsEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.SchedulerEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.TestEntity;
 import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationSuiteRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationTestRetrievalService;
+import fr.njj.galaxion.endtoendtesting.usecases.metrics.AddMetricsUseCase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,7 @@ public class ReportSchedulerService {
     private final ConfigurationSuiteRetrievalService configurationSuiteRetrievalService;
     private final ConfigurationTestRetrievalService configurationTestRetrievalService;
     private final TestScreenshotService testScreenshotService;
+    private final AddMetricsUseCase addMetricsUseCase;
 
     @Transactional
     public void report(ArtifactDataInternal artifactData,
@@ -155,7 +157,7 @@ public class ReportSchedulerService {
         return ConfigurationStatus.FAILED;
     }
 
-    private static void setStats(SchedulerEntity scheduler, MochaReportStatsInternal stats) {
+    private void setStats(SchedulerEntity scheduler, MochaReportStatsInternal stats) {
         if (stats != null) {
             var skipped = 0;
             if (stats.getPending() != null) {
@@ -172,17 +174,16 @@ public class ReportSchedulerService {
             scheduler.setPassPercent(stats.getPassPercent());
             scheduler.setStatus(stats.getFailures() != 0 ? SchedulerStatus.FAILED : SchedulerStatus.SUCCESS);
 
-            MetricsEntity
+            var metric = Metrics
                     .builder()
-                    .environment(scheduler.getEnvironment())
                     .suites(stats.getSuites())
                     .tests(stats.getTests())
                     .passes(stats.getPasses())
                     .failures(stats.getFailures())
                     .skipped(skipped)
                     .passPercent(stats.getPassPercent())
-                    .build()
-                    .persist();
+                    .build();
+            addMetricsUseCase.execute(scheduler.getEnvironment().getId(), metric);
         }
     }
 }

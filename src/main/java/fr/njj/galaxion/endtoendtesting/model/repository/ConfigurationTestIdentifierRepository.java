@@ -10,10 +10,10 @@ import java.util.List;
 public class ConfigurationTestIdentifierRepository implements PanacheRepositoryBase<ConfigurationTestIdentifierEntity, Long> {
 
     public List<ConfigurationTestIdentifierEntity> findAllByEnv(long environmentId) {
-        return find("environmentId = ?1", environmentId).stream().toList();
+        return list("environmentId = ?1", environmentId);
     }
 
     public List<ConfigurationTestIdentifierEntity> findAllByEnvAndIdentifier(long environmentId, String identifier) {
-        return find("environmentId = ?1 AND identifier = ?2", environmentId, identifier).stream().toList();
+        return list("environmentId = ?1 AND identifier = ?2", environmentId, identifier);
     }
 }
