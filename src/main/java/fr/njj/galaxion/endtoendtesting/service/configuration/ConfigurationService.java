@@ -69,7 +69,7 @@ public class ConfigurationService {
                                                 List<Long> suiteIds,
                                                 List<Long> testIds) {
         ConfigurationSuiteEntity configurationSuite;
-        var configurationSuiteOptional = configurationSuiteRetrievalService.getBy(environment, file, NO_SUITE, null);
+        var configurationSuiteOptional = configurationSuiteRetrievalService.getBy(environment.getId(), file, NO_SUITE, null);
         if (configurationSuiteOptional.isEmpty()) {
             configurationSuite = ConfigurationSuiteEntity
                     .builder()
@@ -94,7 +94,7 @@ public class ConfigurationService {
                                      List<Long> testIds) {
         ConfigurationSuiteEntity configurationSuite;
         var parentSuiteId = parentSuite != null ? parentSuite.getId() : null;
-        var configurationSuiteOptional = configurationSuiteRetrievalService.getBy(environment, file, suiteInternal.getTitle(), parentSuiteId);
+        var configurationSuiteOptional = configurationSuiteRetrievalService.getBy(environment.getId(), file, suiteInternal.getTitle(), parentSuiteId);
         if (configurationSuiteOptional.isEmpty()) {
             configurationSuite = ConfigurationSuiteEntity
                     .builder()
@@ -122,7 +122,7 @@ public class ConfigurationService {
                                     ConfigurationSuiteEntity configurationSuite,
                                     List<Long> testIds) {
         ConfigurationTestEntity configurationTest;
-        var configurationTestOptional = configurationTestRetrievalService.getBy(environment, file, testInternal.getTitle(), configurationSuite);
+        var configurationTestOptional = configurationTestRetrievalService.getBy(environment.getId(), file, testInternal.getTitle(), configurationSuite);
 
         var configurationTestIdentifierEntities = new ArrayList<ConfigurationTestIdentifierEntity>();
         if (configurationTestOptional.isEmpty()) {

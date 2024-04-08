@@ -1,13 +1,14 @@
 package fr.njj.galaxion.endtoendtesting.service;
 
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineType;
+import fr.njj.galaxion.endtoendtesting.domain.enumeration.SchedulerStatus;
 import fr.njj.galaxion.endtoendtesting.domain.exception.RunParameterException;
+import fr.njj.galaxion.endtoendtesting.domain.exception.SchedulerInProgressException;
 import fr.njj.galaxion.endtoendtesting.domain.request.RunTestOrSuiteRequest;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.TestEntity;
-import fr.njj.galaxion.endtoendtesting.model.repository.SchedulerRepository;
 import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationSuiteRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationTestRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.GitlabService;
@@ -36,11 +37,9 @@ public class RunSuiteOrTestService {
     private final GitlabService gitlabService;
     private final SecurityIdentity identity;
     private final PipelineService pipelineService;
-    private final SchedulerRepository schedulerRepository;
 
     @Transactional
-    public void run(long environmentId, RunTestOrSuiteRequest request) {
-        schedulerRepository.assertExistInProgressByEnvironment(environmentId);
+    public void run(RunTestOrSuiteRequest request) {
         pipelineService.assertNotConcurrentJobsReached();
         assertOnlyOneParameterInRequest(request);
 
@@ -66,6 +65,7 @@ public class RunSuiteOrTestService {
             addConfigurationTestsFromSuite(configurationSuite, configurationTests);
             buildSuiteGrep(configurationSuite, grep);
         }
+        assertSchedulerInProgress(environment);
 
         var variablesBuilder = new StringBuilder();
         var variablesWithValueMap = new HashMap<String, String>();
@@ -85,7 +85,6 @@ public class RunSuiteOrTestService {
             var test = TestEntity
                     .builder()
                     .configurationTest(configurationTest)
-                    .pipelineId(gitlabResponse.getId())
                     .variables(variablesWithValueMap)
                     .createdBy(identity != null && identity.getPrincipal() != null ? identity.getPrincipal().getName() : "Unknown")
                     .build();
@@ -94,6 +93,12 @@ public class RunSuiteOrTestService {
         });
         if (!testIds.isEmpty()) {
             pipelineService.create(environment, request.getConfigurationTestId() != null ? PipelineType.TEST : PipelineType.SUITE, gitlabResponse.getId(), testIds);
+        }
+    }
+
+    private static void assertSchedulerInProgress(EnvironmentEntity environment) {
+        if (SchedulerStatus.IN_PROGRESS.equals(environment.getSchedulerStatus())) {
+            throw new SchedulerInProgressException();
         }
     }
 

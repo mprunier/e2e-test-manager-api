@@ -15,6 +15,8 @@ import java.time.ZonedDateTime;
 @Builder
 public class EnvironmentErrorResponse {
 
+    private String file;
+
     private String error;
 
     private ZonedDateTime at;

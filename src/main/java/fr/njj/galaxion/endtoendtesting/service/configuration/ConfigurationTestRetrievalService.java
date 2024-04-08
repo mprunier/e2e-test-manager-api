@@ -6,7 +6,6 @@ import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationTestResponse
 import fr.njj.galaxion.endtoendtesting.domain.response.SearchConfigurationTestResponse;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
-import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.repository.ConfigurationTestRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -62,8 +61,8 @@ public class ConfigurationTestRetrievalService {
     }
 
     @Transactional
-    public Optional<ConfigurationTestEntity> getBy(EnvironmentEntity environment, String file, String title, ConfigurationSuiteEntity configurationSuite) {
-        return configurationTestRepository.findBy(file, environment.getId(), configurationSuite.getId(), title);
+    public Optional<ConfigurationTestEntity> getBy(long environmentId, String file, String title, ConfigurationSuiteEntity configurationSuite) {
+        return configurationTestRepository.findBy(file, environmentId, configurationSuite.getId(), title);
     }
 
     @Transactional

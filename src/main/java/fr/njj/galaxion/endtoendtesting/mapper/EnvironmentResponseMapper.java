@@ -16,7 +16,8 @@ public final class EnvironmentResponseMapper {
         var envBuilder = EnvironmentResponse
                 .builder()
                 .id(entity.getId())
-                .description(entity.getDescription());
+                .description(entity.getDescription())
+                .schedulerStatus(entity.getSchedulerStatus());
 
         if (Boolean.TRUE.equals(withDetails)) {
             var variables = buildEnvironmentVariableResponses(entity.getVariables());

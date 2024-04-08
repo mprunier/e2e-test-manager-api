@@ -44,10 +44,10 @@ public class GitlabWebHookService {
             return;
         }
 
-        var projectId = request.getProjectId();
-        var branch = request.getRef();
+        var pipelineId = request.getPipelineId();
+        var jobId = request.getJobId();
 
-        recordResultPipelineUseCase.execute(projectId, branch, status);
+        recordResultPipelineUseCase.execute(pipelineId, jobId, status);
     }
 
     private void pushHook(GitlabWebHookRequest request) {

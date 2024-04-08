@@ -29,14 +29,5 @@ public class CancelSuiteOrTestService {
         gitlabService.cancelPipeline(environment.getToken(), environment.getProjectId(), pipelineId);
         updateStatus(tests, ConfigurationStatus.CANCELED);
     }
-
-    @Transactional
-    public void cancel(Long testId) {
-        var test = testRetrievalService.get(testId);
-
-        var environment = test.getConfigurationTest().getEnvironment();
-        gitlabService.cancelPipeline(environment.getToken(), environment.getProjectId(), test.getPipelineId());
-        updateStatus(test, ConfigurationStatus.CANCELED);
-    }
 }
 

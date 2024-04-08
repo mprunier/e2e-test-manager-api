@@ -7,6 +7,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,9 +20,10 @@ public class RetrieveMetricsHistoryUseCase {
 
     @Transactional
     public List<MetricsResponse> execute(
-            long environmentId) {
+            long environmentId,
+            LocalDate since) {
 
-        var entities = metricRepository.findAllByEnvironmentId(environmentId);
+        var entities = metricRepository.findAllByEnvironmentIdSince(environmentId, since);
 
         var metrics = new ArrayList<MetricsResponse>();
         entities.forEach(entity -> metrics.add(

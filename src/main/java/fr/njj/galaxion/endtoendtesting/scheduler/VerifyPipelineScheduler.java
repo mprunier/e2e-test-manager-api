@@ -41,11 +41,12 @@ public class VerifyPipelineScheduler {
 
     @Scheduled(every = "5m")
     @ActivateRequestContext
-    public void execute() {
+    public void schedule() {
         if (inVerifyProgress.compareAndSet(false, true)) {
             try {
                 var pipelines = pipelineRetrievalService.getOldInProgress(oldPipelineToVerifyInMinutes);
                 for (var pipeline : pipelines) {
+                    log.info("Pipeline id [{}] verified.", pipeline.getId());
                     var environment = pipeline.getEnvironment();
                     var gitlabJobResponse = gitlabService.getJob(environment.getToken(), environment.getProjectId(), pipeline.getId());
                     recordResultPipelineUseCase.execute(pipeline.getId(), gitlabJobResponse.getId(), GitlabJobStatus.fromHeaderValue(gitlabJobResponse.getStatus()));
@@ -57,10 +58,12 @@ public class VerifyPipelineScheduler {
                     if (pipeline.getTestIds() != null) {
                         cancelSuiteOrTestService.cancel(pipeline.getId(), pipeline.getTestIds());
                     } else {
-                        cancelSchedulerService.cancel(pipeline.getId());
+                        cancelSchedulerService.cancel(pipeline.getEnvironment().getId(), pipeline.getId());
                     }
                     pipelineService.cancel(pipeline.getId());
                 }
+            } catch (Exception e) {
+                log.error("Error during the verification of the in progress pipelines. : {}", e.getMessage());
             } finally {
                 inVerifyProgress.set(false);
             }

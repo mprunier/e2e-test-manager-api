@@ -7,7 +7,6 @@ import fr.njj.galaxion.endtoendtesting.domain.response.SearchConfigurationSuiteR
 import fr.njj.galaxion.endtoendtesting.mapper.ConfigurationSuiteResponseMapper;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
-import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.repository.ConfigurationSuiteRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -81,9 +80,9 @@ public class ConfigurationSuiteRetrievalService {
     }
 
     @Transactional
-    public Optional<ConfigurationSuiteEntity> getBy(EnvironmentEntity environment, String file, String title, Long parentSuiteId) {
+    public Optional<ConfigurationSuiteEntity> getBy(long environmentId, String file, String title, Long parentSuiteId) {
         return configurationSuiteRepository.findBy(file,
-                                                   environment.getId(),
+                                                   environmentId,
                                                    title,
                                                    parentSuiteId);
     }

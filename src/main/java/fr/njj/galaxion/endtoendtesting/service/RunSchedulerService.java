@@ -1,8 +1,12 @@
 package fr.njj.galaxion.endtoendtesting.service;
 
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineType;
+import fr.njj.galaxion.endtoendtesting.domain.enumeration.SchedulerStatus;
+import fr.njj.galaxion.endtoendtesting.domain.exception.SchedulerInProgressException;
+import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.service.environment.EnvironmentRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.GitlabService;
+import io.quarkus.cache.CacheManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -16,10 +20,9 @@ import static fr.njj.galaxion.endtoendtesting.helper.EnvironmentHelper.buildVari
 public class RunSchedulerService {
 
     private final EnvironmentRetrievalService environmentRetrievalService;
-    private final SchedulerRetrievalService schedulerRetrievalService;
     private final GitlabService gitlabService;
     private final PipelineService pipelineService;
-    private final SchedulerService schedulerService;
+    private final CacheManager cacheManager;
 
     @Transactional
     public void runFromUser(Long environmentId, String createdBy) {
@@ -30,9 +33,9 @@ public class RunSchedulerService {
     @Transactional
     public void run(Long environmentId, String createdBy) {
         log.info("[{}] ran the Scheduler on Environment id [{}].", createdBy, environmentId);
-        schedulerRetrievalService.assertExistInProgressByEnvironment(environmentId);
-
         var environment = environmentRetrievalService.getEnvironment(environmentId);
+        assertSchedulerInProgress(environment);
+        environment.setSchedulerStatus(SchedulerStatus.IN_PROGRESS);
 
         var variablesBuilder = new StringBuilder();
         buildVariablesEnvironment(environment.getVariables(), variablesBuilder);
@@ -44,8 +47,15 @@ public class RunSchedulerService {
                                                   null,
                                                   false);
 
-        schedulerService.create(environment, createdBy, gitlabResponse.getId());
         pipelineService.create(environment, PipelineType.ALL_TESTS, gitlabResponse.getId(), null);
+        cacheManager.getCache("environment").ifPresent(cache -> cache.invalidate(environmentId).await().indefinitely());
+
+    }
+
+    private static void assertSchedulerInProgress(EnvironmentEntity environment) {
+        if (SchedulerStatus.IN_PROGRESS.equals(environment.getSchedulerStatus())) {
+            throw new SchedulerInProgressException();
+        }
     }
 }
 

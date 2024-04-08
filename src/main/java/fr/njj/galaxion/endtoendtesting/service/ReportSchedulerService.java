@@ -11,12 +11,11 @@ import fr.njj.galaxion.endtoendtesting.domain.internal.MochaReportTestInternal;
 import fr.njj.galaxion.endtoendtesting.domain.record.Metrics;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
-import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
-import fr.njj.galaxion.endtoendtesting.model.entity.SchedulerEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.TestEntity;
 import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationSuiteRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationTestRetrievalService;
 import fr.njj.galaxion.endtoendtesting.usecases.metrics.AddMetricsUseCase;
+import fr.njj.galaxion.endtoendtesting.usecases.scheduler.UpdateSchedulerStatusUseCase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -37,82 +36,78 @@ public class ReportSchedulerService {
     private final ConfigurationTestRetrievalService configurationTestRetrievalService;
     private final TestScreenshotService testScreenshotService;
     private final AddMetricsUseCase addMetricsUseCase;
+    private final UpdateSchedulerStatusUseCase updateSchedulerStatusUseCase;
 
     @Transactional
     public void report(ArtifactDataInternal artifactData,
-                       SchedulerEntity scheduler) {
+                       long environmentId) {
         var screenshots = artifactData.getScreenshots();
         var report = artifactData.getReport();
         if (report != null && report.getResults() != null && !report.getResults().isEmpty()) {
             var results = report.getResults();
             var stats = report.getStats();
-            setStats(scheduler, stats);
-            createSuitesAndTests(scheduler, results, screenshots);
+            setStats(environmentId, stats);
+            createSuitesAndTests(environmentId, results, screenshots);
         } else {
-            scheduler.setStatus(SchedulerStatus.NO_REPORT_ERROR);
+            updateSchedulerStatusUseCase.execute(environmentId, SchedulerStatus.NO_REPORT_ERROR);
         }
     }
 
-    private void createSuitesAndTests(SchedulerEntity scheduler,
+    private void createSuitesAndTests(long environmentId,
                                       List<MochaReportResultInternal> results,
                                       Map<String, byte[]> screenshots) {
-        var environment = scheduler.getEnvironment();
         results.forEach(result -> {
             var file = result.getFile().replaceAll(START_PATH, "");
-            processTestsWithoutSuite(scheduler, environment, file, result.getTests(), screenshots);
-            processSuites(scheduler, environment, file, result.getSuites(), null, screenshots);
+            processTestsWithoutSuite(environmentId, file, result.getTests(), screenshots);
+            processSuites(environmentId, file, result.getSuites(), null, screenshots);
         });
     }
 
-    private void processTestsWithoutSuite(SchedulerEntity scheduler,
-                                          EnvironmentEntity environment,
+    private void processTestsWithoutSuite(long environmentId,
                                           String file,
                                           List<MochaReportTestInternal> tests,
                                           Map<String, byte[]> screenshots) {
         if (tests != null) {
             tests.forEach(mochaTest -> {
-                var configurationSuiteOptional = configurationSuiteRetrievalService.getBy(environment, file, NO_SUITE, null);
+                var configurationSuiteOptional = configurationSuiteRetrievalService.getBy(environmentId, file, NO_SUITE, null);
                 if (configurationSuiteOptional.isPresent()) {
-                    var configurationTestOptional = configurationTestRetrievalService.getBy(environment, file, mochaTest.getTitle(), configurationSuiteOptional.get());
-                    configurationTestOptional.ifPresent(configurationTestEntity -> saveTest(scheduler, mochaTest, configurationTestEntity, screenshots));
+                    var configurationTestOptional = configurationTestRetrievalService.getBy(environmentId, file, mochaTest.getTitle(), configurationSuiteOptional.get());
+                    configurationTestOptional.ifPresent(configurationTestEntity -> saveTest(mochaTest, configurationTestEntity, screenshots));
                 }
             });
         }
     }
 
-    private void processTests(SchedulerEntity scheduler,
-                              EnvironmentEntity environment,
+    private void processTests(long environmentId,
                               String file,
                               List<MochaReportTestInternal> tests,
                               ConfigurationSuiteEntity suite,
                               Map<String, byte[]> screenshots) {
         if (tests != null) {
             tests.forEach(mochaTest -> {
-                var configurationTestOptional = configurationTestRetrievalService.getBy(environment, file, mochaTest.getTitle(), suite);
-                configurationTestOptional.ifPresent(configurationTestEntity -> saveTest(scheduler, mochaTest, configurationTestEntity, screenshots));
+                var configurationTestOptional = configurationTestRetrievalService.getBy(environmentId, file, mochaTest.getTitle(), suite);
+                configurationTestOptional.ifPresent(configurationTestEntity -> saveTest(mochaTest, configurationTestEntity, screenshots));
             });
         }
     }
 
-    private void processSuites(SchedulerEntity scheduler,
-                               EnvironmentEntity environment,
+    private void processSuites(long environmentId,
                                String file,
                                List<MochaReportSuiteInternal> suites,
                                ConfigurationSuiteEntity parentSuite,
                                Map<String, byte[]> screenshots) {
         if (suites != null) {
             suites.forEach(mochaSuite -> {
-                var configurationSuiteOptional = configurationSuiteRetrievalService.getBy(environment, file, mochaSuite.getTitle(), parentSuite != null ? parentSuite.getId() : null);
+                var configurationSuiteOptional = configurationSuiteRetrievalService.getBy(environmentId, file, mochaSuite.getTitle(), parentSuite != null ? parentSuite.getId() : null);
                 if (configurationSuiteOptional.isPresent()) {
-                    processTests(scheduler, environment, file, mochaSuite.getTests(), configurationSuiteOptional.get(), screenshots);
-                    processSuites(scheduler, environment, file, mochaSuite.getSuites(), configurationSuiteOptional.get(), screenshots);
+                    processTests(environmentId, file, mochaSuite.getTests(), configurationSuiteOptional.get(), screenshots);
+                    processSuites(environmentId, file, mochaSuite.getSuites(), configurationSuiteOptional.get(), screenshots);
                 }
             });
         }
     }
 
-    private void saveTest(SchedulerEntity scheduler,
-                          MochaReportTestInternal mochaTest,
+    private void saveTest(MochaReportTestInternal mochaTest,
                           ConfigurationTestEntity configurationTest,
                           Map<String, byte[]> screenshots) {
 
@@ -120,7 +115,6 @@ public class ReportSchedulerService {
         var test = TestEntity
                 .builder()
                 .configurationTest(configurationTest)
-                .pipelineId(scheduler.getPipelineId())
                 .status(status)
                 .errorMessage(mochaTest.getErr() != null ? mochaTest.getErr().getMessage() : null)
                 .errorStacktrace(mochaTest.getErr() != null ? mochaTest.getErr().getEstack() : null)
@@ -157,7 +151,7 @@ public class ReportSchedulerService {
         return ConfigurationStatus.FAILED;
     }
 
-    private void setStats(SchedulerEntity scheduler, MochaReportStatsInternal stats) {
+    private void setStats(long environmentId, MochaReportStatsInternal stats) {
         if (stats != null) {
             var skipped = 0;
             if (stats.getPending() != null) {
@@ -166,13 +160,6 @@ public class ReportSchedulerService {
             if (stats.getSkipped() != null) {
                 skipped += stats.getSkipped();
             }
-            scheduler.setSuites(stats.getSuites());
-            scheduler.setTests(stats.getTests());
-            scheduler.setPasses(stats.getPasses());
-            scheduler.setFailures(stats.getFailures());
-            scheduler.setSkipped(skipped);
-            scheduler.setPassPercent(stats.getPassPercent());
-            scheduler.setStatus(stats.getFailures() != 0 ? SchedulerStatus.FAILED : SchedulerStatus.SUCCESS);
 
             var metric = Metrics
                     .builder()
@@ -183,7 +170,7 @@ public class ReportSchedulerService {
                     .skipped(skipped)
                     .passPercent(stats.getPassPercent())
                     .build();
-            addMetricsUseCase.execute(scheduler.getEnvironment().getId(), metric);
+            addMetricsUseCase.execute(environmentId, metric);
         }
     }
 }

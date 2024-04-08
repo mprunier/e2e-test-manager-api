@@ -10,6 +10,7 @@ import jakarta.ws.rs.QueryParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
@@ -22,8 +23,10 @@ public class MetricController {
 
     @GET
     @Path("/history")
-    public List<MetricsResponse> retrieveMetricsHistory(@NotNull @QueryParam("environmentId") Long environmentId) {
-        return retrieveMetricsHistoryUseCase.execute(environmentId);
+    public List<MetricsResponse> retrieveMetricsHistory(@NotNull @QueryParam("environmentId") Long environmentId,
+                                                        @NotNull @QueryParam("since") String sinceStr) {
+        var since = LocalDate.parse(sinceStr);
+        return retrieveMetricsHistoryUseCase.execute(environmentId, since);
     }
 
     @GET

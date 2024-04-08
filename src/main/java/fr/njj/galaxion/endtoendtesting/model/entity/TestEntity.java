@@ -46,9 +46,6 @@ public class TestEntity extends PanacheEntityBase {
     @JoinColumn(name = "configuration_test_id", foreignKey = @ForeignKey(name = "fk__test__configuration_test_id"), nullable = false)
     private ConfigurationTestEntity configurationTest;
 
-    @Column(name = "pipeline_id", nullable = false)
-    private String pipelineId;
-
     @Convert(converter = StringMapConverter.class)
     @Column(name = "variables")
     private Map<String, String> variables;

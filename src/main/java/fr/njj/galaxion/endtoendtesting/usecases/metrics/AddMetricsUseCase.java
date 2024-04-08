@@ -1,7 +1,6 @@
 package fr.njj.galaxion.endtoendtesting.usecases.metrics;
 
 import fr.njj.galaxion.endtoendtesting.domain.record.Metrics;
-import fr.njj.galaxion.endtoendtesting.lib.logging.Monitored;
 import fr.njj.galaxion.endtoendtesting.model.entity.MetricsEntity;
 import fr.njj.galaxion.endtoendtesting.service.environment.EnvironmentRetrievalService;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -16,7 +15,6 @@ public class AddMetricsUseCase {
 
     private final EnvironmentRetrievalService environmentRetrievalService;
 
-    @Monitored
     @Transactional
     public void execute(
             long environmentId,

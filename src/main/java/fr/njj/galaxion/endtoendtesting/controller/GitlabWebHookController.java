@@ -20,7 +20,14 @@ public class GitlabWebHookController {
     @POST
     public void getResponses(@HeaderParam("X-Gitlab-Event") String gitlabEvent,
                              GitlabWebHookRequest request) {
-        CompletableFuture.runAsync(() -> gitlabWebHookService.gitlabCallback(gitlabEvent, request));
+        CompletableFuture.runAsync(() -> {
+            try {
+                gitlabWebHookService.gitlabCallback(gitlabEvent, request);
+            } catch (Exception e) {
+                log.error("Webhook Async Error", e);
+            }
+
+        });
     }
 
 }

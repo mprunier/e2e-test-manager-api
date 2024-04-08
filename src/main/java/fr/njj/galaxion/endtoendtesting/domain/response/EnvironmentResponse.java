@@ -1,5 +1,6 @@
 package fr.njj.galaxion.endtoendtesting.domain.response;
 
+import fr.njj.galaxion.endtoendtesting.domain.enumeration.SchedulerStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,4 +30,5 @@ public class EnvironmentResponse {
     private ZonedDateTime createdAt;
     private ZonedDateTime updatedAt;
     private Boolean isLocked;
+    private SchedulerStatus schedulerStatus;
 }

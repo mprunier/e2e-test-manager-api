@@ -70,7 +70,6 @@ public class EnvironmentSynchronizationService {
             assertUniqueTitles(configurationInternal);
             configurationService.updateOrCreate(environmentId, relativePathString, configurationInternal);
         } catch (CustomException exception) {
-            log.error(exception.getDetail());
             errors.put(filePath, exception.getDetail());
         }
     }

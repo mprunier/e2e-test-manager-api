@@ -7,7 +7,6 @@ import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentVariableEntity;
 import fr.njj.galaxion.endtoendtesting.model.repository.EnvironmentVariableRepository;
 import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationSchedulerService;
-import fr.njj.galaxion.endtoendtesting.usecases.environment.LockEnvironmentSynchronizationUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.environment.UnLockEnvironmentSynchronizationUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.synchronisation.GlobalEnvironmentSynchronizationUseCase;
 import io.quarkus.security.identity.SecurityIdentity;
@@ -29,7 +28,6 @@ public class EnvironmentService {
     private final GlobalEnvironmentSynchronizationUseCase globalEnvironmentSynchronizationUseCase;
     private final ConfigurationSchedulerService configurationSchedulerService;
     private final EnvironmentVariableRepository environmentVariableRepository;
-    private final LockEnvironmentSynchronizationUseCase lockEnvironmentSynchronizationUseCase;
     private final UnLockEnvironmentSynchronizationUseCase unLockEnvironmentSynchronizationUseCase;
 
     @Transactional
@@ -82,13 +80,12 @@ public class EnvironmentService {
 
         request.getVariables().forEach(variableRequest -> {
             var variableOptional = environmentVariableRepository.findByName(id, variableRequest.getName());
-            if (variableOptional.isPresent()) {
-                if (Boolean.TRUE.equals(variableOptional.get().getIsHidden()) && variableRequest.getDefaultValue().contains("**********")) {
-                    if (Boolean.FALSE.equals(variableRequest.getIsHidden())) {
-                        throw new HiddenVariableException();
-                    }
-                    variableRequest.setDefaultValue(variableOptional.get().getDefaultValue());
+            if (variableOptional.isPresent() && (Boolean.TRUE.equals(variableOptional.get().getIsHidden()) && variableRequest.getDefaultValue().contains("**********"))) {
+                if (Boolean.FALSE.equals(variableRequest.getIsHidden())) {
+                    throw new HiddenVariableException();
                 }
+                variableRequest.setDefaultValue(variableOptional.get().getDefaultValue());
+
             }
         });
 

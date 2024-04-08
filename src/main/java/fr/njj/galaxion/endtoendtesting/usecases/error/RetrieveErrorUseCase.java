@@ -27,6 +27,7 @@ public class RetrieveErrorUseCase {
         entities.forEach(entity -> environmentErrors.add(
                 EnvironmentErrorResponse
                         .builder()
+                        .file(entity.getFile())
                         .error(entity.getError())
                         .at(entity.getAt())
                         .build()));

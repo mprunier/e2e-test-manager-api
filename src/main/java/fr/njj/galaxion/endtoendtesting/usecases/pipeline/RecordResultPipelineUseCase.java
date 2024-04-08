@@ -10,9 +10,9 @@ import fr.njj.galaxion.endtoendtesting.model.entity.PipelineEntity;
 import fr.njj.galaxion.endtoendtesting.service.PipelineRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.ReportSchedulerService;
 import fr.njj.galaxion.endtoendtesting.service.ReportSuiteOrTestService;
-import fr.njj.galaxion.endtoendtesting.service.SchedulerRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.GitlabService;
 import fr.njj.galaxion.endtoendtesting.service.test.TestRetrievalService;
+import fr.njj.galaxion.endtoendtesting.usecases.scheduler.UpdateSchedulerStatusUseCase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +30,7 @@ public class RecordResultPipelineUseCase {
     private final GitlabService gitlabService;
     private final ReportSuiteOrTestService reportSuiteOrTestService;
     private final ReportSchedulerService reportSchedulerService;
-    private final SchedulerRetrievalService schedulerRetrievalService;
+    private final UpdateSchedulerStatusUseCase updateSchedulerStatusUseCase;
 
     @Monitored
     @Transactional
@@ -50,24 +50,24 @@ public class RecordResultPipelineUseCase {
     }
 
     private void globalUpdate(PipelineEntity pipeline, GitlabJobStatus status, EnvironmentEntity environment, String jobId) {
-        var scheduler = schedulerRetrievalService.getSchedulerByPipelineId(pipeline.getId());
+        var environmentId = pipeline.getEnvironment().getId();
         try {
             if (GitlabJobStatus.success.equals(status) || GitlabJobStatus.failed.equals(status)) {
                 var artifactData = gitlabService.getArtifactData(environment.getToken(), environment.getProjectId(), jobId);
                 if (artifactData.getReport() != null) {
-                    reportSchedulerService.report(artifactData, scheduler);
-                    // TODO enregistrer les résulatst dans une table
+                    reportSchedulerService.report(artifactData, environmentId);
+                    updateSchedulerStatusUseCase.execute(environmentId, SchedulerStatus.SUCCESS);
                 } else {
-                    scheduler.setStatus(SchedulerStatus.NO_REPORT_ERROR);
+                    updateSchedulerStatusUseCase.execute(environmentId, SchedulerStatus.NO_REPORT_ERROR);
                 }
                 pipeline.setStatus(PipelineStatus.FINISH);
             } else if (GitlabJobStatus.canceled.equals(status) || GitlabJobStatus.skipped.equals(status)) {
-                scheduler.setStatus(SchedulerStatus.CANCELED);
+                updateSchedulerStatusUseCase.execute(environmentId, SchedulerStatus.CANCELED);
                 pipeline.setStatus(PipelineStatus.FINISH);
             }
         } catch (Exception e) {
             log.error(e.getMessage());
-            scheduler.setStatus(SchedulerStatus.SYSTEM_ERROR);
+            updateSchedulerStatusUseCase.execute(environmentId, SchedulerStatus.SYSTEM_ERROR);
             pipeline.setStatus(PipelineStatus.FINISH);
         }
     }
