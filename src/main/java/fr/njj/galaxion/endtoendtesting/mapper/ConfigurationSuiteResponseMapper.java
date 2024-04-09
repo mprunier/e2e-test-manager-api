@@ -11,7 +11,7 @@ import java.util.List;
 public final class ConfigurationSuiteResponseMapper {
 
     public static ConfigurationSuiteResponse build(ConfigurationSuiteEntity entity) {
-        var tests = ConfigurationTestResponseMapper.builds(entity.getConfigurationTests(), false);
+        var tests = ConfigurationTestResponseMapper.builds(entity.getConfigurationTests());
         return ConfigurationSuiteResponse.builder()
                                          .id(entity.getId())
                                          .title(entity.getTitle())

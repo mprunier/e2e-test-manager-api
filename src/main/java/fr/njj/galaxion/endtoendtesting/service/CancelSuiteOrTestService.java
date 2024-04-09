@@ -25,7 +25,7 @@ public class CancelSuiteOrTestService {
         var testIds = testStrIds.stream().map(Long::valueOf).toList();
 
         var tests = testRetrievalService.getAll(testIds);
-        var environment = tests.get(0).getConfigurationTest().getEnvironment();
+        var environment = tests.getFirst().getConfigurationTest().getEnvironment();
         gitlabService.cancelPipeline(environment.getToken(), environment.getProjectId(), pipelineId);
         updateStatus(tests, ConfigurationStatus.CANCELED);
     }

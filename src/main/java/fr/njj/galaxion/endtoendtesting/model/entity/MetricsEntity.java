@@ -58,6 +58,7 @@ public class MetricsEntity extends PanacheEntityBase {
     @Column(name = "pass_percent")
     private Integer passPercent;
 
+    @Setter
     @Builder.Default
     @Column(name = "created_at", nullable = false)
     private ZonedDateTime createdAt = ZonedDateTime.now();

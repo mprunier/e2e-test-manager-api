@@ -7,6 +7,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
 public class MetricRepository implements PanacheRepositoryBase<MetricsEntity, Long> {
@@ -14,5 +15,9 @@ public class MetricRepository implements PanacheRepositoryBase<MetricsEntity, Lo
     public List<MetricsEntity> findAllByEnvironmentIdSince(long environmentId, LocalDate since) {
         var sinceStartOfDay = since.atStartOfDay(ZoneId.systemDefault());
         return list("environment.id = ?1 AND createdAt >= ?2 ORDER BY createdAt DESC", environmentId, sinceStartOfDay);
+    }
+
+    public Optional<MetricsEntity> findLastMetrics(long environmentId) {
+        return find("environment.id = ?1 ORDER BY createdAt DESC", environmentId).firstResultOptional();
     }
 }

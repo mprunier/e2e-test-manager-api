@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ConfigurationTestResponseMapper {
 
-    public static ConfigurationTestResponse build(ConfigurationTestEntity entity, boolean withSuiteDetails) {
+    public static ConfigurationTestResponse build(ConfigurationTestEntity entity) {
         var variables = new HashSet<String>();
         if (entity.getVariables() != null) {
             variables.addAll(entity.getVariables());
@@ -29,19 +29,12 @@ public final class ConfigurationTestResponseMapper {
                 .identifiers(entity.getConfigurationIdentifiers() != null ? entity.getConfigurationIdentifiers().stream().map(ConfigurationTestIdentifierEntity::getIdentifier).toList() : null)
                 .lastPlayedAt(entity.getLastPlayedAt());
 
-        if (withSuiteDetails) {
-            configurationTestResponseBuilder
-                    .suiteId(entity.getConfigurationSuite().getId())
-                    .suiteTitle(entity.getConfigurationSuite().getTitle())
-                    .path(entity.getFile());
-        }
-
         return configurationTestResponseBuilder.build();
     }
 
-    public static List<ConfigurationTestResponse> builds(List<ConfigurationTestEntity> entities, boolean withSuiteDetails) {
+    public static List<ConfigurationTestResponse> builds(List<ConfigurationTestEntity> entities) {
         return entities.stream()
-                       .map(entity -> build(entity, withSuiteDetails))
+                       .map(ConfigurationTestResponseMapper::build)
                        .toList();
     }
 

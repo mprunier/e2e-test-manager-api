@@ -12,6 +12,8 @@ import fr.njj.galaxion.endtoendtesting.service.ReportSchedulerService;
 import fr.njj.galaxion.endtoendtesting.service.ReportSuiteOrTestService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.GitlabService;
 import fr.njj.galaxion.endtoendtesting.service.test.TestRetrievalService;
+import fr.njj.galaxion.endtoendtesting.usecases.metrics.AddMetricsUseCase;
+import fr.njj.galaxion.endtoendtesting.usecases.metrics.CalculateFinalMetricsUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.scheduler.UpdateSchedulerStatusUseCase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -31,6 +33,8 @@ public class RecordResultPipelineUseCase {
     private final ReportSuiteOrTestService reportSuiteOrTestService;
     private final ReportSchedulerService reportSchedulerService;
     private final UpdateSchedulerStatusUseCase updateSchedulerStatusUseCase;
+    private final CalculateFinalMetricsUseCase calculateFinalMetricsUseCase;
+    private final AddMetricsUseCase addMetricsUseCase;
 
     @Monitored
     @Transactional
@@ -47,6 +51,8 @@ public class RecordResultPipelineUseCase {
         } else {
             globalUpdate(pipeline, status, environment, jobId);
         }
+        pipeline.setStatus(PipelineStatus.FINISH);
+        finalizeMetrics(pipeline.getEnvironment().getId());
     }
 
     private void globalUpdate(PipelineEntity pipeline, GitlabJobStatus status, EnvironmentEntity environment, String jobId) {
@@ -60,15 +66,12 @@ public class RecordResultPipelineUseCase {
                 } else {
                     updateSchedulerStatusUseCase.execute(environmentId, SchedulerStatus.NO_REPORT_ERROR);
                 }
-                pipeline.setStatus(PipelineStatus.FINISH);
             } else if (GitlabJobStatus.canceled.equals(status) || GitlabJobStatus.skipped.equals(status)) {
                 updateSchedulerStatusUseCase.execute(environmentId, SchedulerStatus.CANCELED);
-                pipeline.setStatus(PipelineStatus.FINISH);
             }
         } catch (Exception e) {
             log.error(e.getMessage());
             updateSchedulerStatusUseCase.execute(environmentId, SchedulerStatus.SYSTEM_ERROR);
-            pipeline.setStatus(PipelineStatus.FINISH);
         }
     }
 
@@ -84,16 +87,18 @@ public class RecordResultPipelineUseCase {
                 } else {
                     updateStatus(tests, ConfigurationStatus.NO_REPORT_ERROR);
                 }
-                pipeline.setStatus(PipelineStatus.FINISH);
             } else if (GitlabJobStatus.canceled.equals(status) || GitlabJobStatus.skipped.equals(status)) {
                 updateStatus(tests, ConfigurationStatus.CANCELED);
-                pipeline.setStatus(PipelineStatus.FINISH);
             }
         } catch (Exception e) {
             log.error(e.getMessage());
             updateStatus(tests, ConfigurationStatus.SYSTEM_ERROR);
-            pipeline.setStatus(PipelineStatus.FINISH);
         }
+    }
+
+    private void finalizeMetrics(Long environmentId) {
+        var finalMetrics = calculateFinalMetricsUseCase.execute(environmentId);
+        addMetricsUseCase.execute(environmentId, finalMetrics, true);
     }
 }
 

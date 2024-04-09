@@ -3,10 +3,7 @@ package fr.njj.galaxion.endtoendtesting.controller;
 import fr.njj.galaxion.endtoendtesting.domain.request.SearchConfigurationRequest;
 import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationSuiteResponse;
 import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationTestResponse;
-import fr.njj.galaxion.endtoendtesting.domain.response.SearchConfigurationIdentifierResponse;
 import fr.njj.galaxion.endtoendtesting.domain.response.SearchConfigurationSuiteResponse;
-import fr.njj.galaxion.endtoendtesting.domain.response.SearchConfigurationTestResponse;
-import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationIdentifierRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationSuiteRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationTestIdentifierRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationTestRetrievalService;
@@ -30,28 +27,13 @@ public class ConfigurationController {
 
     private final ConfigurationSuiteRetrievalService configurationSuiteRetrievalService;
     private final ConfigurationTestRetrievalService configurationTestRetrievalService;
-    private final ConfigurationIdentifierRetrievalService configurationIdentifierRetrievalService;
     private final ConfigurationTestIdentifierRetrievalService configurationTestIdentifierRetrievalService;
-
-    @GET
-    @Path("/search/tests")
-    public SearchConfigurationTestResponse searchByTest(@NotNull @QueryParam("environmentId") Long environmentId,
-                                                        @Valid @BeanParam SearchConfigurationRequest request) {
-        return configurationTestRetrievalService.search(environmentId, request);
-    }
 
     @GET
     @Path("/search/suites")
     public SearchConfigurationSuiteResponse searchBySuite(@NotNull @QueryParam("environmentId") Long environmentId,
                                                           @Valid @BeanParam SearchConfigurationRequest request) {
         return configurationSuiteRetrievalService.search(environmentId, request);
-    }
-
-    @GET
-    @Path("/search/identifiers")
-    public SearchConfigurationIdentifierResponse searchByIdentifier(@NotNull @QueryParam("environmentId") Long environmentId,
-                                                                    @Valid @BeanParam SearchConfigurationRequest request) {
-        return configurationIdentifierRetrievalService.search(environmentId, request);
     }
 
     @GET
