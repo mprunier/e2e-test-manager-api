@@ -1,5 +1,6 @@
 package fr.njj.galaxion.endtoendtesting.usecases.synchronisation;
 
+import fr.njj.galaxion.endtoendtesting.domain.event.SyncErrorsEvent;
 import fr.njj.galaxion.endtoendtesting.lib.logging.Monitored;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationService;
@@ -7,6 +8,7 @@ import fr.njj.galaxion.endtoendtesting.service.configuration.EnvironmentSynchron
 import fr.njj.galaxion.endtoendtesting.service.environment.EnvironmentRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.GitlabService;
 import fr.njj.galaxion.endtoendtesting.usecases.cache.CleanCacheAfterSynchronizationUseCase;
+import fr.njj.galaxion.endtoendtesting.usecases.error.RetrieveErrorUseCase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ import java.util.HashMap;
 import java.util.Set;
 
 import static fr.njj.galaxion.endtoendtesting.domain.constant.CommonConstant.GLOBAL_ENVIRONMENT_ERROR;
+import static fr.njj.galaxion.endtoendtesting.websocket.EventsWebSocket.sendEventToEnvironmentSessions;
 
 @Slf4j
 @ApplicationScoped
@@ -28,6 +31,7 @@ public class PartialEnvironmentSynchronizationUseCase {
     private final GitlabService gitlabService;
     private final ConfigurationService configurationService;
     private final CleanCacheAfterSynchronizationUseCase cleanCacheAfterSynchronizationUseCase;
+    private final RetrieveErrorUseCase retrieveErrorUseCase;
 
     @Monitored
     @Transactional
@@ -44,7 +48,13 @@ public class PartialEnvironmentSynchronizationUseCase {
             cleanFilesToRemove(filesToRemove, environment);
             updateFilesToSynchronize(filesToSynchronize, environment);
             cleanCacheAfterSynchronizationUseCase.execute(environment.getId());
+            sendErrorsEvent(environment);
         }
+    }
+
+    private void sendErrorsEvent(EnvironmentEntity environment) {
+        var allErrors = retrieveErrorUseCase.execute(environment.getId());
+        sendEventToEnvironmentSessions(environment.getId().toString(), SyncErrorsEvent.builder().syncErrors(allErrors).build());
     }
 
     private void updateFilesToSynchronize(Set<String> filesToSynchronize, EnvironmentEntity environment) {
