@@ -13,7 +13,7 @@ import java.time.ZonedDateTime;
 @NoArgsConstructor
 @Getter
 @Builder
-public class EnvironmentErrorResponse {
+public class SyncErrorResponse {
 
     private String file;
 

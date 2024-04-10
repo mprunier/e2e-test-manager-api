@@ -18,7 +18,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 @Slf4j
 @ServerEndpoint("/events/environments/{environment_id}")
-public class EventsWebSocket {
+public class WebSocketEvents {
 
     private static final ConcurrentHashMap<String, CopyOnWriteArrayList<Session>> sessionMap = new ConcurrentHashMap<>();
 
@@ -52,6 +52,7 @@ public class EventsWebSocket {
     }
 
     public static void sendEventToEnvironmentSessions(String environmentId, Event event) {
+        log.trace("Send event [{}] on environment [{}].", event.getClass(), environmentId);
         var mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);

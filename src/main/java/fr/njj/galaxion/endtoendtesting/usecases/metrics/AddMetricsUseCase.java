@@ -20,7 +20,10 @@ public class AddMetricsUseCase {
     private final MetricRepository metricRepository;
 
     @Transactional
-    public void execute(long environmentId, Metrics metrics, boolean addOnlyIfNewMetrics) {
+    public void execute(
+            long environmentId,
+            Metrics metrics,
+            boolean addOnlyIfNewMetrics) {
         var now = ZonedDateTime.now();
 
         if (!addOnlyIfNewMetrics) {

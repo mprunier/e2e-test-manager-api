@@ -1,6 +1,5 @@
 package fr.njj.galaxion.endtoendtesting.usecases.synchronisation;
 
-import fr.njj.galaxion.endtoendtesting.domain.event.SyncErrorsEvent;
 import fr.njj.galaxion.endtoendtesting.domain.exception.ConfigurationSynchronizationException;
 import fr.njj.galaxion.endtoendtesting.lib.logging.Monitored;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
@@ -10,7 +9,6 @@ import fr.njj.galaxion.endtoendtesting.service.configuration.EnvironmentSynchron
 import fr.njj.galaxion.endtoendtesting.service.environment.EnvironmentRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.GitlabService;
 import fr.njj.galaxion.endtoendtesting.usecases.cache.CleanCacheAfterSynchronizationUseCase;
-import fr.njj.galaxion.endtoendtesting.usecases.error.RetrieveErrorUseCase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +28,6 @@ import java.util.Set;
 import static fr.njj.galaxion.endtoendtesting.domain.constant.CommonConstant.GLOBAL_ENVIRONMENT_ERROR;
 import static fr.njj.galaxion.endtoendtesting.domain.constant.CommonConstant.START_PATH;
 import static fr.njj.galaxion.endtoendtesting.helper.GitHelper.getChangedFilesAfterDate;
-import static fr.njj.galaxion.endtoendtesting.websocket.EventsWebSocket.sendEventToEnvironmentSessions;
 
 @Slf4j
 @ApplicationScoped
@@ -43,7 +40,6 @@ public class GlobalEnvironmentSynchronizationUseCase {
     private final GitlabService gitlabService;
     private final ConfigurationService configurationService;
     private final CleanCacheAfterSynchronizationUseCase cleanCacheAfterSynchronizationUseCase;
-    private final RetrieveErrorUseCase retrieveErrorUseCase;
 
     @Monitored
     @Transactional
@@ -69,13 +65,6 @@ public class GlobalEnvironmentSynchronizationUseCase {
         EnvironmentSynchronizationService.cleanRepo(environment, projectFolder, errors);
         errors.forEach((file, error) -> addEnvironmentSynchronizationErrorUseCase.execute(environment.getId(), file, error));
         cleanCacheAfterSynchronizationUseCase.execute(environmentId);
-
-        sendErrorsEvent(environment);
-    }
-
-    private void sendErrorsEvent(EnvironmentEntity environment) {
-        var allErrors = retrieveErrorUseCase.execute(environment.getId());
-        sendEventToEnvironmentSessions(environment.getId().toString(), SyncErrorsEvent.builder().syncErrors(allErrors).build());
     }
 
     private void cleanFilesRemoved(File projectFolder, EnvironmentEntity environment) {

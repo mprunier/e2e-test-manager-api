@@ -10,6 +10,8 @@ import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationSchedu
 import fr.njj.galaxion.endtoendtesting.usecases.environment.LockEnvironmentSynchronizationUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.environment.UnLockEnvironmentSynchronizationUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.synchronisation.GlobalEnvironmentSynchronizationUseCase;
+import fr.njj.galaxion.endtoendtesting.websocket.events.SyncErrorEventService;
+import fr.njj.galaxion.endtoendtesting.websocket.events.UpdateEnvironmentEventService;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -31,6 +33,8 @@ public class EnvironmentService {
     private final EnvironmentVariableRepository environmentVariableRepository;
     private final LockEnvironmentSynchronizationUseCase lockEnvironmentSynchronizationUseCase;
     private final UnLockEnvironmentSynchronizationUseCase unLockEnvironmentSynchronizationUseCase;
+    private final UpdateEnvironmentEventService updateEnvironmentEventService;
+    private final SyncErrorEventService syncErrorEventService;
 
     @Transactional
     public EnvironmentResponse create(CreateUpdateEnvironmentRequest request) {
@@ -58,6 +62,8 @@ public class EnvironmentService {
                 globalEnvironmentSynchronizationUseCase.execute(environment.getId());
             } finally {
                 unLockEnvironmentSynchronizationUseCase.execute(environment.getId());
+                updateEnvironmentEventService.send(environment.getId());
+                syncErrorEventService.send(environment.getId());
             }
         });
     }

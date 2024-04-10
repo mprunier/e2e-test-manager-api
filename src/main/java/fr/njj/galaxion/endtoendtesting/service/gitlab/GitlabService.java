@@ -61,7 +61,7 @@ public class GitlabService {
             var zipArtifacts = gitlabClient.getJobArtifacts(token, projectId, jobId);
             extractArtifact(artifactDataInternal, zipArtifacts);
         } catch (Exception e) {
-            log.warn("Error during retrieve artifacts in job id [{}]", jobId);
+            log.warn("Error during retrieve artifacts in job id [{}]", jobId, e);
         }
         return artifactDataInternal;
     }
