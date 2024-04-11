@@ -8,7 +8,7 @@ import fr.njj.galaxion.endtoendtesting.service.PipelineService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.GitlabService;
 import fr.njj.galaxion.endtoendtesting.usecases.metrics.CalculateFinalMetricsUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.pipeline.RecordResultPipelineUseCase;
-import fr.njj.galaxion.endtoendtesting.websocket.events.UpdateFinalMetricsEventService;
+import fr.njj.galaxion.endtoendtesting.websocket.events.UpdateFinalMetricsEventHandler;
 import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.control.ActivateRequestContext;
@@ -30,7 +30,7 @@ public class VerifyPipelineScheduler {
     private final PipelineService pipelineService;
     private final RecordResultPipelineUseCase recordResultPipelineUseCase;
     private final GitlabService gitlabService;
-    private final UpdateFinalMetricsEventService updateFinalMetricsEventService;
+    private final UpdateFinalMetricsEventHandler updateFinalMetricsEventHandler;
     private final CalculateFinalMetricsUseCase calculateFinalMetricsUseCase;
 
     @Getter
@@ -56,7 +56,6 @@ public class VerifyPipelineScheduler {
                     var status = GitlabJobStatus.fromHeaderValue(gitlabJobResponse.getStatus());
                     if (!GitlabJobStatus.created.equals(status) && !GitlabJobStatus.pending.equals(status) && !GitlabJobStatus.running.equals(status)) {
                         recordResultPipelineUseCase.execute(pipeline.getId(), gitlabJobResponse.getId(), status);
-                        buildAndSendFinalMetricsEvent(environment.getId());
                     }
                 }
 
@@ -76,11 +75,6 @@ public class VerifyPipelineScheduler {
                 inVerifyProgress.set(false);
             }
         }
-    }
-
-    private void buildAndSendFinalMetricsEvent(long environmentId) {
-        var finalMetrics = calculateFinalMetricsUseCase.execute(environmentId);
-        updateFinalMetricsEventService.send(environmentId, finalMetrics);
     }
 }
 

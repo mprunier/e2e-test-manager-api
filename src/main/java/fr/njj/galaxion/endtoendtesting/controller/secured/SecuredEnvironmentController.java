@@ -40,7 +40,6 @@ public class SecuredEnvironmentController {
     public void update(@CacheKey @PathParam("id") Long id,
                        @Valid @RequestBody CreateUpdateEnvironmentRequest request) {
         environmentService.update(id, request);
-        cacheManager.getCache("environment").ifPresent(cache -> cache.invalidate(id).await().indefinitely());
     }
 
     @PATCH
@@ -48,7 +47,6 @@ public class SecuredEnvironmentController {
     public void updateIsEnabled(@CacheKey @PathParam("id") Long id,
                                 @NotNull @QueryParam("isEnabled") Boolean isEnabled) {
         environmentService.updateIsEnabled(id, isEnabled);
-        cacheManager.getCache("environment").ifPresent(cache -> cache.invalidate(id).await().indefinitely());
     }
 }
 

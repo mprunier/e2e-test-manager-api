@@ -22,7 +22,6 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +45,7 @@ public class EnvironmentSynchronizationService {
     @RestClient
     private ConverterClient converterClient;
 
-    public void synchronize(EnvironmentEntity environment, Set<String> changedFiles, File projectFolder, HashMap<String, String> errors) throws IOException {
+    public void synchronize(EnvironmentEntity environment, Set<String> changedFiles, File projectFolder, Map<String, String> errors) throws IOException {
         for (var filePath : changedFiles) {
             var file = new File(projectFolder, filePath);
             if (file.exists()) {
@@ -81,7 +80,7 @@ public class EnvironmentSynchronizationService {
         }
     }
 
-    private void assertAndBuild(Long environmentId, String content, String relativePathString, HashMap<String, String> errors, String filePath) {
+    private void assertAndBuild(Long environmentId, String content, String relativePathString, Map<String, String> errors, String filePath) {
         try {
             var configurationInternal = build(content, relativePathString);
             assertUniqueTitles(configurationInternal);

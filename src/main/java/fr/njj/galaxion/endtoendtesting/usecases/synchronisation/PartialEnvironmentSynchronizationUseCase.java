@@ -1,13 +1,14 @@
 package fr.njj.galaxion.endtoendtesting.usecases.synchronisation;
 
+import fr.njj.galaxion.endtoendtesting.domain.event.SyncEnvironmentCompletedEvent;
 import fr.njj.galaxion.endtoendtesting.lib.logging.Monitored;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationService;
 import fr.njj.galaxion.endtoendtesting.service.configuration.EnvironmentSynchronizationService;
 import fr.njj.galaxion.endtoendtesting.service.environment.EnvironmentRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.GitlabService;
-import fr.njj.galaxion.endtoendtesting.usecases.cache.CleanCacheAfterSynchronizationUseCase;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +28,8 @@ public class PartialEnvironmentSynchronizationUseCase {
     private final EnvironmentSynchronizationService environmentSynchronizationService;
     private final GitlabService gitlabService;
     private final ConfigurationService configurationService;
-    private final CleanCacheAfterSynchronizationUseCase cleanCacheAfterSynchronizationUseCase;
+
+    private final Event<SyncEnvironmentCompletedEvent> syncEnvironmentEvent;
 
     @Monitored
     @Transactional
@@ -42,7 +44,7 @@ public class PartialEnvironmentSynchronizationUseCase {
             cleanEnvironmentErrors(filesToSynchronize, filesToRemove, environment);
             cleanFilesToRemove(filesToRemove, environment);
             updateFilesToSynchronize(filesToSynchronize, environment);
-            cleanCacheAfterSynchronizationUseCase.execute(environment.getId());
+            syncEnvironmentEvent.fire(SyncEnvironmentCompletedEvent.builder().environmentId(environment.getId()).build());
         }
     }
 

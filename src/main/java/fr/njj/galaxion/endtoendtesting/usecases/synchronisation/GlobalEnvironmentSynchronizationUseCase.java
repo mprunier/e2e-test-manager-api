@@ -1,5 +1,6 @@
 package fr.njj.galaxion.endtoendtesting.usecases.synchronisation;
 
+import fr.njj.galaxion.endtoendtesting.domain.event.SyncEnvironmentCompletedEvent;
 import fr.njj.galaxion.endtoendtesting.domain.exception.ConfigurationSynchronizationException;
 import fr.njj.galaxion.endtoendtesting.lib.logging.Monitored;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
@@ -10,6 +11,7 @@ import fr.njj.galaxion.endtoendtesting.service.environment.EnvironmentRetrievalS
 import fr.njj.galaxion.endtoendtesting.service.gitlab.GitlabService;
 import fr.njj.galaxion.endtoendtesting.usecases.cache.CleanCacheAfterSynchronizationUseCase;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +42,7 @@ public class GlobalEnvironmentSynchronizationUseCase {
     private final GitlabService gitlabService;
     private final ConfigurationService configurationService;
     private final CleanCacheAfterSynchronizationUseCase cleanCacheAfterSynchronizationUseCase;
+    private final Event<SyncEnvironmentCompletedEvent> syncEnvironmentEvent;
 
     @Monitored
     @Transactional
@@ -64,7 +67,7 @@ public class GlobalEnvironmentSynchronizationUseCase {
 
         EnvironmentSynchronizationService.cleanRepo(environment, projectFolder, errors);
         errors.forEach((file, error) -> addEnvironmentSynchronizationErrorUseCase.execute(environment.getId(), file, error));
-        cleanCacheAfterSynchronizationUseCase.execute(environmentId);
+        syncEnvironmentEvent.fire(SyncEnvironmentCompletedEvent.builder().environmentId(environmentId).build());
     }
 
     private void cleanFilesRemoved(File projectFolder, EnvironmentEntity environment) {

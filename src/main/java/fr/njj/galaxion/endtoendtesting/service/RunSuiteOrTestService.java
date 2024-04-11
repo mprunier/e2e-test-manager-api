@@ -1,6 +1,6 @@
 package fr.njj.galaxion.endtoendtesting.service;
 
-import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineType;
+import fr.njj.galaxion.endtoendtesting.domain.event.TestRunInProgressEvent;
 import fr.njj.galaxion.endtoendtesting.domain.exception.AllTestsAlreadyRunningException;
 import fr.njj.galaxion.endtoendtesting.domain.exception.RunParameterException;
 import fr.njj.galaxion.endtoendtesting.domain.request.RunTestOrSuiteRequest;
@@ -13,6 +13,7 @@ import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationTestRe
 import fr.njj.galaxion.endtoendtesting.service.gitlab.GitlabService;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +37,7 @@ public class RunSuiteOrTestService {
     private final GitlabService gitlabService;
     private final SecurityIdentity identity;
     private final PipelineService pipelineService;
+    private final Event<TestRunInProgressEvent> testRunInProgressEvent;
 
     @Transactional
     public void run(RunTestOrSuiteRequest request) {
@@ -91,12 +93,13 @@ public class RunSuiteOrTestService {
             testIds.add(String.valueOf(test.getId()));
         });
         if (!testIds.isEmpty()) {
-            pipelineService.create(environment, request.getConfigurationTestId() != null ? PipelineType.TEST : PipelineType.SUITE, gitlabResponse.getId(), testIds);
+            pipelineService.create(environment, gitlabResponse.getId(), testIds);
         }
+        testRunInProgressEvent.fire(TestRunInProgressEvent.builder().environmentId(environment.getId()).testId(request.getConfigurationTestId()).suiteId(request.getConfigurationSuiteId()).build());
     }
 
     private static void assertSchedulerInProgress(EnvironmentEntity environment) {
-        if (environment.getIsRunningAllTests()) {
+        if (Boolean.TRUE.equals(environment.getIsRunningAllTests())) {
             throw new AllTestsAlreadyRunningException();
         }
     }

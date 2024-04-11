@@ -1,7 +1,6 @@
 package fr.njj.galaxion.endtoendtesting.model.entity;
 
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineStatus;
-import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineType;
 import fr.njj.galaxion.endtoendtesting.model.converter.StringListConverter;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.Column;
@@ -37,10 +36,6 @@ public class PipelineEntity extends PanacheEntityBase {
     @ManyToOne
     @JoinColumn(name = "environment_id", foreignKey = @ForeignKey(name = "fk__pipeline__environment_id"))
     private EnvironmentEntity environment;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "type", nullable = false)
-    private PipelineType type;
 
     @Setter
     @Builder.Default

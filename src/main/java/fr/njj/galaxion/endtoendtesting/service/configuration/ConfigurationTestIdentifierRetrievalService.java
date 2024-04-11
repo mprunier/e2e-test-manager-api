@@ -32,13 +32,6 @@ public class ConfigurationTestIdentifierRetrievalService {
         return configurationTestIdentifiers;
     }
 
-    public List<Long> getTestId(Long environmentId, String identifier) {
-        var configurationTestIdentifiers = getAllByEnvAndIdentifier(environmentId, identifier);
-        return configurationTestIdentifiers.stream()
-                                           .map(configurationTestIdentifierEntity -> configurationTestIdentifierEntity.getConfigurationTest().getId())
-                                           .toList();
-    }
-
     public List<Long> getSuiteId(Long environmentId, String identifier) {
         var configurationTestIdentifiers = getAllByEnvAndIdentifier(environmentId, identifier);
         return configurationTestIdentifiers.stream()

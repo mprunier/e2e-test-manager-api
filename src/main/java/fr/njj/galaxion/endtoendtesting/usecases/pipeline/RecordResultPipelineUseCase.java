@@ -4,6 +4,7 @@ import fr.njj.galaxion.endtoendtesting.domain.enumeration.ConfigurationStatus;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.GitlabJobStatus;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineStatus;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.ReportAllTestRanStatus;
+import fr.njj.galaxion.endtoendtesting.domain.event.UpdateFinalMetricsEvent;
 import fr.njj.galaxion.endtoendtesting.lib.logging.Monitored;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.PipelineEntity;
@@ -16,6 +17,7 @@ import fr.njj.galaxion.endtoendtesting.usecases.metrics.AddMetricsUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.metrics.CalculateFinalMetricsUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.run.AllTestsRunCompletedUseCase;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +38,8 @@ public class RecordResultPipelineUseCase {
     private final CalculateFinalMetricsUseCase calculateFinalMetricsUseCase;
     private final AddMetricsUseCase addMetricsUseCase;
 
+    private final Event<UpdateFinalMetricsEvent> updateFinalMetricsEvent;
+
     @Monitored
     @Transactional
     public void execute(
@@ -53,6 +57,7 @@ public class RecordResultPipelineUseCase {
         }
         pipeline.setStatus(PipelineStatus.FINISH);
         finalizeMetrics(pipeline.getEnvironment().getId());
+        updateFinalMetricsEvent.fire(UpdateFinalMetricsEvent.builder().environmentId(environment.getId()).build());
     }
 
     private void globalUpdate(PipelineEntity pipeline, GitlabJobStatus status, EnvironmentEntity environment, String jobId) {
@@ -99,6 +104,7 @@ public class RecordResultPipelineUseCase {
     private void finalizeMetrics(Long environmentId) {
         var finalMetrics = calculateFinalMetricsUseCase.execute(environmentId);
         addMetricsUseCase.execute(environmentId, finalMetrics, true);
+        log.info("test");
     }
 }
 

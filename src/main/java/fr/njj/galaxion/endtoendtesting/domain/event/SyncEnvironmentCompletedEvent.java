@@ -1,18 +1,22 @@
 package fr.njj.galaxion.endtoendtesting.domain.event;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import fr.njj.galaxion.endtoendtesting.domain.response.EnvironmentResponse;
 import fr.njj.galaxion.endtoendtesting.domain.response.SyncErrorResponse;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 import java.util.List;
 
+@Setter
 @Getter
-@Builder
+@SuperBuilder
 @AllArgsConstructor
-@JsonTypeName("SYNC_ERRORS_EVENT")
-public class SyncErrorsEvent extends Event {
+@JsonTypeName("SYNC_ENVIRONMENT_EVENT")
+public class SyncEnvironmentCompletedEvent extends AbstractEvent {
 
+    private EnvironmentResponse environment;
     private List<SyncErrorResponse> syncErrors;
 }

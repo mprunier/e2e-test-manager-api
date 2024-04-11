@@ -20,7 +20,6 @@ public class EnvironmentController {
 
     @GET
     @Path("{id}")
-    @CacheResult(cacheName = "environment")
     public EnvironmentResponse getEnvironmentResponse(@PathParam("id") Long id) {
         return environmentRetrievalService.getEnvironmentResponse(id);
     }

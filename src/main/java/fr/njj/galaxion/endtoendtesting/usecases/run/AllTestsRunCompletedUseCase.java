@@ -1,11 +1,11 @@
 package fr.njj.galaxion.endtoendtesting.usecases.run;
 
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.ReportAllTestRanStatus;
+import fr.njj.galaxion.endtoendtesting.domain.event.AllTestsRunCompletedEvent;
 import fr.njj.galaxion.endtoendtesting.lib.logging.Monitored;
 import fr.njj.galaxion.endtoendtesting.service.environment.EnvironmentRetrievalService;
-import fr.njj.galaxion.endtoendtesting.websocket.events.AllTestsRunCompletedEventService;
-import io.quarkus.cache.CacheManager;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,8 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AllTestsRunCompletedUseCase {
 
     private final EnvironmentRetrievalService environmentRetrievalService;
-    private final CacheManager cacheManager;
-    private final AllTestsRunCompletedEventService allTestsRunCompletedEventService;
+    private final Event<AllTestsRunCompletedEvent> allTestsRunCompletedEvent;
 
     @Monitored
     @Transactional
@@ -33,9 +32,7 @@ public class AllTestsRunCompletedUseCase {
             entity.setLastALlTestsError(null);
         }
 
-        allTestsRunCompletedEventService.send(environmentId, entity.getLastALlTestsError());
-
-        cacheManager.getCache("environment").ifPresent(cache -> cache.invalidate(environmentId).await().indefinitely());
+        allTestsRunCompletedEvent.fire(AllTestsRunCompletedEvent.builder().lastALlTestsError(entity.getLastALlTestsError()).environmentId(environmentId).build());
     }
 
 }

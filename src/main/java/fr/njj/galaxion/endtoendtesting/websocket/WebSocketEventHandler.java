@@ -3,7 +3,7 @@ package fr.njj.galaxion.endtoendtesting.websocket;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import fr.njj.galaxion.endtoendtesting.domain.event.Event;
+import fr.njj.galaxion.endtoendtesting.domain.event.AbstractEvent;
 import jakarta.websocket.OnClose;
 import jakarta.websocket.OnError;
 import jakarta.websocket.OnMessage;
@@ -18,23 +18,23 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 @Slf4j
 @ServerEndpoint("/events/environments/{environment_id}")
-public class WebSocketEvents {
+public class WebSocketEventHandler {
 
-    private static final ConcurrentHashMap<String, CopyOnWriteArrayList<Session>> sessionMap = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Long, CopyOnWriteArrayList<Session>> sessionMap = new ConcurrentHashMap<>();
 
     @OnOpen
-    public void onOpen(Session session, @PathParam("environment_id") String environmentId) {
+    public void onOpen(Session session, @PathParam("environment_id") Long environmentId) {
         sessionMap.computeIfAbsent(environmentId, k -> new CopyOnWriteArrayList<>()).add(session);
         log.trace("New session opened: [{}] on Environment ID [{}]", session.getId(), environmentId);
     }
 
     @OnMessage
-    public void onMessage(String message, Session session, @PathParam("environment_id") String environmentId) {
+    public void onMessage(String message, Session session, @PathParam("environment_id") Long environmentId) {
         log.trace("Message from {} on Environment ID [{}] : {}", session.getId(), environmentId, message);
     }
 
     @OnClose
-    public void onClose(Session session, @PathParam("environment_id") String environmentId) {
+    public void onClose(Session session, @PathParam("environment_id") Long environmentId) {
         var sessions = sessionMap.get(environmentId);
         if (sessions != null) {
             sessions.remove(session);
@@ -46,13 +46,13 @@ public class WebSocketEvents {
     }
 
     @OnError
-    public void onError(Session session, Throwable throwable, @PathParam("environment_id") String environmentId) {
+    public void onError(Session session, Throwable throwable, @PathParam("environment_id") Long environmentId) {
         onClose(session, environmentId);
         log.trace("Error on session {} on Environment ID [{}] : {}", session.getId(), environmentId, throwable.getMessage());
     }
 
-    public static void sendEventToEnvironmentSessions(String environmentId, Event event) {
-        log.trace("Send event [{}] on environment [{}].", event.getClass(), environmentId);
+    public static void sendEventToEnvironmentSessions(AbstractEvent event) {
+        log.trace("Send event [{}] on environment [{}].", event.getClass(), event.getEnvironmentId());
         var mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -64,15 +64,15 @@ public class WebSocketEvents {
             return;
         }
 
-        if (sessionMap.containsKey(environmentId)) {
-            CopyOnWriteArrayList<Session> sessions = sessionMap.get(environmentId);
+        if (sessionMap.containsKey(event.getEnvironmentId())) {
+            CopyOnWriteArrayList<Session> sessions = sessionMap.get(event.getEnvironmentId());
             for (Session session : sessions) {
                 if (session.isOpen()) {
                     session.getAsyncRemote().sendText(message);
                 }
             }
         } else {
-            log.trace("No session on environment [{}]", environmentId);
+            log.trace("No session on environment [{}]", event.getEnvironmentId());
         }
     }
 
