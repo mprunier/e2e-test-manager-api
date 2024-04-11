@@ -1,9 +1,8 @@
 package fr.njj.galaxion.endtoendtesting.service;
 
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineType;
-import fr.njj.galaxion.endtoendtesting.domain.enumeration.SchedulerStatus;
+import fr.njj.galaxion.endtoendtesting.domain.exception.AllTestsAlreadyRunningException;
 import fr.njj.galaxion.endtoendtesting.domain.exception.RunParameterException;
-import fr.njj.galaxion.endtoendtesting.domain.exception.SchedulerInProgressException;
 import fr.njj.galaxion.endtoendtesting.domain.request.RunTestOrSuiteRequest;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
@@ -97,8 +96,8 @@ public class RunSuiteOrTestService {
     }
 
     private static void assertSchedulerInProgress(EnvironmentEntity environment) {
-        if (SchedulerStatus.IN_PROGRESS.equals(environment.getSchedulerStatus())) {
-            throw new SchedulerInProgressException();
+        if (environment.getIsRunningAllTests()) {
+            throw new AllTestsAlreadyRunningException();
         }
     }
 

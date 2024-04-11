@@ -1,12 +1,9 @@
 package fr.njj.galaxion.endtoendtesting.model.entity;
 
-import fr.njj.galaxion.endtoendtesting.domain.enumeration.SchedulerStatus;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -88,8 +85,12 @@ public class EnvironmentEntity extends PanacheEntityBase {
     @Column(name = "is_locked", nullable = false)
     private Boolean isLocked = false;
 
+    @Builder.Default
     @Setter
-    @Enumerated(EnumType.STRING)
-    @Column(name = "scheduler_status", nullable = false)
-    private SchedulerStatus schedulerStatus;
+    @Column(name = "is_running_all_tests", nullable = false)
+    private Boolean isRunningAllTests = false;
+
+    @Setter
+    @Column(name = "last_all_tests_error")
+    private String lastALlTestsError;
 }

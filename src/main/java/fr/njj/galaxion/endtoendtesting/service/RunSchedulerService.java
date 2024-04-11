@@ -1,8 +1,7 @@
 package fr.njj.galaxion.endtoendtesting.service;
 
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineType;
-import fr.njj.galaxion.endtoendtesting.domain.enumeration.SchedulerStatus;
-import fr.njj.galaxion.endtoendtesting.domain.exception.SchedulerInProgressException;
+import fr.njj.galaxion.endtoendtesting.domain.exception.AllTestsAlreadyRunningException;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.service.environment.EnvironmentRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.GitlabService;
@@ -35,7 +34,7 @@ public class RunSchedulerService {
         log.info("[{}] ran the Scheduler on Environment id [{}].", createdBy, environmentId);
         var environment = environmentRetrievalService.getEnvironment(environmentId);
         assertSchedulerInProgress(environment);
-        environment.setSchedulerStatus(SchedulerStatus.IN_PROGRESS);
+        environment.setIsRunningAllTests(true);
 
         var variablesBuilder = new StringBuilder();
         buildVariablesEnvironment(environment.getVariables(), variablesBuilder);
@@ -53,8 +52,8 @@ public class RunSchedulerService {
     }
 
     private static void assertSchedulerInProgress(EnvironmentEntity environment) {
-        if (SchedulerStatus.IN_PROGRESS.equals(environment.getSchedulerStatus())) {
-            throw new SchedulerInProgressException();
+        if (environment.getIsRunningAllTests()) {
+            throw new AllTestsAlreadyRunningException();
         }
     }
 }

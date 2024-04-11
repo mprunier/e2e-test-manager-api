@@ -16,8 +16,7 @@ public final class EnvironmentResponseMapper {
         var envBuilder = EnvironmentResponse
                 .builder()
                 .id(entity.getId())
-                .description(entity.getDescription())
-                .schedulerStatus(entity.getSchedulerStatus());
+                .description(entity.getDescription());
 
         if (Boolean.TRUE.equals(withDetails)) {
             var variables = buildEnvironmentVariableResponses(entity.getVariables());
@@ -26,6 +25,8 @@ public final class EnvironmentResponseMapper {
                       .branch(entity.getBranch())
                       .isEnabled(entity.getIsEnabled())
                       .isLocked(entity.getIsLocked())
+                      .isRunningAllTests(entity.getIsRunningAllTests())
+                      .lastALlTestsError(entity.getLastALlTestsError())
                       .variables(variables)
                       .createdAt(entity.getCreatedAt())
                       .updatedAt(entity.getUpdatedAt())

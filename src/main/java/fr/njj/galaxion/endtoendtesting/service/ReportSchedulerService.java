@@ -2,7 +2,7 @@ package fr.njj.galaxion.endtoendtesting.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.ConfigurationStatus;
-import fr.njj.galaxion.endtoendtesting.domain.enumeration.SchedulerStatus;
+import fr.njj.galaxion.endtoendtesting.domain.enumeration.ReportAllTestRanStatus;
 import fr.njj.galaxion.endtoendtesting.domain.internal.ArtifactDataInternal;
 import fr.njj.galaxion.endtoendtesting.domain.internal.MochaReportResultInternal;
 import fr.njj.galaxion.endtoendtesting.domain.internal.MochaReportSuiteInternal;
@@ -12,7 +12,7 @@ import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.TestEntity;
 import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationSuiteRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationTestRetrievalService;
-import fr.njj.galaxion.endtoendtesting.usecases.scheduler.UpdateSchedulerStatusUseCase;
+import fr.njj.galaxion.endtoendtesting.usecases.run.AllTestsRunCompletedUseCase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -32,8 +32,7 @@ public class ReportSchedulerService {
     private final ConfigurationSuiteRetrievalService configurationSuiteRetrievalService;
     private final ConfigurationTestRetrievalService configurationTestRetrievalService;
     private final TestScreenshotService testScreenshotService;
-    //    private final AddMetricsUseCase addMetricsUseCase;
-    private final UpdateSchedulerStatusUseCase updateSchedulerStatusUseCase;
+    private final AllTestsRunCompletedUseCase allTestsRunCompletedUseCase;
 
     @Transactional
     public void report(ArtifactDataInternal artifactData,
@@ -42,11 +41,9 @@ public class ReportSchedulerService {
         var report = artifactData.getReport();
         if (report != null && report.getResults() != null && !report.getResults().isEmpty()) {
             var results = report.getResults();
-            //            var stats = report.getStats();
-            //            setStats(environmentId, stats);
             createSuitesAndTests(environmentId, results, screenshots);
         } else {
-            updateSchedulerStatusUseCase.execute(environmentId, SchedulerStatus.NO_REPORT_ERROR);
+            allTestsRunCompletedUseCase.execute(environmentId, ReportAllTestRanStatus.NO_REPORT_ERROR);
         }
     }
 
@@ -147,27 +144,4 @@ public class ReportSchedulerService {
         }
         return ConfigurationStatus.FAILED;
     }
-
-    //    private void setStats(long environmentId, MochaReportStatsInternal stats) {
-    //        if (stats != null) {
-    //            var skipped = 0;
-    //            if (stats.getPending() != null) {
-    //                skipped += stats.getPending();
-    //            }
-    //            if (stats.getSkipped() != null) {
-    //                skipped += stats.getSkipped();
-    //            }
-    //
-    //            var metric = Metrics
-    //                    .builder()
-    //                    .suites(stats.getSuites())
-    //                    .tests(stats.getTests())
-    //                    .passes(stats.getPasses())
-    //                    .failures(stats.getFailures())
-    //                    .skipped(skipped)
-    //                    .passPercent(stats.getPassPercent())
-    //                    .build();
-    //            addMetricsUseCase.execute(environmentId, metric, false);
-    //        }
-    //    }
 }

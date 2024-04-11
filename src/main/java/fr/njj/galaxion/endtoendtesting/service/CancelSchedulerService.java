@@ -1,9 +1,9 @@
 package fr.njj.galaxion.endtoendtesting.service;
 
-import fr.njj.galaxion.endtoendtesting.domain.enumeration.SchedulerStatus;
+import fr.njj.galaxion.endtoendtesting.domain.enumeration.ReportAllTestRanStatus;
 import fr.njj.galaxion.endtoendtesting.service.environment.EnvironmentRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.GitlabService;
-import fr.njj.galaxion.endtoendtesting.usecases.scheduler.UpdateSchedulerStatusUseCase;
+import fr.njj.galaxion.endtoendtesting.usecases.run.AllTestsRunCompletedUseCase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -16,16 +16,16 @@ public class CancelSchedulerService {
 
     private final EnvironmentRetrievalService environmentRetrievalService;
     private final GitlabService gitlabService;
-    private final UpdateSchedulerStatusUseCase updateSchedulerStatusUseCase;
+    private final AllTestsRunCompletedUseCase allTestsRunCompletedUseCase;
 
     @Transactional
     public void cancel(long environmentId, String pipelineId) {
         try {
             var environment = environmentRetrievalService.getEnvironment(environmentId);
             gitlabService.cancelPipeline(environment.getToken(), environment.getProjectId(), pipelineId);
-            updateSchedulerStatusUseCase.execute(environmentId, SchedulerStatus.CANCELED);
+            allTestsRunCompletedUseCase.execute(environmentId, ReportAllTestRanStatus.CANCELED);
         } catch (Exception e) {
-            updateSchedulerStatusUseCase.execute(environmentId, SchedulerStatus.SYSTEM_ERROR);
+            allTestsRunCompletedUseCase.execute(environmentId, ReportAllTestRanStatus.SYSTEM_ERROR);
         }
     }
 }

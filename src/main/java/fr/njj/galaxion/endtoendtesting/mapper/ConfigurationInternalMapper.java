@@ -34,11 +34,6 @@ public final class ConfigurationInternalMapper {
     public static ConfigurationInternal build(String content, String fullPath) {
         var configurationInternal = new ConfigurationInternal();
         try {
-
-            content = content.replaceAll("(?m)^import .+;$", "");
-            content = content.replaceAll("(?m)^[ \t]*\r?\n", "");
-            content = content.replaceAll("async function", "function");
-
             var env = new CompilerEnvirons();
             env.setRecordingComments(true);
             env.setRecordingLocalJsDocComments(true);
@@ -63,7 +58,7 @@ public final class ConfigurationInternalMapper {
         if (node instanceof ExpressionStatement exprStatement) {
             var expression = exprStatement.getExpression();
             if (expression instanceof FunctionCall call) {
-                var firstArg = call.getArguments().get(0);
+                var firstArg = call.getArguments().getFirst();
                 if (call.getTarget().toSource().equals("describe") && firstArg instanceof StringLiteral) {
                     buildSuite(node, configurationInternal, parentSuite, call, (StringLiteral) firstArg, fullPath);
                 } else if (call.getTarget().toSource().equals("it") && firstArg instanceof StringLiteral) {

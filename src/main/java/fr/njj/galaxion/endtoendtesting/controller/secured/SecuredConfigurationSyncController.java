@@ -4,6 +4,7 @@ import fr.njj.galaxion.endtoendtesting.usecases.environment.LockEnvironmentSynch
 import fr.njj.galaxion.endtoendtesting.usecases.environment.UnLockEnvironmentSynchronizationUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.synchronisation.GlobalEnvironmentSynchronizationUseCase;
 import fr.njj.galaxion.endtoendtesting.websocket.events.SyncErrorEventService;
+import fr.njj.galaxion.endtoendtesting.websocket.events.UpdateEnvironmentEventService;
 import io.quarkus.security.Authenticated;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.POST;
@@ -24,6 +25,7 @@ public class SecuredConfigurationSyncController {
     private final LockEnvironmentSynchronizationUseCase lockEnvironmentSynchronizationUseCase;
     private final UnLockEnvironmentSynchronizationUseCase unLockEnvironmentSynchronizationUseCase;
     private final SyncErrorEventService syncErrorEventService;
+    private final UpdateEnvironmentEventService updateEnvironmentEventService;
 
     @POST
     public void synchronize(@NotNull @QueryParam("environmentId") Long environmentId) {
@@ -32,9 +34,10 @@ public class SecuredConfigurationSyncController {
             try {
                 globalEnvironmentSynchronizationUseCase.execute(environmentId);
             } catch (Exception exception) {
-                log.error("exception", exception);
+                log.error("Synchronize Exception", exception);
             } finally {
                 unLockEnvironmentSynchronizationUseCase.execute(environmentId);
+                updateEnvironmentEventService.send(environmentId);
                 syncErrorEventService.send(environmentId);
             }
         });

@@ -3,7 +3,7 @@ package fr.njj.galaxion.endtoendtesting.usecases.pipeline;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.ConfigurationStatus;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.GitlabJobStatus;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineStatus;
-import fr.njj.galaxion.endtoendtesting.domain.enumeration.SchedulerStatus;
+import fr.njj.galaxion.endtoendtesting.domain.enumeration.ReportAllTestRanStatus;
 import fr.njj.galaxion.endtoendtesting.lib.logging.Monitored;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.PipelineEntity;
@@ -14,7 +14,7 @@ import fr.njj.galaxion.endtoendtesting.service.gitlab.GitlabService;
 import fr.njj.galaxion.endtoendtesting.service.test.TestRetrievalService;
 import fr.njj.galaxion.endtoendtesting.usecases.metrics.AddMetricsUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.metrics.CalculateFinalMetricsUseCase;
-import fr.njj.galaxion.endtoendtesting.usecases.scheduler.UpdateSchedulerStatusUseCase;
+import fr.njj.galaxion.endtoendtesting.usecases.run.AllTestsRunCompletedUseCase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,7 @@ public class RecordResultPipelineUseCase {
     private final GitlabService gitlabService;
     private final ReportSuiteOrTestService reportSuiteOrTestService;
     private final ReportSchedulerService reportSchedulerService;
-    private final UpdateSchedulerStatusUseCase updateSchedulerStatusUseCase;
+    private final AllTestsRunCompletedUseCase allTestsRunCompletedUseCase;
     private final CalculateFinalMetricsUseCase calculateFinalMetricsUseCase;
     private final AddMetricsUseCase addMetricsUseCase;
 
@@ -62,16 +62,16 @@ public class RecordResultPipelineUseCase {
                 var artifactData = gitlabService.getArtifactData(environment.getToken(), environment.getProjectId(), jobId);
                 if (artifactData.getReport() != null) {
                     reportSchedulerService.report(artifactData, environmentId);
-                    updateSchedulerStatusUseCase.execute(environmentId, SchedulerStatus.SUCCESS);
+                    allTestsRunCompletedUseCase.execute(environmentId, null);
                 } else {
-                    updateSchedulerStatusUseCase.execute(environmentId, SchedulerStatus.NO_REPORT_ERROR);
+                    allTestsRunCompletedUseCase.execute(environmentId, ReportAllTestRanStatus.NO_REPORT_ERROR);
                 }
             } else if (GitlabJobStatus.canceled.equals(status) || GitlabJobStatus.skipped.equals(status)) {
-                updateSchedulerStatusUseCase.execute(environmentId, SchedulerStatus.CANCELED);
+                allTestsRunCompletedUseCase.execute(environmentId, ReportAllTestRanStatus.CANCELED);
             }
         } catch (Exception e) {
             log.error(e.getMessage());
-            updateSchedulerStatusUseCase.execute(environmentId, SchedulerStatus.SYSTEM_ERROR);
+            allTestsRunCompletedUseCase.execute(environmentId, ReportAllTestRanStatus.SYSTEM_ERROR);
         }
     }
 

@@ -1,6 +1,5 @@
 package fr.njj.galaxion.endtoendtesting.usecases.environment;
 
-import fr.njj.galaxion.endtoendtesting.domain.enumeration.SchedulerStatus;
 import fr.njj.galaxion.endtoendtesting.service.environment.EnvironmentRetrievalService;
 import io.quarkus.cache.CacheManager;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -22,7 +21,7 @@ public class UnLockAllEnvironmentSynchronizationUseCase {
         var environments = environmentRetrievalService.getEnvironments();
         environments.forEach(environment -> {
             environment.setIsLocked(false);
-            environment.setSchedulerStatus(SchedulerStatus.SUCCESS);
+            environment.setIsRunningAllTests(false);
             cacheManager.getCache("environment").ifPresent(cache -> cache.invalidate(environment.getId()).await().indefinitely());
         });
     }

@@ -1,10 +1,10 @@
-package fr.njj.galaxion.endtoendtesting.client.tstojsconverter.exception;
+package fr.njj.galaxion.endtoendtesting.client.converter.exception;
 
 import fr.njj.galaxion.endtoendtesting.lib.exception.CustomException;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.rest.client.ext.ResponseExceptionMapper;
 
-public class TsToJsConverterExceptionMapper implements ResponseExceptionMapper<CustomException> {
+public class ConverterExceptionMapper implements ResponseExceptionMapper<CustomException> {
 
     @Override
     public CustomException toThrowable(Response response) {

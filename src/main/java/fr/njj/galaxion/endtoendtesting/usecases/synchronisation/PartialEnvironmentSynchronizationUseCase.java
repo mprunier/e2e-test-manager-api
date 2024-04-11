@@ -33,11 +33,10 @@ public class PartialEnvironmentSynchronizationUseCase {
     @Transactional
     public void execute(
             String projectId,
-            String refName,
+            String branch,
             Set<String> filesToSynchronize,
             Set<String> filesToRemove) {
 
-        var branch = extractRefName(refName);
         var environments = environmentRetrievalService.getEnvironmentsByBranchAndProjectId(branch, projectId);
         for (EnvironmentEntity environment : environments) {
             cleanEnvironmentErrors(filesToSynchronize, filesToRemove, environment);
@@ -70,14 +69,6 @@ public class PartialEnvironmentSynchronizationUseCase {
 
     private void cleanFilesToRemove(Set<String> filesToRemove, EnvironmentEntity environment) {
         filesToRemove.forEach(file -> configurationService.deleteConfigurationByFile(file, environment.getId()));
-    }
-
-    private static String extractRefName(final String ref) {
-        if (ref != null && (ref.startsWith("refs/heads/") || ref.startsWith("refs/tags/"))) {
-            String[] parts = ref.split("/");
-            return parts[parts.length - 1];
-        }
-        return ref;
     }
 }
 

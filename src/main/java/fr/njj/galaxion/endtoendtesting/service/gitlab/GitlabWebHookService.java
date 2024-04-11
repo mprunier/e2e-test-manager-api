@@ -9,6 +9,7 @@ import fr.njj.galaxion.endtoendtesting.usecases.metrics.CalculateFinalMetricsUse
 import fr.njj.galaxion.endtoendtesting.usecases.pipeline.RecordResultPipelineUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.synchronisation.PartialEnvironmentSynchronizationUseCase;
 import fr.njj.galaxion.endtoendtesting.websocket.events.SyncErrorEventService;
+import fr.njj.galaxion.endtoendtesting.websocket.events.UpdateEnvironmentEventService;
 import fr.njj.galaxion.endtoendtesting.websocket.events.UpdateFinalMetricsEventService;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class GitlabWebHookService {
     private final UpdateFinalMetricsEventService updateFinalMetricsEventService;
     private final CalculateFinalMetricsUseCase calculateFinalMetricsUseCase;
     private final PipelineRetrievalService pipelineRetrievalService;
+    private final UpdateEnvironmentEventService updateEnvironmentEventService;
 
     public void gitlabCallback(String gitlabEvent, GitlabWebHookRequest request) {
         var event = GitLabWebhookEvent.fromHeaderValue(gitlabEvent);
@@ -86,11 +88,23 @@ public class GitlabWebHookService {
                 filesToSynchronize.addAll(commit.getModified());
                 filesToSynchronize.addAll(commit.getRemoved());
             });
+            branch = extractRefName(branch);
             partialEnvironmentSynchronizationUseCase.execute(projectId, branch, filesToSynchronize, filesToRemove);
         } finally {
             var environments = environmentRetrievalService.getEnvironmentsByBranchAndProjectId(branch, projectId);
-            environments.forEach(environment -> syncErrorEventService.send(environment.getId()));
+            environments.forEach(environment -> {
+                syncErrorEventService.send(environment.getId());
+                updateEnvironmentEventService.send(environment.getId());
+            });
             locks.remove(lockKey);
         }
+    }
+
+    private static String extractRefName(final String ref) {
+        if (ref != null && (ref.startsWith("refs/heads/") || ref.startsWith("refs/tags/"))) {
+            String[] parts = ref.split("/");
+            return parts[parts.length - 1];
+        }
+        return ref;
     }
 }

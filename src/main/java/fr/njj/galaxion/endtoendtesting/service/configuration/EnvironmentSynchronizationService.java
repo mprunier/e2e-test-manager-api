@@ -1,6 +1,6 @@
 package fr.njj.galaxion.endtoendtesting.service.configuration;
 
-import fr.njj.galaxion.endtoendtesting.client.tstojsconverter.TsToJsConverterClient;
+import fr.njj.galaxion.endtoendtesting.client.converter.ConverterClient;
 import fr.njj.galaxion.endtoendtesting.domain.exception.CharactersForbiddenException;
 import fr.njj.galaxion.endtoendtesting.domain.exception.SuiteNoTitleException;
 import fr.njj.galaxion.endtoendtesting.domain.exception.TitleDuplicationException;
@@ -44,7 +44,7 @@ public class EnvironmentSynchronizationService {
     private final EnvironmentSynchronizationErrorRepository environmentSynchronizationErrorRepository;
 
     @RestClient
-    private TsToJsConverterClient tsToJsConverterClient;
+    private ConverterClient converterClient;
 
     public void synchronize(EnvironmentEntity environment, Set<String> changedFiles, File projectFolder, HashMap<String, String> errors) throws IOException {
         for (var filePath : changedFiles) {
@@ -55,10 +55,27 @@ public class EnvironmentSynchronizationService {
                 if (fullPath.contains(START_PATH) && (fullPath.contains(END_TEST_TS_PATH) || fullPath.contains(END_TEST_JS_PATH))) {
                     var relativePathString = fullPath.split(START_PATH)[1];
                     var content = Files.readString(path);
+                    boolean hasError = false;
                     if (fullPath.contains(END_TEST_TS_PATH)) {
-                        content = tsToJsConverterClient.convert(content);
+                        try {
+                            content = converterClient.convertTs(content);
+                        } catch (Exception exception) {
+                            errors.put(filePath, "Error during the transpilation of TypeScript code into JavaScript. Please ensure that your code is correctly formatted as JavaScript or TypeScript without any errors.");
+                            log.error("Error during the transpilation of TypeScript code into JavaScript on file [{}] and Environment id [{}]", filePath, environment.getId());
+                            hasError = true;
+                        }
                     }
-                    assertAndBuild(environment.getId(), content, relativePathString, errors, filePath);
+                    try {
+                        content = converterClient.transpileJs(content);
+                    } catch (Exception exception) {
+                        errors.put(filePath, "Error during the transpilation of JavaScript code to ES6. Please ensure that your code is correctly formatted as JavaScript or TypeScript without any errors.");
+                        log.error("Error during the transpilation of JavaScript code to ES6 on file [{}] and Environment id [{}]", filePath, environment.getId());
+                        hasError = true;
+                    }
+
+                    if (!hasError) {
+                        assertAndBuild(environment.getId(), content, relativePathString, errors, filePath);
+                    }
                 }
             }
         }
