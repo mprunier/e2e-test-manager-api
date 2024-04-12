@@ -24,7 +24,7 @@ public class GitlabWebHookController {
             try {
                 gitlabWebHookService.gitlabCallback(gitlabEvent, request);
             } catch (Exception e) {
-                log.error("Webhook Async Error", e);
+                log.error("Webhook Async Error : {}", e.getMessage());
             }
 
         });

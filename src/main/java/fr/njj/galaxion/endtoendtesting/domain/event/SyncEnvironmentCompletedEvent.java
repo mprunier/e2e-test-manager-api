@@ -14,7 +14,7 @@ import java.util.List;
 @Getter
 @SuperBuilder
 @AllArgsConstructor
-@JsonTypeName("SYNC_ENVIRONMENT_EVENT")
+@JsonTypeName("SYNC_ENVIRONMENT_COMPLETED_EVENT")
 public class SyncEnvironmentCompletedEvent extends AbstractEvent {
 
     private EnvironmentResponse environment;

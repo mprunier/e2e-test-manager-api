@@ -10,8 +10,4 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @JsonTypeName("TEST_RUN_COMPLETED_EVENT")
 public class TestRunCompletedEvent extends AbstractEvent {
-
-    private Long suiteId;
-
-    private Long testId;
 }

@@ -13,9 +13,8 @@ import fr.njj.galaxion.endtoendtesting.service.ReportSchedulerService;
 import fr.njj.galaxion.endtoendtesting.service.ReportSuiteOrTestService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.GitlabService;
 import fr.njj.galaxion.endtoendtesting.service.test.TestRetrievalService;
-import fr.njj.galaxion.endtoendtesting.usecases.metrics.AddMetricsUseCase;
-import fr.njj.galaxion.endtoendtesting.usecases.metrics.CalculateFinalMetricsUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.run.AllTestsRunCompletedUseCase;
+import fr.njj.galaxion.endtoendtesting.usecases.run.TestRunCompletedUseCase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.transaction.Transactional;
@@ -35,8 +34,7 @@ public class RecordResultPipelineUseCase {
     private final ReportSuiteOrTestService reportSuiteOrTestService;
     private final ReportSchedulerService reportSchedulerService;
     private final AllTestsRunCompletedUseCase allTestsRunCompletedUseCase;
-    private final CalculateFinalMetricsUseCase calculateFinalMetricsUseCase;
-    private final AddMetricsUseCase addMetricsUseCase;
+    private final TestRunCompletedUseCase testRunCompletedUseCase;
 
     private final Event<UpdateFinalMetricsEvent> updateFinalMetricsEvent;
 
@@ -56,7 +54,6 @@ public class RecordResultPipelineUseCase {
             globalUpdate(pipeline, status, environment, jobId);
         }
         pipeline.setStatus(PipelineStatus.FINISH);
-        finalizeMetrics(pipeline.getEnvironment().getId());
         updateFinalMetricsEvent.fire(UpdateFinalMetricsEvent.builder().environmentId(environment.getId()).build());
     }
 
@@ -65,7 +62,7 @@ public class RecordResultPipelineUseCase {
         try {
             if (GitlabJobStatus.success.equals(status) || GitlabJobStatus.failed.equals(status)) {
                 var artifactData = gitlabService.getArtifactData(environment.getToken(), environment.getProjectId(), jobId);
-                if (artifactData.getReport() != null) {
+                if (artifactData.getReport() != null && artifactData.getReport().getResults() != null && !artifactData.getReport().getResults().isEmpty()) {
                     reportSchedulerService.report(artifactData, environmentId);
                     allTestsRunCompletedUseCase.execute(environmentId, null);
                 } else {
@@ -87,24 +84,16 @@ public class RecordResultPipelineUseCase {
         try {
             if (GitlabJobStatus.success.equals(status) || GitlabJobStatus.failed.equals(status)) {
                 var artifactData = gitlabService.getArtifactData(environment.getToken(), environment.getProjectId(), jobId);
-                if (artifactData.getReport() != null) {
-                    reportSuiteOrTestService.report(artifactData, tests);
-                } else {
-                    updateStatus(tests, ConfigurationStatus.NO_REPORT_ERROR);
-                }
+                reportSuiteOrTestService.report(artifactData, tests);
             } else if (GitlabJobStatus.canceled.equals(status) || GitlabJobStatus.skipped.equals(status)) {
                 updateStatus(tests, ConfigurationStatus.CANCELED);
             }
         } catch (Exception e) {
             log.error(e.getMessage());
             updateStatus(tests, ConfigurationStatus.SYSTEM_ERROR);
+        } finally {
+            testRunCompletedUseCase.execute(environment.getId());
         }
-    }
-
-    private void finalizeMetrics(Long environmentId) {
-        var finalMetrics = calculateFinalMetricsUseCase.execute(environmentId);
-        addMetricsUseCase.execute(environmentId, finalMetrics, true);
-        log.info("test");
     }
 }
 

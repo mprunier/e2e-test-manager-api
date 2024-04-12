@@ -2,7 +2,6 @@ package fr.njj.galaxion.endtoendtesting.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.ConfigurationStatus;
-import fr.njj.galaxion.endtoendtesting.domain.enumeration.ReportAllTestRanStatus;
 import fr.njj.galaxion.endtoendtesting.domain.internal.ArtifactDataInternal;
 import fr.njj.galaxion.endtoendtesting.domain.internal.MochaReportResultInternal;
 import fr.njj.galaxion.endtoendtesting.domain.internal.MochaReportSuiteInternal;
@@ -12,7 +11,6 @@ import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.TestEntity;
 import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationSuiteRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationTestRetrievalService;
-import fr.njj.galaxion.endtoendtesting.usecases.run.AllTestsRunCompletedUseCase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -32,19 +30,14 @@ public class ReportSchedulerService {
     private final ConfigurationSuiteRetrievalService configurationSuiteRetrievalService;
     private final ConfigurationTestRetrievalService configurationTestRetrievalService;
     private final TestScreenshotService testScreenshotService;
-    private final AllTestsRunCompletedUseCase allTestsRunCompletedUseCase;
 
     @Transactional
     public void report(ArtifactDataInternal artifactData,
                        long environmentId) {
         var screenshots = artifactData.getScreenshots();
         var report = artifactData.getReport();
-        if (report != null && report.getResults() != null && !report.getResults().isEmpty()) {
-            var results = report.getResults();
-            createSuitesAndTests(environmentId, results, screenshots);
-        } else {
-            allTestsRunCompletedUseCase.execute(environmentId, ReportAllTestRanStatus.NO_REPORT_ERROR);
-        }
+        var results = report.getResults();
+        createSuitesAndTests(environmentId, results, screenshots);
     }
 
     private void createSuitesAndTests(long environmentId,

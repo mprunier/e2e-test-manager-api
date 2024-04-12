@@ -22,14 +22,13 @@ public class AddMetricsUseCase {
     @Transactional
     public void execute(
             long environmentId,
-            Metrics metrics,
-            boolean addOnlyIfNewMetrics) {
+            Metrics metrics) {
         var now = ZonedDateTime.now();
 
-        if (!addOnlyIfNewMetrics) {
-            saveMetrics(environmentId, metrics);
-            return;
-        }
+        //        if (!addOnlyIfNewMetrics) {
+        //            saveMetrics(environmentId, metrics);
+        //            return;
+        //        }
 
         metricRepository.findLastMetrics(environmentId).ifPresentOrElse(lastMetrics -> {
             if (areMetricsSame(lastMetrics, metrics) && lastMetrics.getCreatedAt().isAfter(now.minusHours(1))) {

@@ -1,5 +1,6 @@
 package fr.njj.galaxion.endtoendtesting.usecases.environment;
 
+import fr.njj.galaxion.endtoendtesting.domain.exception.EnvironmentAlreadyInSyncProgressException;
 import fr.njj.galaxion.endtoendtesting.service.environment.EnvironmentRetrievalService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -18,6 +19,9 @@ public class LockEnvironmentSynchronizationUseCase {
             long environmentId) {
 
         var environment = environmentRetrievalService.getEnvironment(environmentId);
+        if (Boolean.TRUE.equals(environment.getIsLocked())) {
+            throw new EnvironmentAlreadyInSyncProgressException();
+        }
         environment.setIsLocked(true);
     }
 

@@ -11,5 +11,5 @@ import lombok.experimental.SuperBuilder;
 @JsonTypeName("ALL_TESTS_RUN_COMPLETED_EVENT")
 public class AllTestsRunCompletedEvent extends AbstractEvent {
 
-    private String lastALlTestsError;
+    private String lastAllTestsError;
 }

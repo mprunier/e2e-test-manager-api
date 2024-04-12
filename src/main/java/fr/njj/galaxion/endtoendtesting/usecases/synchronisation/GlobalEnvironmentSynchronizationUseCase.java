@@ -9,7 +9,6 @@ import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationServic
 import fr.njj.galaxion.endtoendtesting.service.configuration.EnvironmentSynchronizationService;
 import fr.njj.galaxion.endtoendtesting.service.environment.EnvironmentRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.GitlabService;
-import fr.njj.galaxion.endtoendtesting.usecases.cache.CleanCacheAfterSynchronizationUseCase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.transaction.Transactional;
@@ -41,7 +40,6 @@ public class GlobalEnvironmentSynchronizationUseCase {
     private final EnvironmentSynchronizationService environmentSynchronizationService;
     private final GitlabService gitlabService;
     private final ConfigurationService configurationService;
-    private final CleanCacheAfterSynchronizationUseCase cleanCacheAfterSynchronizationUseCase;
     private final Event<SyncEnvironmentCompletedEvent> syncEnvironmentEvent;
 
     @Monitored

@@ -4,6 +4,7 @@ import fr.njj.galaxion.endtoendtesting.domain.event.SyncEnvironmentCompletedEven
 import fr.njj.galaxion.endtoendtesting.lib.logging.Monitored;
 import fr.njj.galaxion.endtoendtesting.service.environment.EnvironmentRetrievalService;
 import fr.njj.galaxion.endtoendtesting.usecases.cache.CleanCacheAfterSynchronizationUseCase;
+import fr.njj.galaxion.endtoendtesting.usecases.environment.UnLockEnvironmentSynchronizationUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.error.RetrieveErrorUseCase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
@@ -22,13 +23,16 @@ public class SyncEnvironmentCompletedEventHandler {
     private final RetrieveErrorUseCase retrieveErrorUseCase;
     private final EnvironmentRetrievalService environmentRetrievalService;
     private final CleanCacheAfterSynchronizationUseCase cleanCacheAfterSynchronizationUseCase;
+    private final UnLockEnvironmentSynchronizationUseCase unLockEnvironmentSynchronizationUseCase;
 
-    @Transactional
     @Monitored
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void send(@Observes(during = TransactionPhase.AFTER_SUCCESS) SyncEnvironmentCompletedEvent event) {
         try {
             var allErrors = retrieveErrorUseCase.execute(event.getEnvironmentId());
             event.setSyncErrors(allErrors);
+
+            unLockEnvironmentSynchronizationUseCase.execute(event.getEnvironmentId());
 
             var environmentResponse = environmentRetrievalService.getEnvironmentResponse(event.getEnvironmentId());
             event.setEnvironment(environmentResponse);

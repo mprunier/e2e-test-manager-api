@@ -32,7 +32,7 @@ public class AllTestsRunCompletedUseCase {
             entity.setLastALlTestsError(null);
         }
 
-        allTestsRunCompletedEvent.fire(AllTestsRunCompletedEvent.builder().lastALlTestsError(entity.getLastALlTestsError()).environmentId(environmentId).build());
+        allTestsRunCompletedEvent.fire(AllTestsRunCompletedEvent.builder().lastAllTestsError(entity.getLastALlTestsError()).environmentId(environmentId).build());
     }
 
 }

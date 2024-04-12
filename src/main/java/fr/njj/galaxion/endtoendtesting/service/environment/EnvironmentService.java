@@ -8,7 +8,6 @@ import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentVariableEntity;
 import fr.njj.galaxion.endtoendtesting.model.repository.EnvironmentVariableRepository;
 import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationSchedulerService;
 import fr.njj.galaxion.endtoendtesting.usecases.environment.LockEnvironmentSynchronizationUseCase;
-import fr.njj.galaxion.endtoendtesting.usecases.environment.UnLockEnvironmentSynchronizationUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.synchronisation.GlobalEnvironmentSynchronizationUseCase;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -30,7 +29,6 @@ public class EnvironmentService {
     private final ConfigurationSchedulerService configurationSchedulerService;
     private final EnvironmentVariableRepository environmentVariableRepository;
     private final LockEnvironmentSynchronizationUseCase lockEnvironmentSynchronizationUseCase;
-    private final UnLockEnvironmentSynchronizationUseCase unLockEnvironmentSynchronizationUseCase;
 
     @Transactional
     public EnvironmentResponse create(CreateUpdateEnvironmentRequest request) {
@@ -52,14 +50,7 @@ public class EnvironmentService {
     }
 
     private void synchronize(EnvironmentEntity environment) {
-        lockEnvironmentSynchronizationUseCase.execute(environment.getId());
-        CompletableFuture.runAsync(() -> {
-            try {
-                globalEnvironmentSynchronizationUseCase.execute(environment.getId());
-            } finally {
-                unLockEnvironmentSynchronizationUseCase.execute(environment.getId());
-            }
-        });
+        CompletableFuture.runAsync(() -> globalEnvironmentSynchronizationUseCase.execute(environment.getId()));
     }
 
     private static void createVariables(CreateUpdateEnvironmentRequest request, EnvironmentEntity environment) {
