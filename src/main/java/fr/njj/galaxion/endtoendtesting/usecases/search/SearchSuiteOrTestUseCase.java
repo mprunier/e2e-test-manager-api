@@ -1,4 +1,4 @@
-package fr.njj.galaxion.endtoendtesting.service.configuration;
+package fr.njj.galaxion.endtoendtesting.usecases.search;
 
 import fr.njj.galaxion.endtoendtesting.domain.exception.ConfigurationSuiteNotFoundException;
 import fr.njj.galaxion.endtoendtesting.domain.request.SearchConfigurationRequest;
@@ -7,6 +7,8 @@ import fr.njj.galaxion.endtoendtesting.domain.response.SearchConfigurationSuiteR
 import fr.njj.galaxion.endtoendtesting.mapper.ConfigurationSuiteResponseMapper;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
 import fr.njj.galaxion.endtoendtesting.model.repository.ConfigurationSuiteRepository;
+import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationTestIdentifierRetrievalService;
+import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationTestRetrievalService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -24,14 +26,14 @@ import static fr.njj.galaxion.endtoendtesting.model.search.ConfigurationSuiteSea
 @Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor
-public class ConfigurationSuiteRetrievalService {
+public class SearchSuiteOrTestUseCase {
 
     private final ConfigurationSuiteRepository configurationSuiteRepository;
     private final ConfigurationTestRetrievalService configurationTestRetrievalService;
     private final ConfigurationTestIdentifierRetrievalService configurationTestIdentifierRetrievalService;
 
     @Transactional
-    public SearchConfigurationSuiteResponse search(Long environmentId, SearchConfigurationRequest request) {
+    public SearchConfigurationSuiteResponse execute(Long environmentId, SearchConfigurationRequest request) {
 
         var params = new HashMap<String, Object>();
         var conditions = new ArrayList<String>();
@@ -44,6 +46,11 @@ public class ConfigurationSuiteRetrievalService {
         if (request.getConfigurationTestId() != null) {
             var configurationTest = configurationTestRetrievalService.get(request.getConfigurationTestId());
             request.setConfigurationSuiteId(configurationTest.getConfigurationSuite().getId());
+        }
+
+        if (Boolean.TRUE.equals(request.getAllNotSuccess())) {
+            var configurationTest = configurationTestRetrievalService.getAllNewByEnvironment(environmentId);
+            request.setNewConfigurationSuiteIds(configurationTest.stream().map(configurationTestEntity -> configurationTestEntity.getConfigurationSuite().getId()).toList());
         }
 
         var baseQuery = buildConfigurationSuiteSearchQuery(environmentId, request, params, conditions);

@@ -1,6 +1,7 @@
 package fr.njj.galaxion.endtoendtesting.controller;
 
 import fr.njj.galaxion.endtoendtesting.domain.request.webhook.GitlabWebHookRequest;
+import fr.njj.galaxion.endtoendtesting.lib.exception.CustomException;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.GitlabWebHookService;
 import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
@@ -23,6 +24,8 @@ public class GitlabWebHookController {
         CompletableFuture.runAsync(() -> {
             try {
                 gitlabWebHookService.gitlabCallback(gitlabEvent, request);
+            } catch (CustomException e) {
+                log.error("Business Webhook Async Error : {}", e.getDetail());
             } catch (Exception e) {
                 log.error("Webhook Async Error : {}", e.getMessage());
             }

@@ -1,5 +1,6 @@
 package fr.njj.galaxion.endtoendtesting.usecases.synchronisation;
 
+import fr.njj.galaxion.endtoendtesting.lib.logging.Monitored;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentSynchronizationErrorEntity;
 import fr.njj.galaxion.endtoendtesting.model.repository.EnvironmentSynchronizationErrorRepository;
@@ -19,6 +20,7 @@ public class AddEnvironmentSynchronizationErrorUseCase {
     private final EnvironmentSynchronizationErrorRepository environmentSynchronizationErrorRepository;
     private final EnvironmentRetrievalService environmentRetrievalService;
 
+    @Monitored(logExit = false)
     @Transactional
     public void execute(
             long environmentId,

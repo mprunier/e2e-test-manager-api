@@ -9,8 +9,8 @@ import fr.njj.galaxion.endtoendtesting.domain.internal.MochaReportTestInternal;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.TestEntity;
-import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationSuiteRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationTestRetrievalService;
+import fr.njj.galaxion.endtoendtesting.usecases.search.SearchSuiteOrTestUseCase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -25,9 +25,9 @@ import static fr.njj.galaxion.endtoendtesting.domain.constant.CommonConstant.STA
 @Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor
-public class ReportSchedulerService {
+public class ReportAllTestsService {
 
-    private final ConfigurationSuiteRetrievalService configurationSuiteRetrievalService;
+    private final SearchSuiteOrTestUseCase searchSuiteOrTestUseCase;
     private final ConfigurationTestRetrievalService configurationTestRetrievalService;
     private final TestScreenshotService testScreenshotService;
 
@@ -56,7 +56,7 @@ public class ReportSchedulerService {
                                           Map<String, byte[]> screenshots) {
         if (tests != null) {
             tests.forEach(mochaTest -> {
-                var configurationSuiteOptional = configurationSuiteRetrievalService.getBy(environmentId, file, NO_SUITE, null);
+                var configurationSuiteOptional = searchSuiteOrTestUseCase.getBy(environmentId, file, NO_SUITE, null);
                 if (configurationSuiteOptional.isPresent()) {
                     var configurationTestOptional = configurationTestRetrievalService.getBy(environmentId, file, mochaTest.getTitle(), configurationSuiteOptional.get());
                     configurationTestOptional.ifPresent(configurationTestEntity -> saveTest(mochaTest, configurationTestEntity, screenshots));
@@ -85,7 +85,7 @@ public class ReportSchedulerService {
                                Map<String, byte[]> screenshots) {
         if (suites != null) {
             suites.forEach(mochaSuite -> {
-                var configurationSuiteOptional = configurationSuiteRetrievalService.getBy(environmentId, file, mochaSuite.getTitle(), parentSuite != null ? parentSuite.getId() : null);
+                var configurationSuiteOptional = searchSuiteOrTestUseCase.getBy(environmentId, file, mochaSuite.getTitle(), parentSuite != null ? parentSuite.getId() : null);
                 if (configurationSuiteOptional.isPresent()) {
                     processTests(environmentId, file, mochaSuite.getTests(), configurationSuiteOptional.get(), screenshots);
                     processSuites(environmentId, file, mochaSuite.getSuites(), configurationSuiteOptional.get(), screenshots);

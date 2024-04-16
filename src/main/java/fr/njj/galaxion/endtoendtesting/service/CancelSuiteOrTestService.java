@@ -3,6 +3,7 @@ package fr.njj.galaxion.endtoendtesting.service;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.ConfigurationStatus;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.GitlabService;
 import fr.njj.galaxion.endtoendtesting.service.test.TestRetrievalService;
+import fr.njj.galaxion.endtoendtesting.usecases.run.TestRunCompletedUseCase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ public class CancelSuiteOrTestService {
 
     private final TestRetrievalService testRetrievalService;
     private final GitlabService gitlabService;
+    private final TestRunCompletedUseCase testRunCompletedUseCase;
 
     @Transactional
     public void cancel(String pipelineId, List<String> testStrIds) {
@@ -28,6 +30,7 @@ public class CancelSuiteOrTestService {
         var environment = tests.getFirst().getConfigurationTest().getEnvironment();
         gitlabService.cancelPipeline(environment.getToken(), environment.getProjectId(), pipelineId);
         updateStatus(tests, ConfigurationStatus.CANCELED);
+        testRunCompletedUseCase.execute(environment.getId());
     }
 }
 

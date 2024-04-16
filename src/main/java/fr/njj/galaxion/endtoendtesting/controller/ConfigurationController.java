@@ -4,9 +4,9 @@ import fr.njj.galaxion.endtoendtesting.domain.request.SearchConfigurationRequest
 import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationSuiteResponse;
 import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationTestResponse;
 import fr.njj.galaxion.endtoendtesting.domain.response.SearchConfigurationSuiteResponse;
-import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationSuiteRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationTestIdentifierRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationTestRetrievalService;
+import fr.njj.galaxion.endtoendtesting.usecases.search.SearchSuiteOrTestUseCase;
 import io.quarkus.cache.CacheResult;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -25,7 +25,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class ConfigurationController {
 
-    private final ConfigurationSuiteRetrievalService configurationSuiteRetrievalService;
+    private final SearchSuiteOrTestUseCase searchSuiteOrTestUseCase;
     private final ConfigurationTestRetrievalService configurationTestRetrievalService;
     private final ConfigurationTestIdentifierRetrievalService configurationTestIdentifierRetrievalService;
 
@@ -33,14 +33,14 @@ public class ConfigurationController {
     @Path("/search/suites")
     public SearchConfigurationSuiteResponse searchBySuite(@NotNull @QueryParam("environmentId") Long environmentId,
                                                           @Valid @BeanParam SearchConfigurationRequest request) {
-        return configurationSuiteRetrievalService.search(environmentId, request);
+        return searchSuiteOrTestUseCase.execute(environmentId, request);
     }
 
     @GET
     @Path("/suites")
     @CacheResult(cacheName = "suites")
     public List<ConfigurationSuiteResponse> getConfigurationSuites(@NotNull @QueryParam("environmentId") Long environmentId) {
-        return configurationSuiteRetrievalService.getResponses(environmentId);
+        return searchSuiteOrTestUseCase.getResponses(environmentId);
     }
 
     @GET
@@ -54,7 +54,7 @@ public class ConfigurationController {
     @Path("/files")
     @CacheResult(cacheName = "files")
     public List<String> getConfigurationFiles(@NotNull @QueryParam("environmentId") Long environmentId) {
-        return configurationSuiteRetrievalService.getAllFiles(environmentId);
+        return searchSuiteOrTestUseCase.getAllFiles(environmentId);
     }
 
     @GET

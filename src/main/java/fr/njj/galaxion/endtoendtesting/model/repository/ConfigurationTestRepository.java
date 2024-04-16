@@ -1,5 +1,6 @@
 package fr.njj.galaxion.endtoendtesting.model.repository;
 
+import fr.njj.galaxion.endtoendtesting.domain.enumeration.ConfigurationStatus;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -19,7 +20,11 @@ public class ConfigurationTestRepository implements PanacheRepositoryBase<Config
     }
 
     public List<ConfigurationTestEntity> findAllBy(long environmentId) {
-        return find("environment.id = ?1", environmentId).stream().toList();
+        return list("environment.id = ?1", environmentId);
+    }
+
+    public List<ConfigurationTestEntity> findAllNewByEnvironment(long environmentId) {
+        return list("environment.id = ?1 AND status = ?2", environmentId, ConfigurationStatus.NEW);
     }
 
     public void deleteByEnvAndFileAndNotInTestIds(long environmentId, String file, List<Long> testIds) {

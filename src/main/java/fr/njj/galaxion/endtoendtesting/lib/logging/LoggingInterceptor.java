@@ -8,7 +8,6 @@ import jakarta.interceptor.Interceptor;
 import jakarta.interceptor.InvocationContext;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.StopWatch;
 import org.jboss.logging.Logger;
 
 @Monitored
@@ -33,18 +32,25 @@ public class LoggingInterceptor {
 
     @AroundInvoke
     public Object logMethodInvocation(InvocationContext context) throws Exception {
+        var monitored = context.getMethod().getAnnotation(Monitored.class);
+        if (monitored == null) {
+            monitored = context.getTarget().getClass().getAnnotation(Monitored.class);
+        }
+
         var logger = Logger.getLogger(context.getMethod().getDeclaringClass());
 
-        var sw = new StopWatch();
-        logger.debugf("[%s] --> %s", context.getMethod().getName(), getArgumentsMessage(context));
+        if (monitored != null && monitored.logEntry()) {
+            logger.debugf("[%s] --> %s", context.getMethod().getName(), getArgumentsMessage(context));
+        }
+
         try {
-            sw.start();
             var result = context.proceed();
-            sw.stop();
-            logger.debugf("[%s] <-- %s", context.getMethod().getName(), result != null ? result : "Nothing");
+
+            if (monitored != null && monitored.logExit()) {
+                logger.debugf("[%s] <-- %s", context.getMethod().getName(), result != null ? result : "Nothing");
+            }
             return result;
         } catch (CustomException exception) {
-            sw.stop();
             var status = Response.Status.fromStatusCode(exception.getStatus());
             if (status == null || Response.Status.Family.SERVER_ERROR.equals(status.getFamily())) {
                 logger.errorf("[%s] EXCEPTION ↓", context.getMethod().getName());
@@ -53,11 +59,9 @@ public class LoggingInterceptor {
             }
             throw exception;
         } catch (ResteasyReactiveViolationException exception) {
-            sw.stop();
             logger.errorf("[%s] EXCEPTION <-!-> %s", context.getMethod().getName(), exception.getMessage());
             throw exception;
         } catch (Exception exception) {
-            sw.stop();
             logger.errorf("[%s] EXCEPTION ↓", context.getMethod().getName());
             throw exception;
         }

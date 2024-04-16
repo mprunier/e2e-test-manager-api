@@ -48,7 +48,6 @@ public class RunAllTestsService {
 
         pipelineService.create(environment, gitlabResponse.getId(), null);
         allTestsRunInProgressEvent.fire(AllTestsRunInProgressEvent.builder().environmentId(environmentId).build());
-
     }
 
     private static void assertSchedulerInProgress(EnvironmentEntity environment) {

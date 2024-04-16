@@ -1,7 +1,6 @@
 package fr.njj.galaxion.endtoendtesting.websocket.events;
 
 import fr.njj.galaxion.endtoendtesting.domain.event.TestRunCompletedEvent;
-import fr.njj.galaxion.endtoendtesting.lib.logging.Monitored;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.event.TransactionPhase;
@@ -15,7 +14,6 @@ import static fr.njj.galaxion.endtoendtesting.websocket.WebSocketEventHandler.se
 @RequiredArgsConstructor
 public class TestRunCompletedEventHandler {
 
-    @Monitored
     public void send(@Observes(during = TransactionPhase.AFTER_SUCCESS) TestRunCompletedEvent event) {
         try {
             sendEventToEnvironmentSessions(event);

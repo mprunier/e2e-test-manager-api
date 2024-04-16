@@ -24,12 +24,7 @@ public class AddMetricsUseCase {
             long environmentId,
             Metrics metrics) {
         var now = ZonedDateTime.now();
-
-        //        if (!addOnlyIfNewMetrics) {
-        //            saveMetrics(environmentId, metrics);
-        //            return;
-        //        }
-
+        
         metricRepository.findLastMetrics(environmentId).ifPresentOrElse(lastMetrics -> {
             if (areMetricsSame(lastMetrics, metrics) && lastMetrics.getCreatedAt().isAfter(now.minusHours(1))) {
                 lastMetrics.setCreatedAt(now);

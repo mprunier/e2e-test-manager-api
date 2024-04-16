@@ -42,7 +42,7 @@ public class GlobalEnvironmentSynchronizationUseCase {
     private final ConfigurationService configurationService;
     private final Event<SyncEnvironmentCompletedEvent> syncEnvironmentEvent;
 
-    @Monitored
+    @Monitored(logExit = false)
     @Transactional
     public void execute(
             long environmentId) {

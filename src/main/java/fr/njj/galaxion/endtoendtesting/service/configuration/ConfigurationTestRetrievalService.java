@@ -29,6 +29,11 @@ public class ConfigurationTestRetrievalService {
     }
 
     @Transactional
+    public List<ConfigurationTestEntity> getAllNewByEnvironment(Long environmentId) {
+        return configurationTestRepository.findAllNewByEnvironment(environmentId);
+    }
+
+    @Transactional
     public Optional<ConfigurationTestEntity> getBy(long environmentId, String file, String title, ConfigurationSuiteEntity configurationSuite) {
         return configurationTestRepository.findBy(file, environmentId, configurationSuite.getId(), title);
     }

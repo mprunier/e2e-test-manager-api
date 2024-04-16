@@ -2,7 +2,6 @@ package fr.njj.galaxion.endtoendtesting.websocket.events;
 
 import fr.njj.galaxion.endtoendtesting.domain.event.UpdateFinalMetricsEvent;
 import fr.njj.galaxion.endtoendtesting.domain.response.MetricsResponse;
-import fr.njj.galaxion.endtoendtesting.lib.logging.Monitored;
 import fr.njj.galaxion.endtoendtesting.usecases.metrics.AddMetricsUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.metrics.CalculateFinalMetricsUseCase;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -22,7 +21,6 @@ public class UpdateFinalMetricsEventHandler {
     private final CalculateFinalMetricsUseCase calculateFinalMetricsUseCase;
     private final AddMetricsUseCase addMetricsUseCase;
 
-    @Monitored
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void send(@Observes(during = TransactionPhase.AFTER_SUCCESS) UpdateFinalMetricsEvent event) {
         try {

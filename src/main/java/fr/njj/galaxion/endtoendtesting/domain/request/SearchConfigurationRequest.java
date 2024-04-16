@@ -31,7 +31,7 @@ public class SearchConfigurationRequest {
     private String configurationTestIdentifier;
 
     @Setter
-    private List<Long> configurationTestIds;
+    private List<Long> newConfigurationSuiteIds;
 
     @Setter
     private List<Long> configurationSuiteIds;

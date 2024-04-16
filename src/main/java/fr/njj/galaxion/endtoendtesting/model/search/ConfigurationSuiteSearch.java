@@ -38,8 +38,9 @@ public final class ConfigurationSuiteSearch {
         }
 
         if (Boolean.TRUE.equals(request.getAllNotSuccess())) {
-            conditions.add("status != :status");
+            conditions.add("status != :status OR id IN :newConfigurationSuiteIds");
             params.put("status", ConfigurationStatus.SUCCESS);
+            params.put("newConfigurationSuiteIds", request.getNewConfigurationSuiteIds());
         } else if (request.getStatus() != null) {
             conditions.add("status = :status");
             params.put("status", request.getStatus());

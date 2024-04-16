@@ -5,11 +5,15 @@ metadata:
   namespace: test-e2e
   annotations:
     nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://e2e-testing-manager-api.itsf.io, https://e2e-testing-manager.itsf.io, http://127.0.0.1:5025, http://localhost:5025"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://e2e-testing-manager-api.itsf.io, https://e2e-testing-manager.itsf.io, http://localhost:5025"
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET, PUT, POST, DELETE, PATCH, OPTIONS"
     nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"
     nginx.ingress.kubernetes.io/proxy-buffer-size: "32k"
     nginx.ingress.kubernetes.io/proxy-buffers: "8 32k"
+    # WebSocket Support
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/connection-proxy: "upgrade"
 spec:
   rules:
     - host: e2e-testing-manager-api.itsf.io

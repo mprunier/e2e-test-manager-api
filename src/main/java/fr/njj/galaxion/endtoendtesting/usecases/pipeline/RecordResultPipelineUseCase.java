@@ -9,7 +9,7 @@ import fr.njj.galaxion.endtoendtesting.lib.logging.Monitored;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.PipelineEntity;
 import fr.njj.galaxion.endtoendtesting.service.PipelineRetrievalService;
-import fr.njj.galaxion.endtoendtesting.service.ReportSchedulerService;
+import fr.njj.galaxion.endtoendtesting.service.ReportAllTestsService;
 import fr.njj.galaxion.endtoendtesting.service.ReportSuiteOrTestService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.GitlabService;
 import fr.njj.galaxion.endtoendtesting.service.test.TestRetrievalService;
@@ -32,13 +32,13 @@ public class RecordResultPipelineUseCase {
     private final TestRetrievalService testRetrievalService;
     private final GitlabService gitlabService;
     private final ReportSuiteOrTestService reportSuiteOrTestService;
-    private final ReportSchedulerService reportSchedulerService;
+    private final ReportAllTestsService reportAllTestsService;
     private final AllTestsRunCompletedUseCase allTestsRunCompletedUseCase;
     private final TestRunCompletedUseCase testRunCompletedUseCase;
 
     private final Event<UpdateFinalMetricsEvent> updateFinalMetricsEvent;
 
-    @Monitored
+    @Monitored(logExit = false)
     @Transactional
     public void execute(
             String pipelineId,
@@ -63,7 +63,7 @@ public class RecordResultPipelineUseCase {
             if (GitlabJobStatus.success.equals(status) || GitlabJobStatus.failed.equals(status)) {
                 var artifactData = gitlabService.getArtifactData(environment.getToken(), environment.getProjectId(), jobId);
                 if (artifactData.getReport() != null && artifactData.getReport().getResults() != null && !artifactData.getReport().getResults().isEmpty()) {
-                    reportSchedulerService.report(artifactData, environmentId);
+                    reportAllTestsService.report(artifactData, environmentId);
                     allTestsRunCompletedUseCase.execute(environmentId, null);
                 } else {
                     allTestsRunCompletedUseCase.execute(environmentId, ReportAllTestRanStatus.NO_REPORT_ERROR);

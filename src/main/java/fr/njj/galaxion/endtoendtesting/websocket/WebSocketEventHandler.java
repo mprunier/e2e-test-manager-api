@@ -30,7 +30,6 @@ public class WebSocketEventHandler {
 
     @OnMessage
     public void onMessage(String message, Session session, @PathParam("environment_id") Long environmentId) {
-        log.trace("Message from {} on Environment ID [{}] : {}", session.getId(), environmentId, message);
     }
 
     @OnClose
@@ -48,11 +47,11 @@ public class WebSocketEventHandler {
     @OnError
     public void onError(Session session, Throwable throwable, @PathParam("environment_id") Long environmentId) {
         onClose(session, environmentId);
-        log.trace("Error on session {} on Environment ID [{}] : {}", session.getId(), environmentId, throwable.getMessage());
+        log.error("Error on session {} on Environment ID [{}] : {}", session.getId(), environmentId, throwable.getMessage());
     }
 
     public static void sendEventToEnvironmentSessions(AbstractEvent event) {
-        log.trace("Send event [{}] on environment [{}].", event.getClass(), event.getEnvironmentId());
+        log.debug("Send event [{}] on environment [{}].", event.getClass().getSimpleName(), event.getEnvironmentId());
         var mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);

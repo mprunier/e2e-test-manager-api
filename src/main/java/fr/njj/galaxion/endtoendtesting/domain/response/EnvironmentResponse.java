@@ -30,5 +30,5 @@ public class EnvironmentResponse {
     private ZonedDateTime updatedAt;
     private Boolean isLocked;
     private Boolean isRunningAllTests;
-    private String lastALlTestsError;
+    private String lastAllTestsError;
 }

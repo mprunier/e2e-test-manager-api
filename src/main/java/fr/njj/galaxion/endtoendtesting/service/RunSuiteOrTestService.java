@@ -8,9 +8,9 @@ import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.TestEntity;
-import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationSuiteRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationTestRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.GitlabService;
+import fr.njj.galaxion.endtoendtesting.usecases.search.SearchSuiteOrTestUseCase;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
@@ -33,7 +33,7 @@ import static fr.njj.galaxion.endtoendtesting.helper.EnvironmentHelper.buildVari
 public class RunSuiteOrTestService {
 
     private final ConfigurationTestRetrievalService configurationTestRetrievalService;
-    private final ConfigurationSuiteRetrievalService configurationSuiteRetrievalService;
+    private final SearchSuiteOrTestUseCase searchSuiteOrTestUseCase;
     private final GitlabService gitlabService;
     private final SecurityIdentity identity;
     private final PipelineService pipelineService;
@@ -60,7 +60,7 @@ public class RunSuiteOrTestService {
             }
             grep.append(configurationTest.getTitle());
         } else {
-            var configurationSuite = configurationSuiteRetrievalService.get(request.getConfigurationSuiteId());
+            var configurationSuite = searchSuiteOrTestUseCase.get(request.getConfigurationSuiteId());
             environment = configurationSuite.getEnvironment();
             file = configurationSuite.getFile();
             addConfigurationTestsFromSuite(configurationSuite, configurationTests);

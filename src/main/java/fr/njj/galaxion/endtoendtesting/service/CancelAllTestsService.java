@@ -12,7 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor
-public class CancelSchedulerService {
+public class CancelAllTestsService {
 
     private final EnvironmentRetrievalService environmentRetrievalService;
     private final GitlabService gitlabService;

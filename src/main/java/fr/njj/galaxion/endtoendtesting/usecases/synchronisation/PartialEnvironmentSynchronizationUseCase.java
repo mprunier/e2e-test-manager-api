@@ -32,7 +32,7 @@ public class PartialEnvironmentSynchronizationUseCase {
 
     private final Event<SyncEnvironmentCompletedEvent> syncEnvironmentEvent;
 
-    @Monitored
+    @Monitored(logExit = false)
     @Transactional
     public void execute(
             String projectId,

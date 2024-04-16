@@ -18,7 +18,7 @@ public class AllTestsRunCompletedUseCase {
     private final EnvironmentRetrievalService environmentRetrievalService;
     private final Event<AllTestsRunCompletedEvent> allTestsRunCompletedEvent;
 
-    @Monitored
+    @Monitored(logExit = false)
     @Transactional
     public void execute(
             long environmentId,

@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>fr.njj.galaxion</groupId>
-    <artifactId>e2e-test-manager-api</artifactId>
+    <artifactId>e2e-testing-manager-api</artifactId>
     <version>0.7.0-SNAPSHOT</version>
     <name>${project.artifactId}</name>
 

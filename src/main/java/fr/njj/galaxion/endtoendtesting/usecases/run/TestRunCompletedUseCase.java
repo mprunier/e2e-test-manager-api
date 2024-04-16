@@ -15,7 +15,7 @@ public class TestRunCompletedUseCase {
 
     private final Event<TestRunCompletedEvent> testRunCompletedEvent;
 
-    @Monitored
+    @Monitored(logExit = false)
     @Transactional
     public void execute(
             long environmentId) {

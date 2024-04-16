@@ -10,6 +10,7 @@ import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.repository.ConfigurationSuiteRepository;
 import fr.njj.galaxion.endtoendtesting.model.repository.ConfigurationTestRepository;
 import fr.njj.galaxion.endtoendtesting.service.environment.EnvironmentRetrievalService;
+import fr.njj.galaxion.endtoendtesting.usecases.search.SearchSuiteOrTestUseCase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,7 @@ public class ConfigurationService {
     private final ConfigurationSuiteRepository configurationSuiteRepository;
     private final ConfigurationTestRepository configurationTestRepository;
     private final ConfigurationTestRetrievalService configurationTestRetrievalService;
-    private final ConfigurationSuiteRetrievalService configurationSuiteRetrievalService;
+    private final SearchSuiteOrTestUseCase searchSuiteOrTestUseCase;
 
     @Transactional
     public void deleteConfigurationByFile(String file,
@@ -69,7 +70,7 @@ public class ConfigurationService {
                                                 List<Long> suiteIds,
                                                 List<Long> testIds) {
         ConfigurationSuiteEntity configurationSuite;
-        var configurationSuiteOptional = configurationSuiteRetrievalService.getBy(environment.getId(), file, NO_SUITE, null);
+        var configurationSuiteOptional = searchSuiteOrTestUseCase.getBy(environment.getId(), file, NO_SUITE, null);
         if (configurationSuiteOptional.isEmpty()) {
             configurationSuite = ConfigurationSuiteEntity
                     .builder()
@@ -94,7 +95,7 @@ public class ConfigurationService {
                                      List<Long> testIds) {
         ConfigurationSuiteEntity configurationSuite;
         var parentSuiteId = parentSuite != null ? parentSuite.getId() : null;
-        var configurationSuiteOptional = configurationSuiteRetrievalService.getBy(environment.getId(), file, suiteInternal.getTitle(), parentSuiteId);
+        var configurationSuiteOptional = searchSuiteOrTestUseCase.getBy(environment.getId(), file, suiteInternal.getTitle(), parentSuiteId);
         if (configurationSuiteOptional.isEmpty()) {
             configurationSuite = ConfigurationSuiteEntity
                     .builder()

@@ -1,7 +1,6 @@
 package fr.njj.galaxion.endtoendtesting.websocket.events;
 
 import fr.njj.galaxion.endtoendtesting.domain.event.SyncEnvironmentCompletedEvent;
-import fr.njj.galaxion.endtoendtesting.lib.logging.Monitored;
 import fr.njj.galaxion.endtoendtesting.service.environment.EnvironmentRetrievalService;
 import fr.njj.galaxion.endtoendtesting.usecases.cache.CleanCacheAfterSynchronizationUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.environment.UnLockEnvironmentSynchronizationUseCase;
@@ -25,7 +24,6 @@ public class SyncEnvironmentCompletedEventHandler {
     private final CleanCacheAfterSynchronizationUseCase cleanCacheAfterSynchronizationUseCase;
     private final UnLockEnvironmentSynchronizationUseCase unLockEnvironmentSynchronizationUseCase;
 
-    @Monitored
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void send(@Observes(during = TransactionPhase.AFTER_SUCCESS) SyncEnvironmentCompletedEvent event) {
         try {
