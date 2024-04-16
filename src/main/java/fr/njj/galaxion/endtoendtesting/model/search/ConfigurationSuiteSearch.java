@@ -1,5 +1,6 @@
 package fr.njj.galaxion.endtoendtesting.model.search;
 
+import fr.njj.galaxion.endtoendtesting.domain.enumeration.ConfigurationStatus;
 import fr.njj.galaxion.endtoendtesting.domain.request.SearchConfigurationRequest;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -36,7 +37,10 @@ public final class ConfigurationSuiteSearch {
             params.put("file", request.getFile());
         }
 
-        if (request.getStatus() != null) {
+        if (Boolean.TRUE.equals(request.getAllNotSuccess())) {
+            conditions.add("status != :status");
+            params.put("status", ConfigurationStatus.SUCCESS);
+        } else if (request.getStatus() != null) {
             conditions.add("status = :status");
             params.put("status", request.getStatus());
         }

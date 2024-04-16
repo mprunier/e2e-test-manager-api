@@ -45,6 +45,9 @@ public class SearchConfigurationRequest {
     @QueryParam("status")
     private ConfigurationStatus status;
 
+    @QueryParam("allNotSuccess")
+    private Boolean allNotSuccess;
+
     @QueryParam("page")
     @DefaultValue("0")
     private int page;

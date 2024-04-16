@@ -66,7 +66,7 @@ public class RunSuiteOrTestService {
             addConfigurationTestsFromSuite(configurationSuite, configurationTests);
             buildSuiteGrep(configurationSuite, grep);
         }
-        assertSchedulerInProgress(environment);
+        //        assertSchedulerInProgress(environment);
 
         var variablesBuilder = new StringBuilder();
         var variablesWithValueMap = new HashMap<String, String>();

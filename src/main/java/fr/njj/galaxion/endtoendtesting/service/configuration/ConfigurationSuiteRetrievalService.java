@@ -6,7 +6,6 @@ import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationSuiteRespons
 import fr.njj.galaxion.endtoendtesting.domain.response.SearchConfigurationSuiteResponse;
 import fr.njj.galaxion.endtoendtesting.mapper.ConfigurationSuiteResponseMapper;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
-import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
 import fr.njj.galaxion.endtoendtesting.model.repository.ConfigurationSuiteRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -15,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -65,18 +63,6 @@ public class ConfigurationSuiteRetrievalService {
     public ConfigurationSuiteEntity get(Long id) {
         return configurationSuiteRepository.findByIdOptional(id)
                                            .orElseThrow(() -> new ConfigurationSuiteNotFoundException(id));
-    }
-
-    @Transactional
-    public List<Long> getTestsIds(Long id) {
-        var suiteOptional = configurationSuiteRepository.findByIdOptional(id);
-        return suiteOptional
-                .map(configurationSuiteEntity -> configurationSuiteEntity
-                        .getConfigurationTests()
-                        .stream()
-                        .map(ConfigurationTestEntity::getId)
-                        .toList())
-                .orElse(Collections.emptyList());
     }
 
     @Transactional

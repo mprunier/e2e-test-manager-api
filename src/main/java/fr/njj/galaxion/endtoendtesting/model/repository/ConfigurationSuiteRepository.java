@@ -30,7 +30,7 @@ public class ConfigurationSuiteRepository implements PanacheRepositoryBase<Confi
         return find("environment.id = ?1", environmentId).stream().toList();
     }
 
-    public void deleteBy(String file, long environmentId) {
+    public void deleteByFileAndEnv(String file, long environmentId) {
         delete("environment.id = ?1 AND file = ?2", environmentId, file);
     }
 

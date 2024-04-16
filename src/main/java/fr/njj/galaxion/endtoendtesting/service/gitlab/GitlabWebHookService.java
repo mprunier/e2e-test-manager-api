@@ -66,7 +66,7 @@ public class GitlabWebHookService {
             request.getCommits().forEach(commit -> {
                 filesToSynchronize.addAll(commit.getAdded());
                 filesToSynchronize.addAll(commit.getModified());
-                filesToSynchronize.addAll(commit.getRemoved());
+                filesToRemove.addAll(commit.getRemoved());
             });
             branch = extractRefName(branch);
             partialEnvironmentSynchronizationUseCase.execute(projectId, branch, filesToSynchronize, filesToRemove);

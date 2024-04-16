@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Set;
 
 import static fr.njj.galaxion.endtoendtesting.domain.constant.CommonConstant.GLOBAL_ENVIRONMENT_ERROR;
+import static fr.njj.galaxion.endtoendtesting.domain.constant.CommonConstant.START_PATH;
 
 @Slf4j
 @ApplicationScoped
@@ -70,7 +71,10 @@ public class PartialEnvironmentSynchronizationUseCase {
     }
 
     private void cleanFilesToRemove(Set<String> filesToRemove, EnvironmentEntity environment) {
-        filesToRemove.forEach(file -> configurationService.deleteConfigurationByFile(file, environment.getId()));
+        filesToRemove.forEach(file -> {
+            var relativePathString = file.split(START_PATH)[1];
+            configurationService.deleteConfigurationByFile(relativePathString, environment.getId());
+        });
     }
 }
 

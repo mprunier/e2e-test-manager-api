@@ -1,5 +1,6 @@
 package fr.njj.galaxion.endtoendtesting.mapper;
 
+import fr.njj.galaxion.endtoendtesting.domain.enumeration.ConfigurationStatus;
 import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationSuiteResponse;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
 import lombok.AccessLevel;
@@ -12,6 +13,7 @@ public final class ConfigurationSuiteResponseMapper {
 
     public static ConfigurationSuiteResponse build(ConfigurationSuiteEntity entity) {
         var tests = ConfigurationTestResponseMapper.builds(entity.getConfigurationTests());
+        var hasNewTest = tests.stream().anyMatch(test -> ConfigurationStatus.NEW.equals(test.getStatus()));
         return ConfigurationSuiteResponse.builder()
                                          .id(entity.getId())
                                          .title(entity.getTitle())
@@ -20,6 +22,7 @@ public final class ConfigurationSuiteResponseMapper {
                                          .variables(entity.getVariables())
                                          .tests(tests)
                                          .lastPlayedAt(entity.getLastPlayedAt())
+                                         .hasNewTest(hasNewTest)
                                          .build();
     }
 

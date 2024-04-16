@@ -33,4 +33,6 @@ public class ConfigurationSuiteResponse {
     private List<ConfigurationTestResponse> tests = new ArrayList<>();
 
     private ZonedDateTime lastPlayedAt;
+    
+    private boolean hasNewTest;
 }
