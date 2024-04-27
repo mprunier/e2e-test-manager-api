@@ -20,4 +20,8 @@ public class MetricRepository implements PanacheRepositoryBase<MetricsEntity, Lo
     public Optional<MetricsEntity> findLastMetrics(long environmentId) {
         return find("environment.id = ?1 ORDER BY createdAt DESC", environmentId).firstResultOptional();
     }
+
+    public Optional<MetricsEntity> findLastMetricsWithAllTests(long environmentId) {
+        return find("environment.id = ?1 AND isAllTestsRun IS TRUE ORDER BY createdAt DESC", environmentId).firstResultOptional();
+    }
 }

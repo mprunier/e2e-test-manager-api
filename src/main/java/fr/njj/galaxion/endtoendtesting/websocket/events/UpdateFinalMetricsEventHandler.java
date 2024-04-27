@@ -25,7 +25,7 @@ public class UpdateFinalMetricsEventHandler {
     public void send(@Observes(during = TransactionPhase.AFTER_SUCCESS) UpdateFinalMetricsEvent event) {
         try {
             var finalMetrics = calculateFinalMetricsUseCase.execute(event.getEnvironmentId());
-            addMetricsUseCase.execute(event.getEnvironmentId(), finalMetrics);
+            addMetricsUseCase.execute(event.getEnvironmentId(), finalMetrics, event.isAllTestsRun());
             var metricsResponse = MetricsResponse
                     .builder()
                     .at(finalMetrics.at())
@@ -35,6 +35,7 @@ public class UpdateFinalMetricsEventHandler {
                     .passes(finalMetrics.passes())
                     .failures(finalMetrics.failures())
                     .skipped(finalMetrics.skipped())
+                    .isAllTestsRun(event.isAllTestsRun())
                     .build();
             event.setMetrics(metricsResponse);
             sendEventToEnvironmentSessions(event);

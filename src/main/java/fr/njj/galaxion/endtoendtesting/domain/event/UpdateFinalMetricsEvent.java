@@ -15,4 +15,6 @@ import lombok.experimental.SuperBuilder;
 public class UpdateFinalMetricsEvent extends AbstractEvent {
 
     private MetricsResponse metrics;
+
+    private boolean isAllTestsRun;
 }

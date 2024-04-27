@@ -9,12 +9,12 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.ZonedDateTime;
-
 @Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor
 public class AddMetricsUseCase {
+
+    public static final long MINUTES = 30L;
 
     private final EnvironmentRetrievalService environmentRetrievalService;
     private final MetricRepository metricRepository;
@@ -22,16 +22,19 @@ public class AddMetricsUseCase {
     @Transactional
     public void execute(
             long environmentId,
-            Metrics metrics) {
-        var now = ZonedDateTime.now();
-        
-        metricRepository.findLastMetrics(environmentId).ifPresentOrElse(lastMetrics -> {
-            if (areMetricsSame(lastMetrics, metrics) && lastMetrics.getCreatedAt().isAfter(now.minusHours(1))) {
-                lastMetrics.setCreatedAt(now);
-            } else {
-                saveMetrics(environmentId, metrics);
-            }
-        }, () -> saveMetrics(environmentId, metrics));
+            Metrics metrics,
+            boolean isAllTestsRun) {
+
+        //        var now = ZonedDateTime.now();
+        //        metricRepository.findLastMetrics(environmentId).ifPresentOrElse(lastMetrics -> {
+        //            if (areMetricsSame(lastMetrics, metrics) && lastMetrics.getCreatedAt().isAfter(now.minusMinutes(MINUTES))) {
+        //                lastMetrics.setCreatedAt(now);
+        //            } else {
+        //                saveMetrics(environmentId, metrics);
+        //            }
+        //        }, () -> saveMetrics(environmentId, metrics));
+
+        saveMetrics(environmentId, metrics, isAllTestsRun);
     }
 
     private boolean areMetricsSame(MetricsEntity lastMetrics, Metrics metrics) {
@@ -40,7 +43,10 @@ public class AddMetricsUseCase {
                lastMetrics.getPassPercent() == metrics.passPercent();
     }
 
-    private void saveMetrics(long environmentId, Metrics metrics) {
+    private void saveMetrics(
+            long environmentId,
+            Metrics metrics,
+            boolean isAllTestsRun) {
         var environment = environmentRetrievalService.getEnvironment(environmentId);
         MetricsEntity
                 .builder()
@@ -51,6 +57,7 @@ public class AddMetricsUseCase {
                 .failures(metrics.failures())
                 .skipped(metrics.skipped())
                 .passPercent(metrics.passPercent())
+                .isAllTestsRun(isAllTestsRun)
                 .build()
                 .persist();
     }

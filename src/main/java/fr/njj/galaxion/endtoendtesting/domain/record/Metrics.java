@@ -6,6 +6,7 @@ import java.time.ZonedDateTime;
 
 @Builder
 public record Metrics(
+        boolean isAllTestsRun,
         ZonedDateTime at,
         int suites,
         int tests,

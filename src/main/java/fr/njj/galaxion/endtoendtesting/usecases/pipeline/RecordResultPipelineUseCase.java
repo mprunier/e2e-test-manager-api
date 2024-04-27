@@ -48,13 +48,15 @@ public class RecordResultPipelineUseCase {
         var pipeline = pipelineRetrievalService.get(pipelineId);
         var environment = pipeline.getEnvironment();
 
-        if (pipeline.getTestIds() != null) {
-            partialUpdate(jobId, status, pipeline, environment);
-        } else {
+        var isAllTestsRun = pipeline.getTestIds() == null;
+
+        if (isAllTestsRun) {
             globalUpdate(pipeline, status, environment, jobId);
+        } else {
+            partialUpdate(jobId, status, pipeline, environment);
         }
         pipeline.setStatus(PipelineStatus.FINISH);
-        updateFinalMetricsEvent.fire(UpdateFinalMetricsEvent.builder().environmentId(environment.getId()).build());
+        updateFinalMetricsEvent.fire(UpdateFinalMetricsEvent.builder().environmentId(environment.getId()).isAllTestsRun(isAllTestsRun).build());
     }
 
     private void globalUpdate(PipelineEntity pipeline, GitlabJobStatus status, EnvironmentEntity environment, String jobId) {

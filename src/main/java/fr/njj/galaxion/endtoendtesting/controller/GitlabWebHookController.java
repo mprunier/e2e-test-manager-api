@@ -25,7 +25,7 @@ public class GitlabWebHookController {
             try {
                 gitlabWebHookService.gitlabCallback(gitlabEvent, request);
             } catch (CustomException e) {
-                log.error("Business Webhook Async Error : {}", e.getDetail());
+                log.trace("Business Webhook Async Error : {}", e.getDetail());// Hook likely coming from another configured branch or similar. So not important.
             } catch (Exception e) {
                 log.error("Webhook Async Error : {}", e.getMessage());
             }

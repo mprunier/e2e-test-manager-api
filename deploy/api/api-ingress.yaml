@@ -13,7 +13,8 @@ metadata:
     # WebSocket Support
     nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
-    nginx.ingress.kubernetes.io/connection-proxy: "upgrade"
+    nginx.ingress.kubernetes.io/websocket-services: "e2e-testing-manager-api"
+    nginx.ingress.kubernetes.io/upstream-vhost: "$service_name:$service_port"
 spec:
   rules:
     - host: e2e-testing-manager-api.itsf.io

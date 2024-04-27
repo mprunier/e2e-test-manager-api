@@ -62,4 +62,7 @@ public class MetricsEntity extends PanacheEntityBase {
     @Builder.Default
     @Column(name = "created_at", nullable = false)
     private ZonedDateTime createdAt = ZonedDateTime.now();
+
+    @Column(name = "is_all_tests_run")
+    private boolean isAllTestsRun;
 }

@@ -36,6 +36,7 @@ public class RetrieveMetricsHistoryUseCase {
                         .passes(entity.getPasses())
                         .failures(entity.getFailures())
                         .skipped(entity.getSkipped())
+                        .isAllTestsRun(entity.isAllTestsRun())
                         .build()));
 
         return metrics;

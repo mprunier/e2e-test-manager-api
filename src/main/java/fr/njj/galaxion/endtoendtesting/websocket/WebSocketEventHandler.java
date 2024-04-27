@@ -70,8 +70,6 @@ public class WebSocketEventHandler {
                     session.getAsyncRemote().sendText(message);
                 }
             }
-        } else {
-            log.trace("No session on environment [{}]", event.getEnvironmentId());
         }
     }
 
