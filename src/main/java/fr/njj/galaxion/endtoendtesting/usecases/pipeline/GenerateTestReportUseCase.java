@@ -1,4 +1,4 @@
-package fr.njj.galaxion.endtoendtesting.service;
+package fr.njj.galaxion.endtoendtesting.usecases.pipeline;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.ConfigurationStatus;
@@ -27,11 +27,12 @@ import static fr.njj.galaxion.endtoendtesting.helper.TestHelper.updateStatus;
 @Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor
-public class ReportSuiteOrTestService {
+public class GenerateTestReportUseCase {
 
     @Transactional
-    public void report(ArtifactDataInternal artifactData,
-                       List<TestEntity> tests) {
+    public void execute(
+            ArtifactDataInternal artifactData,
+            List<TestEntity> tests) {
         var screenshots = artifactData.getScreenshots();
         var videos = artifactData.getVideos();
         var report = artifactData.getReport();
@@ -83,8 +84,9 @@ public class ReportSuiteOrTestService {
         }
     }
 
-    private Optional<MochaReportTestInternal> findTestInSuites(List<MochaReportSuiteInternal> mochaSuites,
-                                                               String fullTitle) {
+    private Optional<MochaReportTestInternal> findTestInSuites(
+            List<MochaReportSuiteInternal> mochaSuites,
+            String fullTitle) {
         for (var mochaSuite : mochaSuites) {
             for (var mochaTest : mochaSuite.getTests()) {
                 if (fullTitle.equals(mochaTest.getFullTitle())) {
@@ -101,9 +103,10 @@ public class ReportSuiteOrTestService {
         return Optional.empty();
     }
 
-    private void updateTest(TestEntity test,
-                            MochaReportTestInternal mochaTest,
-                            Map<String, byte[]> screenshots) {
+    private void updateTest(
+            TestEntity test,
+            MochaReportTestInternal mochaTest,
+            Map<String, byte[]> screenshots) {
         var status = getStatus(mochaTest);
         updateStatus(test, status);
         test.setErrorMessage(mochaTest.getErr() != null ? mochaTest.getErr().getMessage() : null);
@@ -129,7 +132,7 @@ public class ReportSuiteOrTestService {
         createScreenshot(test, screenshots);
     }
 
-    private static ConfigurationStatus getStatus(MochaReportTestInternal mochaTest) {
+    private ConfigurationStatus getStatus(MochaReportTestInternal mochaTest) {
         if (Boolean.TRUE.equals(mochaTest.getPass())) {
             return ConfigurationStatus.SUCCESS;
         }
@@ -139,8 +142,9 @@ public class ReportSuiteOrTestService {
         return ConfigurationStatus.FAILED;
     }
 
-    private static void createScreenshot(TestEntity test,
-                                         Map<String, byte[]> screenshots) {
+    private void createScreenshot(
+            TestEntity test,
+            Map<String, byte[]> screenshots) {
         var testTitleWithSuiteTitles = new ArrayList<String>();
         var testTitle = test.getConfigurationTest().getTitle();
         testTitle = testTitle.replace(":", ""); // TODO add other character
@@ -167,8 +171,9 @@ public class ReportSuiteOrTestService {
         }
     }
 
-    private static void buildSuiteTitles(StringBuilder fullTitle,
-                                         ConfigurationSuiteEntity configurationSuite) {
+    private void buildSuiteTitles(
+            StringBuilder fullTitle,
+            ConfigurationSuiteEntity configurationSuite) {
         if (!configurationSuite.getTitle().equals(NO_SUITE)) {
             fullTitle.insert(0, configurationSuite.getTitle() + " ");
             if (configurationSuite.getParentSuite() != null) {
@@ -177,8 +182,9 @@ public class ReportSuiteOrTestService {
         }
     }
 
-    private static void buildTestTitleWithSuiteTitles(ArrayList<String> suiteTitles,
-                                                      ConfigurationSuiteEntity configurationSuite) {
+    private void buildTestTitleWithSuiteTitles(
+            ArrayList<String> suiteTitles,
+            ConfigurationSuiteEntity configurationSuite) {
         var suiteTitle = configurationSuite.getTitle();
         suiteTitle = suiteTitle.replace(":", ""); // TODO add other character
         suiteTitles.add(suiteTitle);

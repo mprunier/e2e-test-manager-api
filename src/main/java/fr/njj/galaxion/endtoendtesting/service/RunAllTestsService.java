@@ -1,8 +1,10 @@
 package fr.njj.galaxion.endtoendtesting.service;
 
+import fr.njj.galaxion.endtoendtesting.client.gitlab.response.GitlabResponse;
 import fr.njj.galaxion.endtoendtesting.domain.event.AllTestsRunInProgressEvent;
 import fr.njj.galaxion.endtoendtesting.domain.exception.AllTestsAlreadyRunningException;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
+import fr.njj.galaxion.endtoendtesting.model.entity.PipelineEntity;
 import fr.njj.galaxion.endtoendtesting.service.environment.EnvironmentRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.GitlabService;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -46,8 +48,18 @@ public class RunAllTestsService {
                                                   null,
                                                   false);
 
-        pipelineService.create(environment, gitlabResponse.getId(), null);
+        createPipeline(gitlabResponse, environment);
+        
         allTestsRunInProgressEvent.fire(AllTestsRunInProgressEvent.builder().environmentId(environmentId).build());
+    }
+
+    private static void createPipeline(GitlabResponse gitlabResponse, EnvironmentEntity environment) {
+        PipelineEntity
+                .builder()
+                .id(gitlabResponse.getId())
+                .environment(environment)
+                .build()
+                .persist();
     }
 
     private static void assertSchedulerInProgress(EnvironmentEntity environment) {

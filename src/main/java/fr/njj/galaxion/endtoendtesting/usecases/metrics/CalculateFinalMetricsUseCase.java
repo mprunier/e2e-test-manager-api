@@ -44,6 +44,7 @@ public class CalculateFinalMetricsUseCase {
     }
 
     public Metrics calculateMetrics(ConfigurationSuiteEntity suite, Metrics metrics) {
+        int suites = metrics.suites() + 1;
         int tests = metrics.tests();
         int passes = metrics.passes();
         int failures = metrics.failures();
@@ -74,13 +75,14 @@ public class CalculateFinalMetricsUseCase {
                 passes += subMetrics.passes();
                 failures += subMetrics.failures();
                 skipped += subMetrics.skipped();
+                suites += subMetrics.suites();
             }
         }
 
         return Metrics
                 .builder()
                 .at(ZonedDateTime.now())
-                .suites(suite.getSubSuites() != null ? suite.getSubSuites().size() : 0)
+                .suites(suites)
                 .tests(tests)
                 .passes(passes)
                 .failures(failures)

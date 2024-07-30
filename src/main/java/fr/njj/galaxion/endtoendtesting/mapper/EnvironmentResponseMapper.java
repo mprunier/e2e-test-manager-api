@@ -5,8 +5,6 @@ import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 import static fr.njj.galaxion.endtoendtesting.mapper.EnvironmentVariableResponseMapper.buildEnvironmentVariableResponses;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -34,12 +32,6 @@ public final class EnvironmentResponseMapper {
                       .updatedBy(entity.getUpdatedBy());
         }
         return envBuilder.build();
-    }
-
-    public static List<EnvironmentResponse> buildEnvironmentResponses(List<EnvironmentEntity> entities, Boolean withDetails) {
-        return entities.stream()
-                       .map(entity -> buildEnvironmentResponse(entity, withDetails))
-                       .toList();
     }
 
     private static String hideToken(String token) {

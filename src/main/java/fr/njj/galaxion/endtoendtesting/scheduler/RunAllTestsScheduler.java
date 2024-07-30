@@ -1,7 +1,7 @@
 package fr.njj.galaxion.endtoendtesting.scheduler;
 
+import fr.njj.galaxion.endtoendtesting.model.repository.ConfigurationSchedulerRepository;
 import fr.njj.galaxion.endtoendtesting.service.RunAllTestsService;
-import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationSchedulerService;
 import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.control.ActivateRequestContext;
@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class RunAllTestsScheduler {
 
     private final RunAllTestsService runAllTestsService;
-    private final ConfigurationSchedulerService configurationSchedulerService;
+    private final ConfigurationSchedulerRepository configurationSchedulerRepository;
 
     private final AtomicBoolean inProgress = new AtomicBoolean(false);
 
@@ -27,7 +27,7 @@ public class RunAllTestsScheduler {
     public void execute() {
         if (inProgress.compareAndSet(false, true)) {
             try {
-                var configurationSchedulers = configurationSchedulerService.getAllEnabled();
+                var configurationSchedulers = configurationSchedulerRepository.findAllEnabled();
                 var zoneId = ZoneId.systemDefault();
                 var now = ZonedDateTime.now(zoneId);
 

@@ -1,6 +1,5 @@
 package fr.njj.galaxion.endtoendtesting.service.environment;
 
-import fr.njj.galaxion.endtoendtesting.domain.exception.EnvironmentBranchAlreadyExistException;
 import fr.njj.galaxion.endtoendtesting.domain.exception.EnvironmentNotFoundException;
 import fr.njj.galaxion.endtoendtesting.domain.response.EnvironmentResponse;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
@@ -13,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 
 import static fr.njj.galaxion.endtoendtesting.mapper.EnvironmentResponseMapper.buildEnvironmentResponse;
-import static fr.njj.galaxion.endtoendtesting.mapper.EnvironmentResponseMapper.buildEnvironmentResponses;
 
 @Slf4j
 @ApplicationScoped
@@ -27,10 +25,6 @@ public class EnvironmentRetrievalService {
         return buildEnvironmentResponse(getEnvironment(id), true);
     }
 
-    @Transactional
-    public List<EnvironmentResponse> getEnvironmentResponses() {
-        return buildEnvironmentResponses(environmentRepository.findAllEnvironmentsEnabled(), false);
-    }
 
     @Transactional
     public EnvironmentEntity getEnvironment(long id) {
@@ -41,14 +35,6 @@ public class EnvironmentRetrievalService {
     @Transactional
     public List<EnvironmentEntity> getEnvironments() {
         return environmentRepository.findAll().stream().toList();
-    }
-
-    @Transactional
-    public void assertBranchNotExist(String branch, String projectId) {
-        var environment = environmentRepository.findByBranchAndProjectId(branch, projectId);
-        if (environment.isPresent()) {
-            throw new EnvironmentBranchAlreadyExistException(branch);
-        }
     }
 
     @Transactional

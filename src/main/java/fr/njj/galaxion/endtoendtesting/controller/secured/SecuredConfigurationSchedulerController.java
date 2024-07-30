@@ -1,7 +1,7 @@
 package fr.njj.galaxion.endtoendtesting.controller.secured;
 
 import fr.njj.galaxion.endtoendtesting.domain.request.UpdateConfigurationSchedulerRequest;
-import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationSchedulerService;
+import fr.njj.galaxion.endtoendtesting.usecases.flowscheduler.UpdateFlowSchedulerUseCase;
 import io.quarkus.cache.CacheManager;
 import io.quarkus.security.Authenticated;
 import jakarta.validation.constraints.NotNull;
@@ -18,13 +18,13 @@ import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 @RequiredArgsConstructor
 public class SecuredConfigurationSchedulerController {
 
-    private final ConfigurationSchedulerService configurationSchedulerService;
+    private final UpdateFlowSchedulerUseCase updateFlowSchedulerUseCase;
     private final CacheManager cacheManager;
 
     @PUT
     public void update(@NotNull @QueryParam("environmentId") Long environmentId,
                        @RequestBody UpdateConfigurationSchedulerRequest request) {
-        configurationSchedulerService.update(environmentId, request);
+        updateFlowSchedulerUseCase.execute(environmentId, request);
         cacheManager.getCache("schedulers").ifPresent(cache -> cache.invalidateAll().await().indefinitely());
     }
 }

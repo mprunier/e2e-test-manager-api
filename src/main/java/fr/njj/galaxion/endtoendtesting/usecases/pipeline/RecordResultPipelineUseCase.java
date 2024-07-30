@@ -10,7 +10,6 @@ import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.PipelineEntity;
 import fr.njj.galaxion.endtoendtesting.service.PipelineRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.ReportAllTestsService;
-import fr.njj.galaxion.endtoendtesting.service.ReportSuiteOrTestService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.GitlabService;
 import fr.njj.galaxion.endtoendtesting.service.test.TestRetrievalService;
 import fr.njj.galaxion.endtoendtesting.usecases.run.AllTestsRunCompletedUseCase;
@@ -31,7 +30,7 @@ public class RecordResultPipelineUseCase {
     private final PipelineRetrievalService pipelineRetrievalService;
     private final TestRetrievalService testRetrievalService;
     private final GitlabService gitlabService;
-    private final ReportSuiteOrTestService reportSuiteOrTestService;
+    private final GenerateTestReportUseCase generateTestReportUseCase;
     private final ReportAllTestsService reportAllTestsService;
     private final AllTestsRunCompletedUseCase allTestsRunCompletedUseCase;
     private final TestRunCompletedUseCase testRunCompletedUseCase;
@@ -86,7 +85,7 @@ public class RecordResultPipelineUseCase {
         try {
             if (GitlabJobStatus.success.equals(status) || GitlabJobStatus.failed.equals(status)) {
                 var artifactData = gitlabService.getArtifactData(environment.getToken(), environment.getProjectId(), jobId);
-                reportSuiteOrTestService.report(artifactData, tests);
+                generateTestReportUseCase.execute(artifactData, tests);
             } else if (GitlabJobStatus.canceled.equals(status) || GitlabJobStatus.skipped.equals(status)) {
                 updateStatus(tests, ConfigurationStatus.CANCELED);
             }

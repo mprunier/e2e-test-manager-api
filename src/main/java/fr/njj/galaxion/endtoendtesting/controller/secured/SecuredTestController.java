@@ -1,7 +1,7 @@
 package fr.njj.galaxion.endtoendtesting.controller.secured;
 
 import fr.njj.galaxion.endtoendtesting.domain.request.RunTestOrSuiteRequest;
-import fr.njj.galaxion.endtoendtesting.service.RunSuiteOrTestService;
+import fr.njj.galaxion.endtoendtesting.usecases.run.RunTestUseCase;
 import io.quarkus.security.Authenticated;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -15,11 +15,11 @@ import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 @RequiredArgsConstructor
 public class SecuredTestController {
 
-    private final RunSuiteOrTestService runSuiteOrTestService;
+    private final RunTestUseCase runTestUseCase;
 
     @POST
     public void run(@RequestBody RunTestOrSuiteRequest request) {
-        runSuiteOrTestService.run(request);
+        runTestUseCase.execute(request);
     }
 }
 

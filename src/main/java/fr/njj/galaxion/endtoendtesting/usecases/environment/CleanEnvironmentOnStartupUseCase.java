@@ -15,7 +15,6 @@ public class CleanEnvironmentOnStartupUseCase {
 
     @Transactional
     public void execute() {
-
         var environments = environmentRetrievalService.getEnvironments();
         environments.forEach(environment -> {
             environment.setIsLocked(false);

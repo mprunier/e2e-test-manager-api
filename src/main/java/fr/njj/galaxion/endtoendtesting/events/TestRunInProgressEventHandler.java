@@ -1,4 +1,4 @@
-package fr.njj.galaxion.endtoendtesting.websocket.events;
+package fr.njj.galaxion.endtoendtesting.events;
 
 import fr.njj.galaxion.endtoendtesting.domain.event.TestRunInProgressEvent;
 import jakarta.enterprise.context.ApplicationScoped;

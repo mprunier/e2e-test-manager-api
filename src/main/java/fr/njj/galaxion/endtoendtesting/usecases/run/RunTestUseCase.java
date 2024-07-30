@@ -1,13 +1,15 @@
-package fr.njj.galaxion.endtoendtesting.service;
+package fr.njj.galaxion.endtoendtesting.usecases.run;
 
+import fr.njj.galaxion.endtoendtesting.client.gitlab.response.GitlabResponse;
 import fr.njj.galaxion.endtoendtesting.domain.event.TestRunInProgressEvent;
-import fr.njj.galaxion.endtoendtesting.domain.exception.AllTestsAlreadyRunningException;
 import fr.njj.galaxion.endtoendtesting.domain.exception.RunParameterException;
 import fr.njj.galaxion.endtoendtesting.domain.request.RunTestOrSuiteRequest;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
+import fr.njj.galaxion.endtoendtesting.model.entity.PipelineEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.TestEntity;
+import fr.njj.galaxion.endtoendtesting.service.PipelineService;
 import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationTestRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.GitlabService;
 import fr.njj.galaxion.endtoendtesting.usecases.search.SearchSuiteOrTestUseCase;
@@ -30,7 +32,7 @@ import static fr.njj.galaxion.endtoendtesting.helper.EnvironmentHelper.buildVari
 @Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor
-public class RunSuiteOrTestService {
+public class RunTestUseCase {
 
     private final ConfigurationTestRetrievalService configurationTestRetrievalService;
     private final SearchSuiteOrTestUseCase searchSuiteOrTestUseCase;
@@ -40,7 +42,8 @@ public class RunSuiteOrTestService {
     private final Event<TestRunInProgressEvent> testRunInProgressEvent;
 
     @Transactional
-    public void run(RunTestOrSuiteRequest request) {
+    public void execute(
+            RunTestOrSuiteRequest request) {
         pipelineService.assertNotConcurrentJobsReached();
         assertOnlyOneParameterInRequest(request);
 
@@ -66,7 +69,6 @@ public class RunSuiteOrTestService {
             addConfigurationTestsFromSuite(configurationSuite, configurationTests);
             buildSuiteGrep(configurationSuite, grep);
         }
-        //        assertSchedulerInProgress(environment);
 
         var variablesBuilder = new StringBuilder();
         var variablesWithValueMap = new HashMap<String, String>();
@@ -93,18 +95,22 @@ public class RunSuiteOrTestService {
             testIds.add(String.valueOf(test.getId()));
         });
         if (!testIds.isEmpty()) {
-            pipelineService.create(environment, gitlabResponse.getId(), testIds);
+            createPipeline(gitlabResponse, environment, testIds);
         }
         testRunInProgressEvent.fire(TestRunInProgressEvent.builder().environmentId(environment.getId()).testId(request.getConfigurationTestId()).suiteId(request.getConfigurationSuiteId()).build());
     }
 
-    private static void assertSchedulerInProgress(EnvironmentEntity environment) {
-        if (Boolean.TRUE.equals(environment.getIsRunningAllTests())) {
-            throw new AllTestsAlreadyRunningException();
-        }
+    private void createPipeline(GitlabResponse gitlabResponse, EnvironmentEntity environment, ArrayList<String> testIds) {
+        PipelineEntity
+                .builder()
+                .id(gitlabResponse.getId())
+                .environment(environment)
+                .testIds(testIds)
+                .build()
+                .persist();
     }
 
-    private static void assertOnlyOneParameterInRequest(RunTestOrSuiteRequest request) {
+    private void assertOnlyOneParameterInRequest(RunTestOrSuiteRequest request) {
         if ((request.getConfigurationTestId() != null && request.getConfigurationSuiteId() != null) ||
             (request.getConfigurationTestId() == null && request.getConfigurationSuiteId() == null)) {
             throw new RunParameterException();
@@ -121,7 +127,7 @@ public class RunSuiteOrTestService {
         }
     }
 
-    private static void buildSuiteGrep(ConfigurationSuiteEntity configurationSuite, StringBuilder grep) {
+    private void buildSuiteGrep(ConfigurationSuiteEntity configurationSuite, StringBuilder grep) {
         if (!NO_SUITE.equals(configurationSuite.getTitle())) {
             var titles = new ArrayList<String>();
             getTitles(titles, configurationSuite);
@@ -135,7 +141,7 @@ public class RunSuiteOrTestService {
         }
     }
 
-    private static void getTitles(List<String> titles, ConfigurationSuiteEntity configurationSuite) {
+    private void getTitles(List<String> titles, ConfigurationSuiteEntity configurationSuite) {
         titles.add(configurationSuite.getTitle());
         if (configurationSuite.getParentSuite() != null) {
             getTitles(titles, configurationSuite.getParentSuite());

@@ -1,6 +1,6 @@
-package fr.njj.galaxion.endtoendtesting.websocket.events;
+package fr.njj.galaxion.endtoendtesting.events;
 
-import fr.njj.galaxion.endtoendtesting.domain.event.AllTestsRunCompletedEvent;
+import fr.njj.galaxion.endtoendtesting.domain.event.AllTestsRunInProgressEvent;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.event.TransactionPhase;
@@ -12,9 +12,9 @@ import static fr.njj.galaxion.endtoendtesting.websocket.WebSocketEventHandler.se
 @Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor
-public class AllTestsRunCompletedEventHandler {
+public class AllTestsRunInProgressEventHandler {
 
-    public void send(@Observes(during = TransactionPhase.AFTER_SUCCESS) AllTestsRunCompletedEvent event) {
+    public void send(@Observes(during = TransactionPhase.AFTER_SUCCESS) AllTestsRunInProgressEvent event) {
         try {
             sendEventToEnvironmentSessions(event);
         } catch (Exception e) {

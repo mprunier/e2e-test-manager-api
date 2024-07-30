@@ -1,4 +1,4 @@
-package fr.njj.galaxion.endtoendtesting.usecases.cache;
+package fr.njj.galaxion.endtoendtesting.service;
 
 import io.quarkus.cache.CacheManager;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor
-public class CleanCacheAfterSynchronizationUseCase {
+public class CleanCacheAfterSynchronizationService {
 
     private final CacheManager cacheManager;
 

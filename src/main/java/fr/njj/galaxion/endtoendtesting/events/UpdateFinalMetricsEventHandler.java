@@ -1,4 +1,4 @@
-package fr.njj.galaxion.endtoendtesting.websocket.events;
+package fr.njj.galaxion.endtoendtesting.events;
 
 import fr.njj.galaxion.endtoendtesting.domain.event.UpdateFinalMetricsEvent;
 import fr.njj.galaxion.endtoendtesting.domain.response.MetricsResponse;

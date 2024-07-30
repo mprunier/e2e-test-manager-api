@@ -10,16 +10,16 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class EnvironmentHelper {
 
-    public static void buildVariablesEnvironment(List<EnvironmentVariableEntity> environmentVariableEntities, StringBuilder variablesBuilder) {
+    public static void buildVariablesEnvironment(
+            List<EnvironmentVariableEntity> environmentVariableEntities,
+            StringBuilder variablesBuilder) {
         if (StringUtils.isNotBlank(variablesBuilder.toString())) {
             variablesBuilder.append(",");
         }
-        environmentVariableEntities.forEach(variable -> {
-            variablesBuilder.append(variable.getName())
-                            .append("=")
-                            .append(variable.getDefaultValue())
-                            .append(",");
-        });
+        environmentVariableEntities.forEach(variable -> variablesBuilder.append(variable.getName())
+                                                                        .append("=")
+                                                                        .append(variable.getDefaultValue())
+                                                                        .append(","));
         if (!environmentVariableEntities.isEmpty()) {
             variablesBuilder.deleteCharAt(variablesBuilder.length() - 1);
         }

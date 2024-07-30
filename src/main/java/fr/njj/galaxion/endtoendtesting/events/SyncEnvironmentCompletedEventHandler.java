@@ -1,8 +1,8 @@
-package fr.njj.galaxion.endtoendtesting.websocket.events;
+package fr.njj.galaxion.endtoendtesting.events;
 
 import fr.njj.galaxion.endtoendtesting.domain.event.SyncEnvironmentCompletedEvent;
+import fr.njj.galaxion.endtoendtesting.service.CleanCacheAfterSynchronizationService;
 import fr.njj.galaxion.endtoendtesting.service.environment.EnvironmentRetrievalService;
-import fr.njj.galaxion.endtoendtesting.usecases.cache.CleanCacheAfterSynchronizationUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.environment.UnLockEnvironmentSynchronizationUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.error.RetrieveErrorUseCase;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -21,7 +21,7 @@ public class SyncEnvironmentCompletedEventHandler {
 
     private final RetrieveErrorUseCase retrieveErrorUseCase;
     private final EnvironmentRetrievalService environmentRetrievalService;
-    private final CleanCacheAfterSynchronizationUseCase cleanCacheAfterSynchronizationUseCase;
+    private final CleanCacheAfterSynchronizationService cleanCacheAfterSynchronizationService;
     private final UnLockEnvironmentSynchronizationUseCase unLockEnvironmentSynchronizationUseCase;
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)
@@ -35,7 +35,7 @@ public class SyncEnvironmentCompletedEventHandler {
             var environmentResponse = environmentRetrievalService.getEnvironmentResponse(event.getEnvironmentId());
             event.setEnvironment(environmentResponse);
 
-            cleanCacheAfterSynchronizationUseCase.execute(event.getEnvironmentId());
+            cleanCacheAfterSynchronizationService.execute(event.getEnvironmentId());
 
             sendEventToEnvironmentSessions(event);
         } catch (Exception e) {

@@ -2,7 +2,9 @@ package fr.njj.galaxion.endtoendtesting.controller.secured;
 
 import fr.njj.galaxion.endtoendtesting.domain.request.CreateUpdateEnvironmentRequest;
 import fr.njj.galaxion.endtoendtesting.domain.response.EnvironmentResponse;
-import fr.njj.galaxion.endtoendtesting.service.environment.EnvironmentService;
+import fr.njj.galaxion.endtoendtesting.usecases.environment.CreateEnvironmentUseCase;
+import fr.njj.galaxion.endtoendtesting.usecases.environment.ToggleEnvironmentUseCase;
+import fr.njj.galaxion.endtoendtesting.usecases.environment.UpdateEnvironmentUseCase;
 import io.quarkus.cache.CacheKey;
 import io.quarkus.cache.CacheManager;
 import io.quarkus.security.Authenticated;
@@ -24,12 +26,14 @@ import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 @RequiredArgsConstructor
 public class SecuredEnvironmentController {
 
-    private final EnvironmentService environmentService;
+    private final CreateEnvironmentUseCase createEnvironmentUseCase;
+    private final UpdateEnvironmentUseCase updateEnvironmentUseCase;
+    private final ToggleEnvironmentUseCase toggleEnvironmentUseCase;
     private final CacheManager cacheManager;
 
     @POST
     public EnvironmentResponse create(@Valid @RequestBody CreateUpdateEnvironmentRequest request) {
-        var response = environmentService.create(request);
+        var response = createEnvironmentUseCase.execute(request);
         cacheManager.getCache("environments").ifPresent(cache -> cache.invalidateAll().await().indefinitely());
         cacheManager.getCache("schedulers").ifPresent(cache -> cache.invalidateAll().await().indefinitely());
         return response;
@@ -39,14 +43,14 @@ public class SecuredEnvironmentController {
     @Path("{id}")
     public void update(@CacheKey @PathParam("id") Long id,
                        @Valid @RequestBody CreateUpdateEnvironmentRequest request) {
-        environmentService.update(id, request);
+        updateEnvironmentUseCase.execute(id, request);
     }
 
     @PATCH
     @Path("{id}")
     public void updateIsEnabled(@CacheKey @PathParam("id") Long id,
                                 @NotNull @QueryParam("isEnabled") Boolean isEnabled) {
-        environmentService.updateIsEnabled(id, isEnabled);
+        toggleEnvironmentUseCase.updateIsEnabled(id, isEnabled);
     }
 }
 

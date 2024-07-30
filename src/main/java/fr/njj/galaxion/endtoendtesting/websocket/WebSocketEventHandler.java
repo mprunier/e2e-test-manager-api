@@ -25,11 +25,12 @@ public class WebSocketEventHandler {
     @OnOpen
     public void onOpen(Session session, @PathParam("environment_id") Long environmentId) {
         sessionMap.computeIfAbsent(environmentId, k -> new CopyOnWriteArrayList<>()).add(session);
-        log.trace("New session opened: [{}] on Environment ID [{}]", session.getId(), environmentId);
+        log.trace("New session opened: [{}] on Environment ID [{}]. Current session(s) : [{}]", session.getId(), environmentId, getTotalNumberOfSessions());
     }
 
     @OnMessage
     public void onMessage(String message, Session session, @PathParam("environment_id") Long environmentId) {
+        // Do nothing
     }
 
     @OnClose
@@ -41,7 +42,7 @@ public class WebSocketEventHandler {
                 sessionMap.remove(environmentId);
             }
         }
-        log.trace("Session closed: {} on environment ID [{}]", session.getId(), environmentId);
+        log.trace("Session closed: {} on environment ID [{}]. Current session(s) : [{}]", session.getId(), environmentId, getTotalNumberOfSessions());
     }
 
     @OnError
@@ -73,4 +74,9 @@ public class WebSocketEventHandler {
         }
     }
 
+    private static int getTotalNumberOfSessions() {
+        return sessionMap.values().stream()
+                         .mapToInt(CopyOnWriteArrayList::size)
+                         .sum();
+    }
 }
