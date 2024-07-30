@@ -17,11 +17,12 @@ public class RetrieveFlowSchedulerUseCase {
             Long environmentId) {
 
         var configurationScheduler = configurationSchedulerRepository.findBy(environmentId);
-        return ConfigurationSchedulerResponse.builder()
-                                             .isEnabled(configurationScheduler.isEnabled())
-                                             .scheduledTime(configurationScheduler.getScheduledTime())
-                                             .daysOfWeek(configurationScheduler.getDaysOfWeek())
-                                             .build();
+        return ConfigurationSchedulerResponse
+                .builder()
+                .isEnabled(configurationScheduler.isEnabled())
+                .scheduledTime(configurationScheduler.getScheduledTime())
+                .daysOfWeek(configurationScheduler.getDaysOfWeek())
+                .build();
     }
 }
 

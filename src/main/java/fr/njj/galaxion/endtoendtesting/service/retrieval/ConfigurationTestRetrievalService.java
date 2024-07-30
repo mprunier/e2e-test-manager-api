@@ -1,4 +1,4 @@
-package fr.njj.galaxion.endtoendtesting.service.configuration;
+package fr.njj.galaxion.endtoendtesting.service.retrieval;
 
 import fr.njj.galaxion.endtoendtesting.domain.exception.ConfigurationTestNotFoundException;
 import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationTestResponse;

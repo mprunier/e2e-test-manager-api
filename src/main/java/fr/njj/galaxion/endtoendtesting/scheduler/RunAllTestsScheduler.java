@@ -1,7 +1,7 @@
 package fr.njj.galaxion.endtoendtesting.scheduler;
 
 import fr.njj.galaxion.endtoendtesting.model.repository.ConfigurationSchedulerRepository;
-import fr.njj.galaxion.endtoendtesting.service.RunAllTestsService;
+import fr.njj.galaxion.endtoendtesting.usecases.run.RunAllTestsUseCase;
 import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.control.ActivateRequestContext;
@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @RequiredArgsConstructor
 public class RunAllTestsScheduler {
 
-    private final RunAllTestsService runAllTestsService;
+    private final RunAllTestsUseCase runAllTestsUseCase;
     private final ConfigurationSchedulerRepository configurationSchedulerRepository;
 
     private final AtomicBoolean inProgress = new AtomicBoolean(false);
@@ -36,7 +36,7 @@ public class RunAllTestsScheduler {
                     if (configurationScheduler.getDaysOfWeek().contains(now.getDayOfWeek()) &&
                         scheduledTime.getHour() == now.getHour() &&
                         scheduledTime.getMinute() == now.getMinute()) {
-                        runAllTestsService.run(configurationScheduler.getEnvironment().getId(), "System");
+                        runAllTestsUseCase.execute(configurationScheduler.getEnvironment().getId(), "System");
                     }
                 }
             } finally {

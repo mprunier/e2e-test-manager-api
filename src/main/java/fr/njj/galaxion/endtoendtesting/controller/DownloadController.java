@@ -1,7 +1,7 @@
 package fr.njj.galaxion.endtoendtesting.controller;
 
-import fr.njj.galaxion.endtoendtesting.service.test.TestRetrievalService;
-import fr.njj.galaxion.endtoendtesting.service.test.TestScreenshotRetrievalService;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.TestRetrievalService;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.TestScreenshotRetrievalService;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -28,7 +28,7 @@ public class DownloadController {
     @Path("/screenshots/{id}")
     @Produces("image/png")
     public byte[] getCypressScreenshot(@PathParam("id") Long id) {
-        return testScreenshotRetrievalService.getCypressScreenshot(id);
+        return testScreenshotRetrievalService.getScreenshot(id);
     }
 }
 

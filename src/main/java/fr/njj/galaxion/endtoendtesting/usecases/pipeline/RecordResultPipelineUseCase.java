@@ -1,25 +1,41 @@
 package fr.njj.galaxion.endtoendtesting.usecases.pipeline;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.ConfigurationStatus;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.GitlabJobStatus;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineStatus;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.ReportAllTestRanStatus;
 import fr.njj.galaxion.endtoendtesting.domain.event.UpdateFinalMetricsEvent;
+import fr.njj.galaxion.endtoendtesting.domain.internal.ArtifactDataInternal;
+import fr.njj.galaxion.endtoendtesting.domain.internal.MochaReportResultInternal;
+import fr.njj.galaxion.endtoendtesting.domain.internal.MochaReportSuiteInternal;
+import fr.njj.galaxion.endtoendtesting.domain.internal.MochaReportTestInternal;
 import fr.njj.galaxion.endtoendtesting.lib.logging.Monitored;
+import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
+import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.PipelineEntity;
-import fr.njj.galaxion.endtoendtesting.service.PipelineRetrievalService;
-import fr.njj.galaxion.endtoendtesting.service.ReportAllTestsService;
-import fr.njj.galaxion.endtoendtesting.service.gitlab.GitlabService;
-import fr.njj.galaxion.endtoendtesting.service.test.TestRetrievalService;
+import fr.njj.galaxion.endtoendtesting.model.entity.TestEntity;
+import fr.njj.galaxion.endtoendtesting.model.entity.TestScreenshotEntity;
+import fr.njj.galaxion.endtoendtesting.service.gitlab.RetrieveGitlabJobArtifactsService;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationTestRetrievalService;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.PipelineRetrievalService;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.TestRetrievalService;
 import fr.njj.galaxion.endtoendtesting.usecases.run.AllTestsRunCompletedUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.run.TestRunCompletedUseCase;
+import fr.njj.galaxion.endtoendtesting.usecases.search.SearchSuiteOrTestUseCase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+import java.util.Map;
+
+import static fr.njj.galaxion.endtoendtesting.domain.constant.CommonConstant.NO_SUITE;
+import static fr.njj.galaxion.endtoendtesting.domain.constant.CommonConstant.SCREENSHOT_PATH;
+import static fr.njj.galaxion.endtoendtesting.domain.constant.CommonConstant.START_PATH;
 import static fr.njj.galaxion.endtoendtesting.helper.TestHelper.updateStatus;
 
 @Slf4j
@@ -29,11 +45,12 @@ public class RecordResultPipelineUseCase {
 
     private final PipelineRetrievalService pipelineRetrievalService;
     private final TestRetrievalService testRetrievalService;
-    private final GitlabService gitlabService;
+    private final RetrieveGitlabJobArtifactsService retrieveGitlabJobArtifactsService;
     private final GenerateTestReportUseCase generateTestReportUseCase;
-    private final ReportAllTestsService reportAllTestsService;
     private final AllTestsRunCompletedUseCase allTestsRunCompletedUseCase;
     private final TestRunCompletedUseCase testRunCompletedUseCase;
+    private final SearchSuiteOrTestUseCase searchSuiteOrTestUseCase;
+    private final ConfigurationTestRetrievalService configurationTestRetrievalService;
 
     private final Event<UpdateFinalMetricsEvent> updateFinalMetricsEvent;
 
@@ -62,9 +79,9 @@ public class RecordResultPipelineUseCase {
         var environmentId = pipeline.getEnvironment().getId();
         try {
             if (GitlabJobStatus.success.equals(status) || GitlabJobStatus.failed.equals(status)) {
-                var artifactData = gitlabService.getArtifactData(environment.getToken(), environment.getProjectId(), jobId);
+                var artifactData = retrieveGitlabJobArtifactsService.getArtifactData(environment.getToken(), environment.getProjectId(), jobId);
                 if (artifactData.getReport() != null && artifactData.getReport().getResults() != null && !artifactData.getReport().getResults().isEmpty()) {
-                    reportAllTestsService.report(artifactData, environmentId);
+                    report(artifactData, environmentId);
                     allTestsRunCompletedUseCase.execute(environmentId, null);
                 } else {
                     allTestsRunCompletedUseCase.execute(environmentId, ReportAllTestRanStatus.NO_REPORT_ERROR);
@@ -84,7 +101,7 @@ public class RecordResultPipelineUseCase {
 
         try {
             if (GitlabJobStatus.success.equals(status) || GitlabJobStatus.failed.equals(status)) {
-                var artifactData = gitlabService.getArtifactData(environment.getToken(), environment.getProjectId(), jobId);
+                var artifactData = retrieveGitlabJobArtifactsService.getArtifactData(environment.getToken(), environment.getProjectId(), jobId);
                 generateTestReportUseCase.execute(artifactData, tests);
             } else if (GitlabJobStatus.canceled.equals(status) || GitlabJobStatus.skipped.equals(status)) {
                 updateStatus(tests, ConfigurationStatus.CANCELED);
@@ -95,6 +112,170 @@ public class RecordResultPipelineUseCase {
         } finally {
             testRunCompletedUseCase.execute(environment.getId());
         }
+    }
+
+    public void report(ArtifactDataInternal artifactData,
+                       long environmentId) {
+        var screenshots = artifactData.getScreenshots();
+        var report = artifactData.getReport();
+        var results = report.getResults();
+        createSuitesAndTests(environmentId, results, screenshots);
+    }
+
+    private void createSuitesAndTests(long environmentId,
+                                      List<MochaReportResultInternal> results,
+                                      Map<String, byte[]> screenshots) {
+        results.forEach(result -> {
+            var file = result.getFile().replaceAll(START_PATH, "");
+            processTestsWithoutSuite(environmentId, file, result.getTests(), screenshots);
+            processSuites(environmentId, file, result.getSuites(), null, screenshots);
+        });
+    }
+
+    private void processTestsWithoutSuite(long environmentId,
+                                          String file,
+                                          List<MochaReportTestInternal> tests,
+                                          Map<String, byte[]> screenshots) {
+        if (tests != null) {
+            tests.forEach(mochaTest -> {
+                var configurationSuiteOptional = searchSuiteOrTestUseCase.getBy(environmentId, file, NO_SUITE, null);
+                if (configurationSuiteOptional.isPresent()) {
+                    var configurationTestOptional = configurationTestRetrievalService.getBy(environmentId, file, mochaTest.getTitle(), configurationSuiteOptional.get());
+                    configurationTestOptional.ifPresent(configurationTestEntity -> saveTest(mochaTest, configurationTestEntity, screenshots));
+                }
+            });
+        }
+    }
+
+    private void processTests(long environmentId,
+                              String file,
+                              List<MochaReportTestInternal> tests,
+                              ConfigurationSuiteEntity suite,
+                              Map<String, byte[]> screenshots) {
+        if (tests != null) {
+            tests.forEach(mochaTest -> {
+                var configurationTestOptional = configurationTestRetrievalService.getBy(environmentId, file, mochaTest.getTitle(), suite);
+                configurationTestOptional.ifPresent(configurationTestEntity -> saveTest(mochaTest, configurationTestEntity, screenshots));
+            });
+        }
+    }
+
+    private void processSuites(long environmentId,
+                               String file,
+                               List<MochaReportSuiteInternal> suites,
+                               ConfigurationSuiteEntity parentSuite,
+                               Map<String, byte[]> screenshots) {
+        if (suites != null) {
+            suites.forEach(mochaSuite -> {
+                var configurationSuiteOptional = searchSuiteOrTestUseCase.getBy(environmentId, file, mochaSuite.getTitle(), parentSuite != null ? parentSuite.getId() : null);
+                if (configurationSuiteOptional.isPresent()) {
+                    processTests(environmentId, file, mochaSuite.getTests(), configurationSuiteOptional.get(), screenshots);
+                    processSuites(environmentId, file, mochaSuite.getSuites(), configurationSuiteOptional.get(), screenshots);
+                }
+            });
+        }
+    }
+
+    private void saveTest(MochaReportTestInternal mochaTest,
+                          ConfigurationTestEntity configurationTest,
+                          Map<String, byte[]> screenshots) {
+
+        var status = getConfigurationStatus(mochaTest);
+        var test = TestEntity
+                .builder()
+                .configurationTest(configurationTest)
+                .status(status)
+                .errorMessage(mochaTest.getErr() != null ? mochaTest.getErr().getMessage() : null)
+                .errorStacktrace(mochaTest.getErr() != null ? mochaTest.getErr().getEstack() : null)
+                .code(mochaTest.getCode())
+                .duration(mochaTest.getDuration())
+                .createdBy("Scheduler")
+                .build();
+        try {
+            var contextList = mochaTest.getContextParse();
+            if (contextList != null) {
+                contextList.stream()
+                           .filter(item -> "reference".equals(item.getTitle()))
+                           .findFirst()
+                           .ifPresent(mochaReportContextInternal -> test.setReference(mochaReportContextInternal.getValue()));
+                contextList.stream()
+                           .filter(item -> "urlError".equals(item.getTitle()))
+                           .findFirst()
+                           .ifPresent(mochaReportContextInternal -> test.setErrorUrl(mochaReportContextInternal.getValue()));
+            }
+        } catch (JsonProcessingException e) {
+            test.setReference("No Reference");
+        }
+        test.persist();
+
+        createTestScreenshot(mochaTest, screenshots, test);
+    }
+
+    private static ConfigurationStatus getConfigurationStatus(MochaReportTestInternal mochaTest) {
+        if (Boolean.TRUE.equals(mochaTest.getPass())) {
+            return ConfigurationStatus.SUCCESS;
+        } else if (Boolean.TRUE.equals(mochaTest.getPending()) || Boolean.TRUE.equals(mochaTest.getSkipped())) {
+            return ConfigurationStatus.SKIPPED;
+        }
+        return ConfigurationStatus.FAILED;
+    }
+
+    private void createTestScreenshot(MochaReportTestInternal mochaTest,
+                                      Map<String, byte[]> screenshots,
+                                      TestEntity test) {
+        try {
+            var contextList = mochaTest.getContextParse();
+            if (contextList != null) {
+                var screenshotError = contextList.stream()
+                                                 .filter(item -> "screenshotError".equals(item.getTitle()))
+                                                 .findFirst();
+                screenshotError.ifPresent(mochaReportContextInternal -> handleScreenshot(mochaReportContextInternal.getValue(), screenshots, test));
+            }
+        } catch (JsonProcessingException e) {
+            log.info("Screenshot not found on test id [{}]", test.getId());
+        }
+    }
+
+    private void handleScreenshot(String screenshotFilename, Map<String, byte[]> screenshots, TestEntity test) {
+        screenshotFilename = screenshotFilename.replace(":", ""); // TODO add other character
+        byte[] screenshot = screenshots.get(screenshotFilename);
+
+        if (screenshot != null) {
+            TestScreenshotEntity.builder()
+                                .test(test)
+                                .filename(screenshotFilename.replace(SCREENSHOT_PATH, ""))
+                                .screenshot(screenshot)
+                                .build()
+                                .persist();
+        } else {
+            var modifiedScreenshotFilename = removeTextBetweenSlashes(screenshotFilename);
+            if (!modifiedScreenshotFilename.equals(screenshotFilename)) {
+                handleScreenshot(modifiedScreenshotFilename, screenshots, test);
+            }
+        }
+    }
+
+    private static String removeTextBetweenSlashes(String input) {
+        int firstSlash = indexOfNthSlash(input, 2);
+        int secondSlash = indexOfNthSlash(input, 3);
+
+        if (firstSlash == -1 || secondSlash == -1) {
+            return input;
+        }
+
+        String before = input.substring(0, firstSlash);
+        String after = input.substring(secondSlash);
+
+        return before + after;
+    }
+
+    private static int indexOfNthSlash(String input, int n) {
+        int index = -1;
+        while (n > 0 && index < input.length() - 1) {
+            index = input.indexOf("/", index + 1);
+            n--;
+        }
+        return index;
     }
 }
 

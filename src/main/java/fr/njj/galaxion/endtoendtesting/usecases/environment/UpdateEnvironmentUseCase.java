@@ -5,7 +5,7 @@ import fr.njj.galaxion.endtoendtesting.domain.request.CreateUpdateEnvironmentReq
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentVariableEntity;
 import fr.njj.galaxion.endtoendtesting.model.repository.EnvironmentVariableRepository;
-import fr.njj.galaxion.endtoendtesting.service.environment.EnvironmentRetrievalService;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.EnvironmentRetrievalService;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;

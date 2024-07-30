@@ -1,12 +1,12 @@
 package fr.njj.galaxion.endtoendtesting.scheduler;
 
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.GitlabJobStatus;
-import fr.njj.galaxion.endtoendtesting.service.CancelAllTestsService;
-import fr.njj.galaxion.endtoendtesting.service.CancelSuiteOrTestService;
-import fr.njj.galaxion.endtoendtesting.service.PipelineRetrievalService;
-import fr.njj.galaxion.endtoendtesting.service.PipelineService;
-import fr.njj.galaxion.endtoendtesting.service.gitlab.GitlabService;
+import fr.njj.galaxion.endtoendtesting.service.gitlab.RetrieveGitlabJobService;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.PipelineRetrievalService;
+import fr.njj.galaxion.endtoendtesting.usecases.pipeline.CancelPipelineUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.pipeline.RecordResultPipelineUseCase;
+import fr.njj.galaxion.endtoendtesting.usecases.run.CancelAllTestsUseCase;
+import fr.njj.galaxion.endtoendtesting.usecases.run.CancelTestUseCase;
 import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.control.ActivateRequestContext;
@@ -22,12 +22,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @RequiredArgsConstructor
 public class VerifyPipelineScheduler {
 
-    private final CancelSuiteOrTestService cancelSuiteOrTestService;
-    private final CancelAllTestsService cancelAllTestsService;
+    private final CancelTestUseCase cancelTestUseCase;
+    private final CancelAllTestsUseCase cancelAllTestsUseCase;
     private final PipelineRetrievalService pipelineRetrievalService;
-    private final PipelineService pipelineService;
+    private final CancelPipelineUseCase cancelPipelineUseCase;
     private final RecordResultPipelineUseCase recordResultPipelineUseCase;
-    private final GitlabService gitlabService;
+    private final RetrieveGitlabJobService retrieveGitlabJobService;
 
     @Getter
     @ConfigProperty(name = "gitlab.old-pipeline-to-verify-in-minutes")
@@ -47,7 +47,7 @@ public class VerifyPipelineScheduler {
                 var pipelines = pipelineRetrievalService.getOldInProgress(oldPipelineToVerifyInMinutes);
                 for (var pipeline : pipelines) {
                     var environment = pipeline.getEnvironment();
-                    var gitlabJobResponse = gitlabService.getJob(environment.getToken(), environment.getProjectId(), pipeline.getId());
+                    var gitlabJobResponse = retrieveGitlabJobService.getJob(environment.getToken(), environment.getProjectId(), pipeline.getId());
                     var status = GitlabJobStatus.fromHeaderValue(gitlabJobResponse.getStatus());
                     if (!GitlabJobStatus.created.equals(status) && !GitlabJobStatus.pending.equals(status) && !GitlabJobStatus.running.equals(status)) {
                         recordResultPipelineUseCase.execute(pipeline.getId(), gitlabJobResponse.getId(), status);
@@ -58,11 +58,11 @@ public class VerifyPipelineScheduler {
                 var oldJPipelines = pipelineRetrievalService.getOldInProgress(oldPipelineToCancelInMinutes);
                 for (var pipeline : oldJPipelines) {
                     if (pipeline.getTestIds() != null) {
-                        cancelSuiteOrTestService.cancel(pipeline.getId(), pipeline.getTestIds());
+                        cancelTestUseCase.execute(pipeline.getId(), pipeline.getTestIds());
                     } else {
-                        cancelAllTestsService.cancel(pipeline.getEnvironment().getId(), pipeline.getId());
+                        cancelAllTestsUseCase.execute(pipeline.getEnvironment().getId(), pipeline.getId());
                     }
-                    pipelineService.cancel(pipeline.getId());
+                    cancelPipelineUseCase.execute(pipeline.getId());
                     log.info("Pipeline id [{}] canceled.", pipeline.getId());
                 }
             } catch (Exception e) {

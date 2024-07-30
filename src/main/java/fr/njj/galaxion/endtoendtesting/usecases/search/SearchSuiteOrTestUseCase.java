@@ -7,8 +7,8 @@ import fr.njj.galaxion.endtoendtesting.domain.response.SearchConfigurationSuiteR
 import fr.njj.galaxion.endtoendtesting.mapper.ConfigurationSuiteResponseMapper;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
 import fr.njj.galaxion.endtoendtesting.model.repository.ConfigurationSuiteRepository;
-import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationTestIdentifierRetrievalService;
-import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationTestRetrievalService;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationTestIdentifierRetrievalService;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationTestRetrievalService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +39,7 @@ public class SearchSuiteOrTestUseCase {
         var conditions = new ArrayList<String>();
 
         if (StringUtils.isNotBlank(request.getConfigurationTestIdentifier())) {
-            var configurationTestIds = configurationTestIdentifierRetrievalService.getSuiteId(environmentId, request.getConfigurationTestIdentifier());
+            var configurationTestIds = configurationTestIdentifierRetrievalService.getSuiteIds(environmentId, request.getConfigurationTestIdentifier());
             request.setConfigurationSuiteIds(configurationTestIds);
         }
 

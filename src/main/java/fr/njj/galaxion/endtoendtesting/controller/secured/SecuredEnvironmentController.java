@@ -50,7 +50,7 @@ public class SecuredEnvironmentController {
     @Path("{id}")
     public void updateIsEnabled(@CacheKey @PathParam("id") Long id,
                                 @NotNull @QueryParam("isEnabled") Boolean isEnabled) {
-        toggleEnvironmentUseCase.updateIsEnabled(id, isEnabled);
+        toggleEnvironmentUseCase.execute(id, isEnabled);
     }
 }
 

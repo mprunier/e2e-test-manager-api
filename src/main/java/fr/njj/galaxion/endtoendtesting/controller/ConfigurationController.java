@@ -4,8 +4,8 @@ import fr.njj.galaxion.endtoendtesting.domain.request.SearchConfigurationRequest
 import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationSuiteResponse;
 import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationTestResponse;
 import fr.njj.galaxion.endtoendtesting.domain.response.SearchConfigurationSuiteResponse;
-import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationTestIdentifierRetrievalService;
-import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationTestRetrievalService;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationTestIdentifierRetrievalService;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationTestRetrievalService;
 import fr.njj.galaxion.endtoendtesting.usecases.search.SearchSuiteOrTestUseCase;
 import io.quarkus.cache.CacheResult;
 import jakarta.validation.Valid;

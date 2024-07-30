@@ -3,7 +3,7 @@ package fr.njj.galaxion.endtoendtesting.usecases.run;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.ReportAllTestRanStatus;
 import fr.njj.galaxion.endtoendtesting.domain.event.AllTestsRunCompletedEvent;
 import fr.njj.galaxion.endtoendtesting.lib.logging.Monitored;
-import fr.njj.galaxion.endtoendtesting.service.environment.EnvironmentRetrievalService;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.EnvironmentRetrievalService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.transaction.Transactional;

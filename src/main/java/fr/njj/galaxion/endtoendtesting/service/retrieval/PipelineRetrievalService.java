@@ -1,4 +1,4 @@
-package fr.njj.galaxion.endtoendtesting.service;
+package fr.njj.galaxion.endtoendtesting.service.retrieval;
 
 import fr.njj.galaxion.endtoendtesting.domain.exception.JobNotFoundException;
 import fr.njj.galaxion.endtoendtesting.model.entity.PipelineEntity;

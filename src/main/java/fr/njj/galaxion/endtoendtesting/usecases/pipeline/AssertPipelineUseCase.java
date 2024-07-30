@@ -1,9 +1,8 @@
-package fr.njj.galaxion.endtoendtesting.service;
+package fr.njj.galaxion.endtoendtesting.usecases.pipeline;
 
-import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineStatus;
 import fr.njj.galaxion.endtoendtesting.domain.exception.ConcurrentJobsReachedException;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.PipelineRetrievalService;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +11,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor
-public class PipelineService {
+public class AssertPipelineUseCase {
 
     @Getter
     @ConfigProperty(name = "gitlab.job.max-in-parallel")
@@ -20,12 +19,7 @@ public class PipelineService {
 
     private final PipelineRetrievalService pipelineRetrievalService;
 
-    @Transactional
-    public void cancel(String id) {
-        pipelineRetrievalService.get(id).setStatus(PipelineStatus.CANCELED);
-    }
-
-    public void assertNotConcurrentJobsReached() {
+    public void execute() {
         var testNumber = pipelineRetrievalService.countInProgress();
         if (testNumber >= maxJobInParallel) {
             throw new ConcurrentJobsReachedException();

@@ -1,6 +1,7 @@
 package fr.njj.galaxion.endtoendtesting.controller.secured;
 
-import fr.njj.galaxion.endtoendtesting.service.RunAllTestsService;
+import fr.njj.galaxion.endtoendtesting.usecases.pipeline.AssertPipelineUseCase;
+import fr.njj.galaxion.endtoendtesting.usecases.run.RunAllTestsUseCase;
 import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.validation.constraints.NotNull;
@@ -16,13 +17,15 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class SecuredSchedulerController {
 
-    private final RunAllTestsService runAllTestsService;
+    private final AssertPipelineUseCase assertPipelineUseCase;
+    private final RunAllTestsUseCase runAllTestsUseCase;
     private final SecurityIdentity identity;
 
     @POST
     public void run(@NotNull @QueryParam("environmentId") Long environmentId) {
         var createdBy = identity != null && identity.getPrincipal() != null ? identity.getPrincipal().getName() : "Unknown";
-        runAllTestsService.runFromUser(environmentId, createdBy);
+        assertPipelineUseCase.execute();
+        runAllTestsUseCase.execute(environmentId, createdBy);
     }
 }
 

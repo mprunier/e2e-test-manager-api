@@ -1,12 +1,12 @@
-package fr.njj.galaxion.endtoendtesting.service;
+package fr.njj.galaxion.endtoendtesting.usecases.run;
 
 import fr.njj.galaxion.endtoendtesting.client.gitlab.response.GitlabResponse;
 import fr.njj.galaxion.endtoendtesting.domain.event.AllTestsRunInProgressEvent;
 import fr.njj.galaxion.endtoendtesting.domain.exception.AllTestsAlreadyRunningException;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.PipelineEntity;
-import fr.njj.galaxion.endtoendtesting.service.environment.EnvironmentRetrievalService;
-import fr.njj.galaxion.endtoendtesting.service.gitlab.GitlabService;
+import fr.njj.galaxion.endtoendtesting.service.gitlab.RunGitlabJobService;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.EnvironmentRetrievalService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.transaction.Transactional;
@@ -18,21 +18,16 @@ import static fr.njj.galaxion.endtoendtesting.helper.EnvironmentHelper.buildVari
 @Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor
-public class RunAllTestsService {
+public class RunAllTestsUseCase {
 
     private final EnvironmentRetrievalService environmentRetrievalService;
-    private final GitlabService gitlabService;
-    private final PipelineService pipelineService;
+    private final RunGitlabJobService runGitlabJobService;
     private final Event<AllTestsRunInProgressEvent> allTestsRunInProgressEvent;
 
     @Transactional
-    public void runFromUser(Long environmentId, String createdBy) {
-        pipelineService.assertNotConcurrentJobsReached();
-        run(environmentId, createdBy);
-    }
-
-    @Transactional
-    public void run(Long environmentId, String createdBy) {
+    public void execute(
+            Long environmentId,
+            String createdBy) {
         log.info("[{}] ran all tests on Environment id [{}].", createdBy, environmentId);
         var environment = environmentRetrievalService.getEnvironment(environmentId);
         assertSchedulerInProgress(environment);
@@ -40,16 +35,16 @@ public class RunAllTestsService {
 
         var variablesBuilder = new StringBuilder();
         buildVariablesEnvironment(environment.getVariables(), variablesBuilder);
-        var gitlabResponse = gitlabService.runJob(environment.getBranch(),
-                                                  environment.getToken(),
-                                                  environment.getProjectId(),
-                                                  null,
-                                                  variablesBuilder.toString(),
-                                                  null,
-                                                  false);
+        var gitlabResponse = runGitlabJobService.runJob(environment.getBranch(),
+                                                        environment.getToken(),
+                                                        environment.getProjectId(),
+                                                        null,
+                                                        variablesBuilder.toString(),
+                                                        null,
+                                                        false);
 
         createPipeline(gitlabResponse, environment);
-        
+
         allTestsRunInProgressEvent.fire(AllTestsRunInProgressEvent.builder().environmentId(environmentId).build());
     }
 

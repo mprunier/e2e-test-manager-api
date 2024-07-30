@@ -1,4 +1,4 @@
-package fr.njj.galaxion.endtoendtesting.service.test;
+package fr.njj.galaxion.endtoendtesting.service.retrieval;
 
 import fr.njj.galaxion.endtoendtesting.domain.exception.TestNotFoundException;
 import fr.njj.galaxion.endtoendtesting.domain.exception.TestVideoNotFoundException;
@@ -60,11 +60,6 @@ public class TestRetrievalService {
     public List<TestResponse> getErrorResponses(String pipelineId) {
         var tests = testRepository.findAllErrorByPipelineId(pipelineId);
         return buildTestResponses(tests);
-    }
-
-    @Transactional
-    public long countInProgressTestEntityByEnvironmentId(long environmentId) {
-        return testRepository.countInProgressTestEntityByEnvironmentId(environmentId);
     }
 
     @Transactional

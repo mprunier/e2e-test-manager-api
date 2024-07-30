@@ -1,4 +1,4 @@
-package fr.njj.galaxion.endtoendtesting.service.environment;
+package fr.njj.galaxion.endtoendtesting.service.retrieval;
 
 import fr.njj.galaxion.endtoendtesting.domain.exception.EnvironmentNotFoundException;
 import fr.njj.galaxion.endtoendtesting.domain.response.EnvironmentResponse;
@@ -24,7 +24,6 @@ public class EnvironmentRetrievalService {
     public EnvironmentResponse getEnvironmentResponse(long id) {
         return buildEnvironmentResponse(getEnvironment(id), true);
     }
-
 
     @Transactional
     public EnvironmentEntity getEnvironment(long id) {

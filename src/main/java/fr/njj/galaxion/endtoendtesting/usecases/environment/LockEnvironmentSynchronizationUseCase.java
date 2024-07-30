@@ -1,7 +1,7 @@
 package fr.njj.galaxion.endtoendtesting.usecases.environment;
 
 import fr.njj.galaxion.endtoendtesting.domain.exception.EnvironmentAlreadyInSyncProgressException;
-import fr.njj.galaxion.endtoendtesting.service.environment.EnvironmentRetrievalService;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.EnvironmentRetrievalService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

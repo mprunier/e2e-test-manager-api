@@ -2,7 +2,7 @@ package fr.njj.galaxion.endtoendtesting.controller;
 
 import fr.njj.galaxion.endtoendtesting.domain.response.ScreenshotResponse;
 import fr.njj.galaxion.endtoendtesting.domain.response.TestResponse;
-import fr.njj.galaxion.endtoendtesting.service.test.TestRetrievalService;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.TestRetrievalService;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;

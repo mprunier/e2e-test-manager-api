@@ -9,9 +9,9 @@ import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.PipelineEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.TestEntity;
-import fr.njj.galaxion.endtoendtesting.service.PipelineService;
-import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationTestRetrievalService;
-import fr.njj.galaxion.endtoendtesting.service.gitlab.GitlabService;
+import fr.njj.galaxion.endtoendtesting.service.gitlab.RunGitlabJobService;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationTestRetrievalService;
+import fr.njj.galaxion.endtoendtesting.usecases.pipeline.AssertPipelineUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.search.SearchSuiteOrTestUseCase;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -36,15 +36,15 @@ public class RunTestUseCase {
 
     private final ConfigurationTestRetrievalService configurationTestRetrievalService;
     private final SearchSuiteOrTestUseCase searchSuiteOrTestUseCase;
-    private final GitlabService gitlabService;
+    private final RunGitlabJobService runGitlabJobService;
     private final SecurityIdentity identity;
-    private final PipelineService pipelineService;
+    private final AssertPipelineUseCase assertPipelineUseCase;
     private final Event<TestRunInProgressEvent> testRunInProgressEvent;
 
     @Transactional
     public void execute(
             RunTestOrSuiteRequest request) {
-        pipelineService.assertNotConcurrentJobsReached();
+        assertPipelineUseCase.execute();
         assertOnlyOneParameterInRequest(request);
 
         String file;
@@ -75,13 +75,13 @@ public class RunTestUseCase {
         buildVariables(request, variablesBuilder, variablesWithValueMap);
         buildVariablesEnvironment(environment.getVariables(), variablesBuilder);
         var isVideo = configurationTests.size() == 1;
-        var gitlabResponse = gitlabService.runJob(environment.getBranch(),
-                                                  environment.getToken(),
-                                                  environment.getProjectId(),
-                                                  file,
-                                                  variablesBuilder.toString(),
-                                                  grep.toString(),
-                                                  isVideo);
+        var gitlabResponse = runGitlabJobService.runJob(environment.getBranch(),
+                                                        environment.getToken(),
+                                                        environment.getProjectId(),
+                                                        file,
+                                                        variablesBuilder.toString(),
+                                                        grep.toString(),
+                                                        isVideo);
 
         var testIds = new ArrayList<String>();
         configurationTests.forEach(configurationTest -> {

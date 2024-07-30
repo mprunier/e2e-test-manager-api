@@ -5,10 +5,11 @@ import fr.njj.galaxion.endtoendtesting.domain.exception.ConfigurationSynchroniza
 import fr.njj.galaxion.endtoendtesting.lib.logging.Monitored;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
-import fr.njj.galaxion.endtoendtesting.service.configuration.ConfigurationService;
-import fr.njj.galaxion.endtoendtesting.service.configuration.EnvironmentSynchronizationService;
-import fr.njj.galaxion.endtoendtesting.service.environment.EnvironmentRetrievalService;
-import fr.njj.galaxion.endtoendtesting.service.gitlab.GitlabService;
+import fr.njj.galaxion.endtoendtesting.service.CleanEnvironmentSynchronizationErrorService;
+import fr.njj.galaxion.endtoendtesting.service.DeleteConfigurationTestService;
+import fr.njj.galaxion.endtoendtesting.service.SynchronizeEnvironmentService;
+import fr.njj.galaxion.endtoendtesting.service.gitlab.CloneGitlabRepositoryService;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.EnvironmentRetrievalService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.transaction.Transactional;
@@ -28,6 +29,7 @@ import java.util.Set;
 
 import static fr.njj.galaxion.endtoendtesting.domain.constant.CommonConstant.GLOBAL_ENVIRONMENT_ERROR;
 import static fr.njj.galaxion.endtoendtesting.domain.constant.CommonConstant.START_PATH;
+import static fr.njj.galaxion.endtoendtesting.helper.FileHelper.cleanRepo;
 import static fr.njj.galaxion.endtoendtesting.helper.GitHelper.getChangedFilesAfterDate;
 
 @Slf4j
@@ -37,10 +39,11 @@ public class GlobalEnvironmentSynchronizationUseCase {
 
     private final AddEnvironmentSynchronizationErrorUseCase addEnvironmentSynchronizationErrorUseCase;
     private final EnvironmentRetrievalService environmentRetrievalService;
-    private final EnvironmentSynchronizationService environmentSynchronizationService;
-    private final GitlabService gitlabService;
-    private final ConfigurationService configurationService;
+    private final SynchronizeEnvironmentService synchronizeEnvironmentService;
+    private final CloneGitlabRepositoryService cloneGitlabRepositoryService;
+    private final DeleteConfigurationTestService deleteConfigurationTestService;
     private final Event<SyncEnvironmentCompletedEvent> syncEnvironmentEvent;
+    private final CleanEnvironmentSynchronizationErrorService cleanEnvironmentSynchronizationErrorService;
 
     @Monitored(logExit = false)
     @Transactional
@@ -48,22 +51,22 @@ public class GlobalEnvironmentSynchronizationUseCase {
             long environmentId) {
 
         var environment = environmentRetrievalService.getEnvironment(environmentId);
-        environmentSynchronizationService.cleanErrors(environment.getId(), null);
+        cleanEnvironmentSynchronizationErrorService.cleanErrors(environment.getId(), null);
 
         var errors = new HashMap<String, String>();
-        var projectFolder = gitlabService.cloneRepo(environment.getProjectId(), environment.getId().toString(), environment.getToken(), environment.getBranch());
+        var projectFolder = cloneGitlabRepositoryService.cloneRepo(environment.getProjectId(), environment.getId().toString(), environment.getToken(), environment.getBranch());
 
         try {
             var commitAfterDate = ZonedDateTime.of(LocalDateTime.now().minusYears(10), ZoneId.systemDefault());
             var changedFiles = getChangedFilesAfterDate(projectFolder, commitAfterDate);
             cleanFilesRemoved(projectFolder, environment);
-            environmentSynchronizationService.synchronize(environment, changedFiles, projectFolder, errors);
+            synchronizeEnvironmentService.synchronize(environment, changedFiles, projectFolder, errors);
         } catch (Exception exception) {
             errors.put(GLOBAL_ENVIRONMENT_ERROR, exception.getMessage());
             log.error("Error during synchronization for Environment id [{}] : {}.", environment.getId(), exception.getMessage());
         }
 
-        EnvironmentSynchronizationService.cleanRepo(environment, projectFolder, errors);
+        cleanRepo(environment, projectFolder, errors);
         errors.forEach((file, error) -> addEnvironmentSynchronizationErrorUseCase.execute(environment.getId(), file, error));
         syncEnvironmentEvent.fire(SyncEnvironmentCompletedEvent.builder().environmentId(environmentId).build());
     }
@@ -73,7 +76,7 @@ public class GlobalEnvironmentSynchronizationUseCase {
         var allConfTestFiles = environment.getConfigurationSuites().stream().map(ConfigurationSuiteEntity::getFile).toList();
         allConfTestFiles.forEach(file -> {
             if (!allTestFiles.contains(file)) {
-                configurationService.deleteConfigurationByFile(file, environment.getId());
+                deleteConfigurationTestService.deleteByFile(file, environment.getId());
             }
         });
     }
