@@ -6,7 +6,7 @@ import fr.njj.galaxion.endtoendtesting.lib.logging.Monitored;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.service.CleanEnvironmentSynchronizationErrorService;
-import fr.njj.galaxion.endtoendtesting.service.DeleteConfigurationTestService;
+import fr.njj.galaxion.endtoendtesting.service.DeleteConfigurationTestAndSuiteService;
 import fr.njj.galaxion.endtoendtesting.service.SynchronizeEnvironmentService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.CloneGitlabRepositoryService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.EnvironmentRetrievalService;
@@ -38,19 +38,21 @@ import static fr.njj.galaxion.endtoendtesting.helper.GitHelper.getChangedFilesAf
 public class GlobalEnvironmentSynchronizationUseCase {
 
     private final AddEnvironmentSynchronizationErrorUseCase addEnvironmentSynchronizationErrorUseCase;
+
     private final EnvironmentRetrievalService environmentRetrievalService;
     private final SynchronizeEnvironmentService synchronizeEnvironmentService;
     private final CloneGitlabRepositoryService cloneGitlabRepositoryService;
-    private final DeleteConfigurationTestService deleteConfigurationTestService;
-    private final Event<SyncEnvironmentCompletedEvent> syncEnvironmentEvent;
+    private final DeleteConfigurationTestAndSuiteService deleteConfigurationTestAndSuiteService;
     private final CleanEnvironmentSynchronizationErrorService cleanEnvironmentSynchronizationErrorService;
+
+    private final Event<SyncEnvironmentCompletedEvent> syncEnvironmentEvent;
 
     @Monitored(logExit = false)
     @Transactional
     public void execute(
             long environmentId) {
 
-        var environment = environmentRetrievalService.getEnvironment(environmentId);
+        var environment = environmentRetrievalService.get(environmentId);
         cleanEnvironmentSynchronizationErrorService.cleanErrors(environment.getId(), null);
 
         var errors = new HashMap<String, String>();
@@ -76,7 +78,7 @@ public class GlobalEnvironmentSynchronizationUseCase {
         var allConfTestFiles = environment.getConfigurationSuites().stream().map(ConfigurationSuiteEntity::getFile).toList();
         allConfTestFiles.forEach(file -> {
             if (!allTestFiles.contains(file)) {
-                deleteConfigurationTestService.deleteByFile(file, environment.getId());
+                deleteConfigurationTestAndSuiteService.deleteByEnvAndFile(environment.getId(), file);
             }
         });
     }

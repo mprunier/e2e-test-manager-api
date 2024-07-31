@@ -21,7 +21,7 @@ public class CalculateFinalMetricsUseCase {
     public Metrics execute(
             long environmentId) {
 
-        var environment = environmentRetrievalService.getEnvironment(environmentId);
+        var environment = environmentRetrievalService.get(environmentId);
         var configurationSuites = environment.getConfigurationSuites();
 
         var metrics = Metrics.builder().at(ZonedDateTime.now()).build();

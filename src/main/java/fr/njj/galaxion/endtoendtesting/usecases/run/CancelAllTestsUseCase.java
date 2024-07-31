@@ -13,14 +13,15 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class CancelAllTestsUseCase {
 
+    private final AllTestsRunCompletedUseCase allTestsRunCompletedUseCase;
+
     private final EnvironmentRetrievalService environmentRetrievalService;
     private final CancelGitlabPipelineService cancelGitlabPipelineService;
-    private final AllTestsRunCompletedUseCase allTestsRunCompletedUseCase;
 
     @Transactional
     public void execute(long environmentId, String pipelineId) {
         try {
-            var environment = environmentRetrievalService.getEnvironment(environmentId);
+            var environment = environmentRetrievalService.get(environmentId);
             cancelGitlabPipelineService.cancelPipeline(environment.getToken(), environment.getProjectId(), pipelineId);
             allTestsRunCompletedUseCase.execute(environmentId, ReportAllTestRanStatus.CANCELED);
         } catch (Exception e) {

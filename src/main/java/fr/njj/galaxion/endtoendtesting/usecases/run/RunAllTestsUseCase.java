@@ -22,6 +22,7 @@ public class RunAllTestsUseCase {
 
     private final EnvironmentRetrievalService environmentRetrievalService;
     private final RunGitlabJobService runGitlabJobService;
+
     private final Event<AllTestsRunInProgressEvent> allTestsRunInProgressEvent;
 
     @Transactional
@@ -29,7 +30,7 @@ public class RunAllTestsUseCase {
             Long environmentId,
             String createdBy) {
         log.info("[{}] ran all tests on Environment id [{}].", createdBy, environmentId);
-        var environment = environmentRetrievalService.getEnvironment(environmentId);
+        var environment = environmentRetrievalService.get(environmentId);
         assertSchedulerInProgress(environment);
         environment.setIsRunningAllTests(true);
 

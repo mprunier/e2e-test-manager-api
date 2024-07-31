@@ -1,9 +1,8 @@
 package fr.njj.galaxion.endtoendtesting.usecases.environment;
 
-import fr.njj.galaxion.endtoendtesting.domain.exception.EnvironmentNotFoundException;
 import fr.njj.galaxion.endtoendtesting.domain.response.EnvironmentResponse;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
-import fr.njj.galaxion.endtoendtesting.model.repository.EnvironmentRepository;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.EnvironmentRetrievalService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -16,13 +15,11 @@ import static fr.njj.galaxion.endtoendtesting.mapper.EnvironmentVariableResponse
 @RequiredArgsConstructor
 public class RetrieveEnvironmentDetailsUseCase {
 
-    private final EnvironmentRepository environmentRepository;
+    private final EnvironmentRetrievalService environmentRetrievalService;
 
     @Transactional
     public EnvironmentResponse execute(long id) {
-        var environment = environmentRepository
-                .findByIdOptional(id)
-                .orElseThrow(() -> new EnvironmentNotFoundException(id));
+        var environment = environmentRetrievalService.get(id);
         return buildEnvironmentResponse(environment);
     }
 

@@ -1,7 +1,7 @@
 package fr.njj.galaxion.endtoendtesting.usecases.metrics;
 
 import fr.njj.galaxion.endtoendtesting.domain.response.MetricsResponse;
-import fr.njj.galaxion.endtoendtesting.model.repository.MetricRepository;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.MetricRetrievalService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -16,14 +16,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RetrieveMetricsHistoryUseCase {
 
-    private final MetricRepository metricRepository;
+    private final MetricRetrievalService metricRetrievalService;
 
     @Transactional
     public List<MetricsResponse> execute(
             long environmentId,
             LocalDate since) {
 
-        var entities = metricRepository.findAllByEnvironmentIdSince(environmentId, since);
+        var entities = metricRetrievalService.getAllByEnvironmentSince(environmentId, since);
 
         var metrics = new ArrayList<MetricsResponse>();
         entities.forEach(entity -> metrics.add(

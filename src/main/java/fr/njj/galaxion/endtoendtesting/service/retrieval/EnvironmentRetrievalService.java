@@ -21,12 +21,12 @@ public class EnvironmentRetrievalService {
     private final EnvironmentRepository environmentRepository;
 
     @Transactional
-    public EnvironmentResponse getEnvironmentResponse(long id) {
-        return buildEnvironmentResponse(getEnvironment(id), true);
+    public EnvironmentResponse getResponse(long id) {
+        return buildEnvironmentResponse(get(id), true);
     }
 
     @Transactional
-    public EnvironmentEntity getEnvironment(long id) {
+    public EnvironmentEntity get(long id) {
         return environmentRepository.findByIdOptional(id)
                                     .orElseThrow(() -> new EnvironmentNotFoundException(id));
     }
@@ -39,5 +39,10 @@ public class EnvironmentRetrievalService {
     @Transactional
     public List<EnvironmentEntity> getEnvironmentsByBranchAndProjectId(String branch, String projectId) {
         return environmentRepository.findAllByBranchAndProjectId(branch, projectId);
+    }
+
+    @Transactional
+    public List<EnvironmentEntity> getAllEnabled() {
+        return environmentRepository.findAllEnvironmentsEnabled();
     }
 }

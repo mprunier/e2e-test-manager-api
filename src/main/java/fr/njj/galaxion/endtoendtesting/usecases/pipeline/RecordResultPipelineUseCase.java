@@ -20,10 +20,10 @@ import fr.njj.galaxion.endtoendtesting.model.entity.TestScreenshotEntity;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.RetrieveGitlabJobArtifactsService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationTestRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.PipelineRetrievalService;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.SearchSuiteRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.TestRetrievalService;
 import fr.njj.galaxion.endtoendtesting.usecases.run.AllTestsRunCompletedUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.run.TestRunCompletedUseCase;
-import fr.njj.galaxion.endtoendtesting.usecases.search.SearchSuiteOrTestUseCase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.transaction.Transactional;
@@ -43,13 +43,14 @@ import static fr.njj.galaxion.endtoendtesting.helper.TestHelper.updateStatus;
 @RequiredArgsConstructor
 public class RecordResultPipelineUseCase {
 
-    private final PipelineRetrievalService pipelineRetrievalService;
-    private final TestRetrievalService testRetrievalService;
-    private final RetrieveGitlabJobArtifactsService retrieveGitlabJobArtifactsService;
     private final GenerateTestReportUseCase generateTestReportUseCase;
     private final AllTestsRunCompletedUseCase allTestsRunCompletedUseCase;
     private final TestRunCompletedUseCase testRunCompletedUseCase;
-    private final SearchSuiteOrTestUseCase searchSuiteOrTestUseCase;
+
+    private final PipelineRetrievalService pipelineRetrievalService;
+    private final TestRetrievalService testRetrievalService;
+    private final RetrieveGitlabJobArtifactsService retrieveGitlabJobArtifactsService;
+    private final SearchSuiteRetrievalService searchSuiteRetrievalService;
     private final ConfigurationTestRetrievalService configurationTestRetrievalService;
 
     private final Event<UpdateFinalMetricsEvent> updateFinalMetricsEvent;
@@ -138,7 +139,7 @@ public class RecordResultPipelineUseCase {
                                           Map<String, byte[]> screenshots) {
         if (tests != null) {
             tests.forEach(mochaTest -> {
-                var configurationSuiteOptional = searchSuiteOrTestUseCase.getBy(environmentId, file, NO_SUITE, null);
+                var configurationSuiteOptional = searchSuiteRetrievalService.getBy(environmentId, file, NO_SUITE, null);
                 if (configurationSuiteOptional.isPresent()) {
                     var configurationTestOptional = configurationTestRetrievalService.getBy(environmentId, file, mochaTest.getTitle(), configurationSuiteOptional.get());
                     configurationTestOptional.ifPresent(configurationTestEntity -> saveTest(mochaTest, configurationTestEntity, screenshots));
@@ -167,7 +168,7 @@ public class RecordResultPipelineUseCase {
                                Map<String, byte[]> screenshots) {
         if (suites != null) {
             suites.forEach(mochaSuite -> {
-                var configurationSuiteOptional = searchSuiteOrTestUseCase.getBy(environmentId, file, mochaSuite.getTitle(), parentSuite != null ? parentSuite.getId() : null);
+                var configurationSuiteOptional = searchSuiteRetrievalService.getBy(environmentId, file, mochaSuite.getTitle(), parentSuite != null ? parentSuite.getId() : null);
                 if (configurationSuiteOptional.isPresent()) {
                     processTests(environmentId, file, mochaSuite.getTests(), configurationSuiteOptional.get(), screenshots);
                     processSuites(environmentId, file, mochaSuite.getSuites(), configurationSuiteOptional.get(), screenshots);

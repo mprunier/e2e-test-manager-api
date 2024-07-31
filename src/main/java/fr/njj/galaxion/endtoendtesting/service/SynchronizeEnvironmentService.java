@@ -13,11 +13,9 @@ import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestIdentifierEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
-import fr.njj.galaxion.endtoendtesting.model.repository.ConfigurationSuiteRepository;
-import fr.njj.galaxion.endtoendtesting.model.repository.ConfigurationTestRepository;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationTestRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.EnvironmentRetrievalService;
-import fr.njj.galaxion.endtoendtesting.usecases.search.SearchSuiteOrTestUseCase;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.SearchSuiteRetrievalService;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,10 +45,9 @@ import static fr.njj.galaxion.endtoendtesting.mapper.ConfigurationInternalMapper
 public class SynchronizeEnvironmentService {
 
     private final EnvironmentRetrievalService environmentRetrievalService;
-    private final ConfigurationSuiteRepository configurationSuiteRepository;
-    private final ConfigurationTestRepository configurationTestRepository;
+    private final DeleteConfigurationTestAndSuiteService deleteConfigurationTestAndSuiteService;
     private final ConfigurationTestRetrievalService configurationTestRetrievalService;
-    private final SearchSuiteOrTestUseCase searchSuiteOrTestUseCase;
+    private final SearchSuiteRetrievalService searchSuiteRetrievalService;
 
     @RestClient
     private ConverterClient converterClient;
@@ -137,7 +134,7 @@ public class SynchronizeEnvironmentService {
     private void updateOrCreate(Long environmentId,
                                 String file,
                                 ConfigurationInternal configurationInternal) {
-        var environment = environmentRetrievalService.getEnvironment(environmentId);
+        var environment = environmentRetrievalService.get(environmentId);
 
         var suiteIds = new ArrayList<Long>();
         var testIds = new ArrayList<Long>();
@@ -151,8 +148,8 @@ public class SynchronizeEnvironmentService {
                                  .forEach(suiteInternal -> updateOrCreateSuite(environment, file, suiteInternal, null, suiteIds, testIds));
         }
 
-        configurationTestRepository.deleteByEnvAndFileAndNotInTestIds(environmentId, file, testIds);
-        configurationSuiteRepository.deleteByEnvAndFileAndNotInSuiteIds(environmentId, file, suiteIds);
+        deleteConfigurationTestAndSuiteService.deleteTestByEnvAndFileAndNotInTestIds(environmentId, file, testIds);
+        deleteConfigurationTestAndSuiteService.deleteSuiteByEnvAndFileAndNotInTestIds(environmentId, file, suiteIds);
     }
 
     private void updateOrCreateTestWithoutSuite(EnvironmentEntity environment,
@@ -161,7 +158,7 @@ public class SynchronizeEnvironmentService {
                                                 List<Long> suiteIds,
                                                 List<Long> testIds) {
         ConfigurationSuiteEntity configurationSuite;
-        var configurationSuiteOptional = searchSuiteOrTestUseCase.getBy(environment.getId(), file, NO_SUITE, null);
+        var configurationSuiteOptional = searchSuiteRetrievalService.getBy(environment.getId(), file, NO_SUITE, null);
         if (configurationSuiteOptional.isEmpty()) {
             configurationSuite = ConfigurationSuiteEntity
                     .builder()
@@ -186,7 +183,7 @@ public class SynchronizeEnvironmentService {
                                      List<Long> testIds) {
         ConfigurationSuiteEntity configurationSuite;
         var parentSuiteId = parentSuite != null ? parentSuite.getId() : null;
-        var configurationSuiteOptional = searchSuiteOrTestUseCase.getBy(environment.getId(), file, suiteInternal.getTitle(), parentSuiteId);
+        var configurationSuiteOptional = searchSuiteRetrievalService.getBy(environment.getId(), file, suiteInternal.getTitle(), parentSuiteId);
         if (configurationSuiteOptional.isEmpty()) {
             configurationSuite = ConfigurationSuiteEntity
                     .builder()

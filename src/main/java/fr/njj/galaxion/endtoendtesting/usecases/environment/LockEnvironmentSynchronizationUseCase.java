@@ -18,7 +18,7 @@ public class LockEnvironmentSynchronizationUseCase {
     public void execute(
             long environmentId) {
 
-        var environment = environmentRetrievalService.getEnvironment(environmentId);
+        var environment = environmentRetrievalService.get(environmentId);
         if (Boolean.TRUE.equals(environment.getIsLocked())) {
             throw new EnvironmentAlreadyInSyncProgressException();
         }

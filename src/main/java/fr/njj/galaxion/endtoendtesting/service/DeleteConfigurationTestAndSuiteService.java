@@ -7,20 +7,39 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+
 @Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor
-public class DeleteConfigurationTestService {
+public class DeleteConfigurationTestAndSuiteService {
 
     private final ConfigurationSuiteRepository configurationSuiteRepository;
     private final ConfigurationTestRepository configurationTestRepository;
 
     @Transactional
-    public void deleteByFile(String file,
-                             long environmentId) {
+    public void deleteByEnvAndFile(
+            long environmentId,
+            String file) {
         log.info("Environment id [{}] : Remove file [{}].", environmentId, file);
         configurationTestRepository.deleteByFileAndEnv(file, environmentId);
         configurationSuiteRepository.deleteByFileAndEnv(file, environmentId);
+    }
+
+    @Transactional
+    public void deleteTestByEnvAndFileAndNotInTestIds(
+            long environmentId,
+            String file,
+            List<Long> testIds) {
+        configurationTestRepository.deleteByEnvAndFileAndNotInTestIds(environmentId, file, testIds);
+    }
+
+    @Transactional
+    public void deleteSuiteByEnvAndFileAndNotInTestIds(
+            long environmentId,
+            String file,
+            List<Long> suiteIds) {
+        configurationSuiteRepository.deleteByEnvAndFileAndNotInSuiteIds(environmentId, file, suiteIds);
     }
 }
 

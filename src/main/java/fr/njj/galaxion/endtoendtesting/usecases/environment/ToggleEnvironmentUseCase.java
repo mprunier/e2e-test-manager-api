@@ -15,13 +15,14 @@ import java.time.ZonedDateTime;
 public class ToggleEnvironmentUseCase {
 
     private final EnvironmentRetrievalService environmentRetrievalService;
+
     private final SecurityIdentity identity;
 
     @Transactional
     public void execute(
             Long environmentId,
             Boolean isEnabled) {
-        var environment = environmentRetrievalService.getEnvironment(environmentId);
+        var environment = environmentRetrievalService.get(environmentId);
         environment.setIsEnabled(isEnabled);
         environment.setUpdatedBy(identity.getPrincipal().getName());
         environment.setUpdatedAt(ZonedDateTime.now());

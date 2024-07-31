@@ -4,8 +4,8 @@ import fr.njj.galaxion.endtoendtesting.domain.exception.HiddenVariableException;
 import fr.njj.galaxion.endtoendtesting.domain.request.CreateUpdateEnvironmentRequest;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentVariableEntity;
-import fr.njj.galaxion.endtoendtesting.model.repository.EnvironmentVariableRepository;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.EnvironmentRetrievalService;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.EnvironmentVariableRetrievalService;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -20,16 +20,17 @@ import java.time.ZonedDateTime;
 public class UpdateEnvironmentUseCase {
 
     private final EnvironmentRetrievalService environmentRetrievalService;
+    private final EnvironmentVariableRetrievalService environmentVariableRetrievalService;
+
     private final SecurityIdentity identity;
-    private final EnvironmentVariableRepository environmentVariableRepository;
 
     @Transactional
     public void execute(
             Long environmentId,
             CreateUpdateEnvironmentRequest request) {
-        var environment = environmentRetrievalService.getEnvironment(environmentId);
+        var environment = environmentRetrievalService.get(environmentId);
         request.getVariables().forEach(variableRequest -> {
-            var variableOptional = environmentVariableRepository.findByName(environmentId, variableRequest.getName());
+            var variableOptional = environmentVariableRetrievalService.getByEnvironmentAndName(environmentId, variableRequest.getName());
             if (variableOptional.isPresent() && (Boolean.TRUE.equals(variableOptional.get().getIsHidden()) && variableRequest.getDefaultValue().contains("**********"))) {
                 if (Boolean.FALSE.equals(variableRequest.getIsHidden())) {
                     throw new HiddenVariableException();

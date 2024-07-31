@@ -32,7 +32,7 @@ public class SyncEnvironmentCompletedEventHandler {
 
             unLockEnvironmentSynchronizationUseCase.execute(event.getEnvironmentId());
 
-            var environmentResponse = environmentRetrievalService.getEnvironmentResponse(event.getEnvironmentId());
+            var environmentResponse = environmentRetrievalService.getResponse(event.getEnvironmentId());
             event.setEnvironment(environmentResponse);
 
             cacheManager.getCache("suites").ifPresent(cache -> cache.invalidate(event.getEnvironmentId()).await().indefinitely());

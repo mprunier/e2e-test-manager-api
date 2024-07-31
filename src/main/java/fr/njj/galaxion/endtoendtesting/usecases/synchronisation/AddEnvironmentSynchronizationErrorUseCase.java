@@ -3,8 +3,8 @@ package fr.njj.galaxion.endtoendtesting.usecases.synchronisation;
 import fr.njj.galaxion.endtoendtesting.lib.logging.Monitored;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentSynchronizationErrorEntity;
-import fr.njj.galaxion.endtoendtesting.model.repository.EnvironmentSynchronizationErrorRepository;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.EnvironmentRetrievalService;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.EnvironmentSynchronizationErrorRetrievalService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ import java.time.ZonedDateTime;
 @RequiredArgsConstructor
 public class AddEnvironmentSynchronizationErrorUseCase {
 
-    private final EnvironmentSynchronizationErrorRepository environmentSynchronizationErrorRepository;
+    private final EnvironmentSynchronizationErrorRetrievalService environmentSynchronizationErrorRetrievalService;
     private final EnvironmentRetrievalService environmentRetrievalService;
 
     @Monitored(logExit = false)
@@ -27,9 +27,9 @@ public class AddEnvironmentSynchronizationErrorUseCase {
             String file,
             String error) {
 
-        var environment = environmentRetrievalService.getEnvironment(environmentId);
+        var environment = environmentRetrievalService.get(environmentId);
 
-        var optionalEntity = environmentSynchronizationErrorRepository.findByEnvironmentIdAndFile(environment.getId(), file);
+        var optionalEntity = environmentSynchronizationErrorRetrievalService.getByEnvAndFile(environment.getId(), file);
         if (optionalEntity.isPresent()) {
             update(error, optionalEntity.get());
         } else {

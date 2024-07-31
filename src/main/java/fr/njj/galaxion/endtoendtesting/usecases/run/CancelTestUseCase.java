@@ -16,10 +16,11 @@ import static fr.njj.galaxion.endtoendtesting.helper.TestHelper.updateStatus;
 @ApplicationScoped
 @RequiredArgsConstructor
 public class CancelTestUseCase {
+    
+    private final TestRunCompletedUseCase testRunCompletedUseCase;
 
     private final TestRetrievalService testRetrievalService;
     private final CancelGitlabPipelineService cancelGitlabPipelineService;
-    private final TestRunCompletedUseCase testRunCompletedUseCase;
 
     @Transactional
     public void execute(

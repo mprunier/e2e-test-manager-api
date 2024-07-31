@@ -4,7 +4,7 @@ import fr.njj.galaxion.endtoendtesting.domain.event.SyncEnvironmentCompletedEven
 import fr.njj.galaxion.endtoendtesting.lib.logging.Monitored;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.service.CleanEnvironmentSynchronizationErrorService;
-import fr.njj.galaxion.endtoendtesting.service.DeleteConfigurationTestService;
+import fr.njj.galaxion.endtoendtesting.service.DeleteConfigurationTestAndSuiteService;
 import fr.njj.galaxion.endtoendtesting.service.SynchronizeEnvironmentService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.CloneGitlabRepositoryService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.EnvironmentRetrievalService;
@@ -27,10 +27,11 @@ import static fr.njj.galaxion.endtoendtesting.helper.FileHelper.cleanRepo;
 public class PartialEnvironmentSynchronizationUseCase {
 
     private final AddEnvironmentSynchronizationErrorUseCase addEnvironmentSynchronizationErrorUseCase;
+
     private final EnvironmentRetrievalService environmentRetrievalService;
     private final SynchronizeEnvironmentService synchronizeEnvironmentService;
     private final CloneGitlabRepositoryService cloneGitlabRepositoryService;
-    private final DeleteConfigurationTestService deleteConfigurationTestService;
+    private final DeleteConfigurationTestAndSuiteService deleteConfigurationTestAndSuiteService;
     private final CleanEnvironmentSynchronizationErrorService cleanEnvironmentSynchronizationErrorService;
 
     private final Event<SyncEnvironmentCompletedEvent> syncEnvironmentEvent;
@@ -76,7 +77,7 @@ public class PartialEnvironmentSynchronizationUseCase {
     private void cleanFilesToRemove(Set<String> filesToRemove, EnvironmentEntity environment) {
         filesToRemove.forEach(file -> {
             var relativePathString = file.split(START_PATH)[1];
-            deleteConfigurationTestService.deleteByFile(relativePathString, environment.getId());
+            deleteConfigurationTestAndSuiteService.deleteByEnvAndFile(environment.getId(), relativePathString);
         });
     }
 }

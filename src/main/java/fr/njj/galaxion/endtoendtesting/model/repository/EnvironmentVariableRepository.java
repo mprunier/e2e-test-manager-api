@@ -9,7 +9,7 @@ import java.util.Optional;
 @ApplicationScoped
 public class EnvironmentVariableRepository implements PanacheRepositoryBase<EnvironmentVariableEntity, Long> {
 
-    public Optional<EnvironmentVariableEntity> findByName(Long environmentId, String name) {
+    public Optional<EnvironmentVariableEntity> findByEnvironmentAndName(Long environmentId, String name) {
         return find("environment.id = ?1 AND name = ?2", environmentId, name).firstResultOptional();
     }
 }

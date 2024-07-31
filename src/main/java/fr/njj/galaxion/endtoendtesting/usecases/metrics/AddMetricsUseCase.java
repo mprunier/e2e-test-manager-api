@@ -21,7 +21,7 @@ public class AddMetricsUseCase {
             Metrics metrics,
             boolean isAllTestsRun) {
 
-        var environment = environmentRetrievalService.getEnvironment(environmentId);
+        var environment = environmentRetrievalService.get(environmentId);
         MetricsEntity
                 .builder()
                 .environment(environment)

@@ -11,8 +11,8 @@ import fr.njj.galaxion.endtoendtesting.model.entity.PipelineEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.TestEntity;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.RunGitlabJobService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationTestRetrievalService;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.SearchSuiteRetrievalService;
 import fr.njj.galaxion.endtoendtesting.usecases.pipeline.AssertPipelineUseCase;
-import fr.njj.galaxion.endtoendtesting.usecases.search.SearchSuiteOrTestUseCase;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
@@ -34,12 +34,15 @@ import static fr.njj.galaxion.endtoendtesting.helper.EnvironmentHelper.buildVari
 @RequiredArgsConstructor
 public class RunTestUseCase {
 
-    private final ConfigurationTestRetrievalService configurationTestRetrievalService;
-    private final SearchSuiteOrTestUseCase searchSuiteOrTestUseCase;
-    private final RunGitlabJobService runGitlabJobService;
-    private final SecurityIdentity identity;
     private final AssertPipelineUseCase assertPipelineUseCase;
+
+    private final ConfigurationTestRetrievalService configurationTestRetrievalService;
+    private final SearchSuiteRetrievalService searchSuiteRetrievalService;
+    private final RunGitlabJobService runGitlabJobService;
+
     private final Event<TestRunInProgressEvent> testRunInProgressEvent;
+
+    private final SecurityIdentity identity;
 
     @Transactional
     public void execute(
@@ -63,7 +66,7 @@ public class RunTestUseCase {
             }
             grep.append(configurationTest.getTitle());
         } else {
-            var configurationSuite = searchSuiteOrTestUseCase.get(request.getConfigurationSuiteId());
+            var configurationSuite = searchSuiteRetrievalService.get(request.getConfigurationSuiteId());
             environment = configurationSuite.getEnvironment();
             file = configurationSuite.getFile();
             addConfigurationTestsFromSuite(configurationSuite, configurationTests);

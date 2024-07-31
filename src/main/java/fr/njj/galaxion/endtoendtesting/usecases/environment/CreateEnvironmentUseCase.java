@@ -20,8 +20,9 @@ import java.util.concurrent.CompletableFuture;
 public class CreateEnvironmentUseCase {
 
     private final RetrieveEnvironmentDetailsUseCase retrieveEnvironmentDetailsUseCase;
-    private final SecurityIdentity identity;
     private final GlobalEnvironmentSynchronizationUseCase globalEnvironmentSynchronizationUseCase;
+
+    private final SecurityIdentity identity;
 
     @Transactional
     public EnvironmentResponse execute(

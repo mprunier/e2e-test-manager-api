@@ -1,7 +1,7 @@
 package fr.njj.galaxion.endtoendtesting.usecases.error;
 
 import fr.njj.galaxion.endtoendtesting.domain.response.SyncErrorResponse;
-import fr.njj.galaxion.endtoendtesting.model.repository.EnvironmentSynchronizationErrorRepository;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.EnvironmentSynchronizationErrorRetrievalService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -15,13 +15,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RetrieveErrorUseCase {
 
-    private final EnvironmentSynchronizationErrorRepository environmentSynchronizationErrorRepository;
+    private final EnvironmentSynchronizationErrorRetrievalService environmentSynchronizationErrorRetrievalService;
 
     @Transactional
     public List<SyncErrorResponse> execute(
             long environmentId) {
 
-        var entities = environmentSynchronizationErrorRepository.findByEnvironmentId(environmentId);
+        var entities = environmentSynchronizationErrorRetrievalService.getByEnvironment(environmentId);
 
         var environmentErrors = new ArrayList<SyncErrorResponse>();
         entities.forEach(entity -> environmentErrors.add(

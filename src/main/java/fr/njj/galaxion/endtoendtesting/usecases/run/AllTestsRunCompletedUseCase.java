@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AllTestsRunCompletedUseCase {
 
     private final EnvironmentRetrievalService environmentRetrievalService;
+
     private final Event<AllTestsRunCompletedEvent> allTestsRunCompletedEvent;
 
     @Monitored(logExit = false)
@@ -24,7 +25,7 @@ public class AllTestsRunCompletedUseCase {
             long environmentId,
             ReportAllTestRanStatus reportAllTestRanStatus) {
 
-        var entity = environmentRetrievalService.getEnvironment(environmentId);
+        var entity = environmentRetrievalService.get(environmentId);
         entity.setIsRunningAllTests(false);
         if (reportAllTestRanStatus != null) {
             entity.setLastALlTestsError(reportAllTestRanStatus.getErrorMessage());

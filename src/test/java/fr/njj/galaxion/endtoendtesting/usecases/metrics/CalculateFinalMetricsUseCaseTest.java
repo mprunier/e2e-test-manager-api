@@ -31,7 +31,7 @@ class CalculateFinalMetricsUseCaseTest {
         // Given
         var environmentId = 1L;
         var environment = createEnvironmentWithAllPassingTests();
-        when(environmentRetrievalService.getEnvironment(environmentId)).thenReturn(environment);
+        when(environmentRetrievalService.get(environmentId)).thenReturn(environment);
 
         // When
         var metrics = calculateFinalMetricsUseCase.execute(environmentId);
@@ -45,7 +45,7 @@ class CalculateFinalMetricsUseCaseTest {
         // Given
         var environmentId = 1L;
         var environment = createEnvironmentWithSomeFailingTests();
-        when(environmentRetrievalService.getEnvironment(environmentId)).thenReturn(environment);
+        when(environmentRetrievalService.get(environmentId)).thenReturn(environment);
 
         // When
         var metrics = calculateFinalMetricsUseCase.execute(environmentId);
@@ -59,7 +59,7 @@ class CalculateFinalMetricsUseCaseTest {
         // Given
         var environmentId = 1L;
         var environment = createEnvironmentWithAllFailingTests();
-        when(environmentRetrievalService.getEnvironment(environmentId)).thenReturn(environment);
+        when(environmentRetrievalService.get(environmentId)).thenReturn(environment);
 
         // When
         var metrics = calculateFinalMetricsUseCase.execute(environmentId);

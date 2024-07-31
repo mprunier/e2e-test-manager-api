@@ -17,7 +17,7 @@ public class UnLockEnvironmentSynchronizationUseCase {
     public void execute(
             long environmentId) {
 
-        var environment = environmentRetrievalService.getEnvironment(environmentId);
+        var environment = environmentRetrievalService.get(environmentId);
         environment.setIsLocked(false);
     }
 

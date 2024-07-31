@@ -1,7 +1,7 @@
 package fr.njj.galaxion.endtoendtesting.usecases.metrics;
 
 import fr.njj.galaxion.endtoendtesting.domain.response.MetricsResponse;
-import fr.njj.galaxion.endtoendtesting.model.repository.MetricRepository;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.MetricRetrievalService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -12,14 +12,14 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class RetrieveFinalMetricsUseCase {
 
-    private final MetricRepository metricRepository;
+    private final MetricRetrievalService metricRetrievalService;
 
     @Transactional
     public MetricsResponse execute(
             long environmentId) {
         var metricsResponseBuilder = MetricsResponse.builder();
 
-        var lastMetrics = metricRepository.findLastMetrics(environmentId);
+        var lastMetrics = metricRetrievalService.getOptionalLastMetrics(environmentId);
         lastMetrics.ifPresent(metricsEntity -> metricsResponseBuilder
                 .at(metricsEntity.getCreatedAt())
                 .suites(metricsEntity.getSuites())
@@ -30,7 +30,7 @@ public class RetrieveFinalMetricsUseCase {
                 .skipped(metricsEntity.getSkipped())
                 .isAllTestsRun(metricsEntity.isAllTestsRun())
                 .build());
-        var lastMetricsWithAllTests = metricRepository.findLastMetricsWithAllTests(environmentId);
+        var lastMetricsWithAllTests = metricRetrievalService.getOptionalLastMetricsWithAllTestsRun(environmentId);
         lastMetricsWithAllTests.ifPresent(metricsEntity -> metricsResponseBuilder
                 .lastAllTestsRunAt(metricsEntity.getCreatedAt())
                 .build());
