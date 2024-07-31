@@ -5,6 +5,7 @@ import fr.njj.galaxion.endtoendtesting.domain.enumeration.ConfigurationStatus;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.GitlabJobStatus;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineStatus;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.ReportAllTestRanStatus;
+import fr.njj.galaxion.endtoendtesting.domain.event.TestRunCompletedEvent;
 import fr.njj.galaxion.endtoendtesting.domain.event.UpdateFinalMetricsEvent;
 import fr.njj.galaxion.endtoendtesting.domain.internal.ArtifactDataInternal;
 import fr.njj.galaxion.endtoendtesting.domain.internal.MochaReportResultInternal;
@@ -17,13 +18,12 @@ import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.PipelineEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.TestEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.TestScreenshotEntity;
+import fr.njj.galaxion.endtoendtesting.service.CompleteAllTestsRunService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.RetrieveGitlabJobArtifactsService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationTestRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.PipelineRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.SearchSuiteRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.TestRetrievalService;
-import fr.njj.galaxion.endtoendtesting.usecases.run.AllTestsRunCompletedUseCase;
-import fr.njj.galaxion.endtoendtesting.usecases.run.TestRunCompletedUseCase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.transaction.Transactional;
@@ -44,8 +44,7 @@ import static fr.njj.galaxion.endtoendtesting.helper.TestHelper.updateStatus;
 public class RecordResultPipelineUseCase {
 
     private final GenerateTestReportUseCase generateTestReportUseCase;
-    private final AllTestsRunCompletedUseCase allTestsRunCompletedUseCase;
-    private final TestRunCompletedUseCase testRunCompletedUseCase;
+    private final CompleteAllTestsRunService completeAllTestsRunService;
 
     private final PipelineRetrievalService pipelineRetrievalService;
     private final TestRetrievalService testRetrievalService;
@@ -54,6 +53,7 @@ public class RecordResultPipelineUseCase {
     private final ConfigurationTestRetrievalService configurationTestRetrievalService;
 
     private final Event<UpdateFinalMetricsEvent> updateFinalMetricsEvent;
+    private final Event<TestRunCompletedEvent> testRunCompletedEvent;
 
     @Monitored(logExit = false)
     @Transactional
@@ -83,16 +83,16 @@ public class RecordResultPipelineUseCase {
                 var artifactData = retrieveGitlabJobArtifactsService.getArtifactData(environment.getToken(), environment.getProjectId(), jobId);
                 if (artifactData.getReport() != null && artifactData.getReport().getResults() != null && !artifactData.getReport().getResults().isEmpty()) {
                     report(artifactData, environmentId);
-                    allTestsRunCompletedUseCase.execute(environmentId, null);
+                    completeAllTestsRunService.complete(environmentId, null);
                 } else {
-                    allTestsRunCompletedUseCase.execute(environmentId, ReportAllTestRanStatus.NO_REPORT_ERROR);
+                    completeAllTestsRunService.complete(environmentId, ReportAllTestRanStatus.NO_REPORT_ERROR);
                 }
             } else if (GitlabJobStatus.canceled.equals(status) || GitlabJobStatus.skipped.equals(status)) {
-                allTestsRunCompletedUseCase.execute(environmentId, ReportAllTestRanStatus.CANCELED);
+                completeAllTestsRunService.complete(environmentId, ReportAllTestRanStatus.CANCELED);
             }
         } catch (Exception e) {
             log.error(e.getMessage());
-            allTestsRunCompletedUseCase.execute(environmentId, ReportAllTestRanStatus.SYSTEM_ERROR);
+            completeAllTestsRunService.complete(environmentId, ReportAllTestRanStatus.SYSTEM_ERROR);
         }
     }
 
@@ -111,7 +111,7 @@ public class RecordResultPipelineUseCase {
             log.error(e.getMessage());
             updateStatus(tests, ConfigurationStatus.SYSTEM_ERROR);
         } finally {
-            testRunCompletedUseCase.execute(environment.getId());
+            testRunCompletedEvent.fire(TestRunCompletedEvent.builder().environmentId(environment.getId()).build());
         }
     }
 

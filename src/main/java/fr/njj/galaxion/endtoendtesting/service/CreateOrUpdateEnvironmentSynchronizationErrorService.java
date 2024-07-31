@@ -1,6 +1,5 @@
-package fr.njj.galaxion.endtoendtesting.usecases.synchronisation;
+package fr.njj.galaxion.endtoendtesting.service;
 
-import fr.njj.galaxion.endtoendtesting.lib.logging.Monitored;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentSynchronizationErrorEntity;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.EnvironmentRetrievalService;
@@ -15,14 +14,13 @@ import java.time.ZonedDateTime;
 @Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor
-public class AddEnvironmentSynchronizationErrorUseCase {
+public class CreateOrUpdateEnvironmentSynchronizationErrorService {
 
     private final EnvironmentSynchronizationErrorRetrievalService environmentSynchronizationErrorRetrievalService;
     private final EnvironmentRetrievalService environmentRetrievalService;
 
-    @Monitored(logExit = false)
     @Transactional
-    public void execute(
+    public void createOrUpdateSynchronizationError(
             long environmentId,
             String file,
             String error) {

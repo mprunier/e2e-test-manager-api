@@ -1,8 +1,7 @@
-package fr.njj.galaxion.endtoendtesting.usecases.run;
+package fr.njj.galaxion.endtoendtesting.service;
 
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.ReportAllTestRanStatus;
 import fr.njj.galaxion.endtoendtesting.domain.event.AllTestsRunCompletedEvent;
-import fr.njj.galaxion.endtoendtesting.lib.logging.Monitored;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.EnvironmentRetrievalService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
@@ -13,15 +12,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor
-public class AllTestsRunCompletedUseCase {
+public class CompleteAllTestsRunService {
 
     private final EnvironmentRetrievalService environmentRetrievalService;
 
     private final Event<AllTestsRunCompletedEvent> allTestsRunCompletedEvent;
 
-    @Monitored(logExit = false)
     @Transactional
-    public void execute(
+    public void complete(
             long environmentId,
             ReportAllTestRanStatus reportAllTestRanStatus) {
 

@@ -4,6 +4,7 @@ import fr.njj.galaxion.endtoendtesting.domain.event.SyncEnvironmentCompletedEven
 import fr.njj.galaxion.endtoendtesting.lib.logging.Monitored;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.service.CleanEnvironmentSynchronizationErrorService;
+import fr.njj.galaxion.endtoendtesting.service.CreateOrUpdateEnvironmentSynchronizationErrorService;
 import fr.njj.galaxion.endtoendtesting.service.DeleteConfigurationTestAndSuiteService;
 import fr.njj.galaxion.endtoendtesting.service.SynchronizeEnvironmentService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.CloneGitlabRepositoryService;
@@ -26,8 +27,7 @@ import static fr.njj.galaxion.endtoendtesting.helper.FileHelper.cleanRepo;
 @RequiredArgsConstructor
 public class PartialEnvironmentSynchronizationUseCase {
 
-    private final AddEnvironmentSynchronizationErrorUseCase addEnvironmentSynchronizationErrorUseCase;
-
+    private final CreateOrUpdateEnvironmentSynchronizationErrorService createOrUpdateEnvironmentSynchronizationErrorService;
     private final EnvironmentRetrievalService environmentRetrievalService;
     private final SynchronizeEnvironmentService synchronizeEnvironmentService;
     private final CloneGitlabRepositoryService cloneGitlabRepositoryService;
@@ -65,7 +65,7 @@ public class PartialEnvironmentSynchronizationUseCase {
         }
 
         cleanRepo(environment, projectFolder, errors);
-        errors.forEach((file, error) -> addEnvironmentSynchronizationErrorUseCase.execute(environment.getId(), file, error));
+        errors.forEach((file, error) -> createOrUpdateEnvironmentSynchronizationErrorService.createOrUpdateSynchronizationError(environment.getId(), file, error));
     }
 
     private void cleanEnvironmentErrors(Set<String> filesToSynchronize, Set<String> filesToRemove, EnvironmentEntity environment) {

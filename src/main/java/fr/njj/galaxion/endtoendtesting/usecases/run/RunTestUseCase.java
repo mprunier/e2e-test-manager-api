@@ -9,10 +9,10 @@ import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.PipelineEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.TestEntity;
+import fr.njj.galaxion.endtoendtesting.service.AssertPipelineService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.RunGitlabJobService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationTestRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.SearchSuiteRetrievalService;
-import fr.njj.galaxion.endtoendtesting.usecases.pipeline.AssertPipelineUseCase;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
@@ -34,8 +34,7 @@ import static fr.njj.galaxion.endtoendtesting.helper.EnvironmentHelper.buildVari
 @RequiredArgsConstructor
 public class RunTestUseCase {
 
-    private final AssertPipelineUseCase assertPipelineUseCase;
-
+    private final AssertPipelineService assertPipelineService;
     private final ConfigurationTestRetrievalService configurationTestRetrievalService;
     private final SearchSuiteRetrievalService searchSuiteRetrievalService;
     private final RunGitlabJobService runGitlabJobService;
@@ -47,7 +46,7 @@ public class RunTestUseCase {
     @Transactional
     public void execute(
             RunTestOrSuiteRequest request) {
-        assertPipelineUseCase.execute();
+        assertPipelineService.assertPipeline();
         assertOnlyOneParameterInRequest(request);
 
         String file;

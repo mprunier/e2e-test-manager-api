@@ -1,26 +1,27 @@
 package fr.njj.galaxion.endtoendtesting.usecases.environment;
 
+import fr.njj.galaxion.endtoendtesting.domain.event.EnvironmentCreatedEvent;
 import fr.njj.galaxion.endtoendtesting.domain.request.CreateUpdateEnvironmentRequest;
 import fr.njj.galaxion.endtoendtesting.domain.response.EnvironmentResponse;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSchedulerEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentVariableEntity;
-import fr.njj.galaxion.endtoendtesting.usecases.synchronisation.GlobalEnvironmentSynchronizationUseCase;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.EnvironmentRetrievalService;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor
 public class CreateEnvironmentUseCase {
 
-    private final RetrieveEnvironmentDetailsUseCase retrieveEnvironmentDetailsUseCase;
-    private final GlobalEnvironmentSynchronizationUseCase globalEnvironmentSynchronizationUseCase;
+    private final EnvironmentRetrievalService environmentRetrievalService;
+    
+    private final Event<EnvironmentCreatedEvent> environmentCreatedEvent;
 
     private final SecurityIdentity identity;
 
@@ -40,8 +41,8 @@ public class CreateEnvironmentUseCase {
         environment.persist();
         createVariables(request, environment);
         createConfigurationScheduler(environment);
-        synchronize(environment);
-        return retrieveEnvironmentDetailsUseCase.execute(environment.getId());
+        environmentCreatedEvent.fire(EnvironmentCreatedEvent.builder().environmentId(environment.getId()).build());
+        return environmentRetrievalService.getResponse(environment.getId());
     }
 
     private void createConfigurationScheduler(EnvironmentEntity environment) {
@@ -50,10 +51,6 @@ public class CreateEnvironmentUseCase {
                 .environment(environment)
                 .build()
                 .persist();
-    }
-
-    private void synchronize(EnvironmentEntity environment) {
-        CompletableFuture.runAsync(() -> globalEnvironmentSynchronizationUseCase.execute(environment.getId()));
     }
 
     private void createVariables(CreateUpdateEnvironmentRequest request, EnvironmentEntity environment) {
