@@ -9,6 +9,7 @@ import static fr.njj.galaxion.endtoendtesting.mapper.ConfigurationInternalMapper
 import fr.njj.galaxion.endtoendtesting.client.converter.ConverterClient;
 import fr.njj.galaxion.endtoendtesting.domain.exception.CharactersForbiddenException;
 import fr.njj.galaxion.endtoendtesting.domain.exception.SuiteNoTitleException;
+import fr.njj.galaxion.endtoendtesting.domain.exception.SuiteShouldBeNotContainsSubSuiteException;
 import fr.njj.galaxion.endtoendtesting.domain.exception.TitleDuplicationException;
 import fr.njj.galaxion.endtoendtesting.domain.exception.TitleEmptyException;
 import fr.njj.galaxion.endtoendtesting.domain.internal.ConfigurationInternal;
@@ -113,11 +114,25 @@ public class SynchronizeEnvironmentService {
       String filePath) {
     try {
       var configurationInternal = build(content, relativePathString);
+      assertNoSubSuiteInTestSuite(configurationInternal);
       assertUniqueTitles(configurationInternal);
       updateOrCreate(environmentId, relativePathString, configurationInternal);
     } catch (CustomException exception) {
       errors.put(filePath, exception.getDetail());
     }
+  }
+
+  // Always managed by the api but not by the front so we block here for the moment. To see if clean
+  // to not manage it on the api side, is not cleaner. (TODO)
+  private static void assertNoSubSuiteInTestSuite(ConfigurationInternal configurationInternal) {
+    configurationInternal
+        .getSuites()
+        .forEach(
+            suite -> {
+              if (suite.isExistSubSuite()) {
+                throw new SuiteShouldBeNotContainsSubSuiteException();
+              }
+            });
   }
 
   private static void assertUniqueTitles(ConfigurationInternal config) {

@@ -1,6 +1,6 @@
 package fr.njj.galaxion.endtoendtesting.controller.secured;
 
-import fr.njj.galaxion.endtoendtesting.usecases.pipeline.AssertPipelineUseCase;
+import fr.njj.galaxion.endtoendtesting.usecases.pipeline.AssertPipelineReachedUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.run.RunAllTestsUseCase;
 import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class SecuredSchedulerController {
 
-  private final AssertPipelineUseCase assertPipelineUseCase;
+  private final AssertPipelineReachedUseCase assertPipelineReachedUseCase;
   private final RunAllTestsUseCase runAllTestsUseCase;
   private final SecurityIdentity identity;
 
@@ -27,7 +27,7 @@ public class SecuredSchedulerController {
         identity != null && identity.getPrincipal() != null
             ? identity.getPrincipal().getName()
             : "Unknown";
-    assertPipelineUseCase.execute();
+    assertPipelineReachedUseCase.execute();
     runAllTestsUseCase.execute(environmentId, createdBy);
   }
 }

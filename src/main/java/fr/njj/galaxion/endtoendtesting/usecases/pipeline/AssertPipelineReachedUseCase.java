@@ -1,6 +1,6 @@
 package fr.njj.galaxion.endtoendtesting.usecases.pipeline;
 
-import fr.njj.galaxion.endtoendtesting.service.AssertPipelineService;
+import fr.njj.galaxion.endtoendtesting.service.AssertPipelineReachedService;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,11 +8,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor
-public class AssertPipelineUseCase {
+public class AssertPipelineReachedUseCase {
 
-  private final AssertPipelineService assertPipelineService;
+  private final AssertPipelineReachedService assertPipelineReachedService;
 
   public void execute() {
-    assertPipelineService.assertPipeline();
+    assertPipelineReachedService.assertPipeline();
   }
 }

@@ -11,7 +11,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor
-public class AssertPipelineService {
+public class AssertPipelineReachedService {
 
   @Getter
   @ConfigProperty(name = "gitlab.job.max-in-parallel")

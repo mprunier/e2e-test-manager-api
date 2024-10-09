@@ -12,7 +12,7 @@ import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.PipelineEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.TestEntity;
-import fr.njj.galaxion.endtoendtesting.service.AssertPipelineService;
+import fr.njj.galaxion.endtoendtesting.service.AssertPipelineReachedService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.RunGitlabJobService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationTestRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.SearchSuiteRetrievalService;
@@ -33,7 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 @RequiredArgsConstructor
 public class RunTestUseCase {
 
-  private final AssertPipelineService assertPipelineService;
+  private final AssertPipelineReachedService assertPipelineReachedService;
   private final ConfigurationTestRetrievalService configurationTestRetrievalService;
   private final SearchSuiteRetrievalService searchSuiteRetrievalService;
   private final RunGitlabJobService runGitlabJobService;
@@ -44,7 +44,7 @@ public class RunTestUseCase {
 
   @Transactional
   public void execute(RunTestOrSuiteRequest request) {
-    assertPipelineService.assertPipeline();
+    assertPipelineReachedService.assertPipeline();
     assertOnlyOneParameterInRequest(request);
 
     String file;

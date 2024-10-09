@@ -8,21 +8,26 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Builder
 public class ConfigurationSuiteInternal {
 
-  @Setter private String title;
+  private String title;
 
-  @Builder.Default @Setter private List<String> variables = new ArrayList<>();
+  @Builder.Default private List<String> variables = new ArrayList<>();
 
-  @Builder.Default @Setter private List<String> tags = new ArrayList<>();
+  @Builder.Default private List<String> tags = new ArrayList<>();
 
-  @Builder.Default @Setter private List<ConfigurationTestInternal> tests = new ArrayList<>();
+  @Builder.Default private List<ConfigurationTestInternal> tests = new ArrayList<>();
 
-  @Builder.Default @Setter private List<ConfigurationSuiteInternal> suites = new ArrayList<>();
+  @Builder.Default private List<ConfigurationSuiteInternal> suites = new ArrayList<>();
 
-  @Builder.Default @Setter private boolean toDisable = false;
+  @Builder.Default private boolean toDisable = false;
+
+  public boolean isExistSubSuite() {
+    return !suites.isEmpty();
+  }
 }
