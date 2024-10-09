@@ -19,8 +19,10 @@ import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestTagEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
+import fr.njj.galaxion.endtoendtesting.model.entity.FileGroupEntity;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationTestRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.EnvironmentRetrievalService;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.FileGroupRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.SearchSuiteRetrievalService;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.io.File;
@@ -47,6 +49,8 @@ public class SynchronizeEnvironmentService {
   private final DeleteConfigurationTestAndSuiteService deleteConfigurationTestAndSuiteService;
   private final ConfigurationTestRetrievalService configurationTestRetrievalService;
   private final SearchSuiteRetrievalService searchSuiteRetrievalService;
+  private final DeleteFileGroupService deleteFileGroupService;
+  private final FileGroupRetrievalService fileGroupRetrievalService;
 
   @RestClient private ConverterClient converterClient;
 
@@ -178,6 +182,32 @@ public class SynchronizeEnvironmentService {
         environmentId, file, testIds);
     deleteConfigurationTestAndSuiteService.deleteSuiteByEnvAndFileAndNotInTestIds(
         environmentId, file, suiteIds);
+
+    deleteOrCreateFileGroup(
+        environmentId, file, configurationInternal, suiteIds, testIds, environment);
+  }
+
+  private void deleteOrCreateFileGroup(
+      Long environmentId,
+      String file,
+      ConfigurationInternal configurationInternal,
+      ArrayList<Long> suiteIds,
+      ArrayList<Long> testIds,
+      EnvironmentEntity environment) {
+    if (suiteIds.isEmpty() && testIds.isEmpty()) {
+      deleteFileGroupService.deleteByEnvAndFile(environmentId, file);
+    } else {
+      var fileGroup = fileGroupRetrievalService.getByFileAndEnv(environmentId, file);
+      if (fileGroup.isEmpty() && StringUtils.isNotBlank(configurationInternal.getGroup())) {
+        FileGroupEntity.builder()
+            .environment(environment)
+            .file(file)
+            .group(configurationInternal.getGroup())
+            .build()
+            .persist();
+      } else if (fileGroup.isPresent() && StringUtils.isBlank(configurationInternal.getGroup()))
+        deleteFileGroupService.deleteByEnvAndFile(environmentId, file);
+    }
   }
 
   private void updateOrCreateTestWithoutSuite(

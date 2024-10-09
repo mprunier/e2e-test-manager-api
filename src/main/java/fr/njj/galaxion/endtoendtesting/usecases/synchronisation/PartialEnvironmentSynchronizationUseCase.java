@@ -10,6 +10,7 @@ import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.service.CleanEnvironmentSynchronizationErrorService;
 import fr.njj.galaxion.endtoendtesting.service.CreateOrUpdateEnvironmentSynchronizationErrorService;
 import fr.njj.galaxion.endtoendtesting.service.DeleteConfigurationTestAndSuiteService;
+import fr.njj.galaxion.endtoendtesting.service.DeleteFileGroupService;
 import fr.njj.galaxion.endtoendtesting.service.SynchronizeEnvironmentService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.CloneGitlabRepositoryService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.EnvironmentRetrievalService;
@@ -34,6 +35,7 @@ public class PartialEnvironmentSynchronizationUseCase {
   private final DeleteConfigurationTestAndSuiteService deleteConfigurationTestAndSuiteService;
   private final CleanEnvironmentSynchronizationErrorService
       cleanEnvironmentSynchronizationErrorService;
+  private final DeleteFileGroupService deleteFileGroupService;
 
   private final Event<SyncEnvironmentCompletedEvent> syncEnvironmentEvent;
 
@@ -93,10 +95,10 @@ public class PartialEnvironmentSynchronizationUseCase {
 
   private void cleanFilesToRemove(Set<String> filesToRemove, EnvironmentEntity environment) {
     filesToRemove.forEach(
-        file -> {
-          var relativePathString = file.split(START_PATH)[1];
-          deleteConfigurationTestAndSuiteService.deleteByEnvAndFile(
-              environment.getId(), relativePathString);
+        relativePathString -> {
+          var file = relativePathString.split(START_PATH)[1];
+          deleteConfigurationTestAndSuiteService.deleteByEnvAndFile(environment.getId(), file);
+          deleteFileGroupService.deleteByEnvAndFile(environment.getId(), file);
         });
   }
 }

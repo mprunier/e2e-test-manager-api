@@ -2,6 +2,7 @@ package fr.njj.galaxion.endtoendtesting.mapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -11,7 +12,9 @@ class ConfigurationInternalMapperTest {
   @Test
   void build_withAllParams() {
     var content =
-        "describe('Suite1', {variables: ['variableSuite1'], tags: ['tagSuite1']}, function() { "
+        "//use group-for-parallelization-1 "
+            + System.lineSeparator()
+            + "describe('Suite1', {variables: ['variableSuite1'], tags: ['tagSuite1']}, function() { "
             + "  it('Test1', {tags: ['tagTest1'], variables: ['variableTest1']}, function() { /* test code */ });"
             + "  it('Test2', function() { /* test code */ });"
             + "});";
@@ -38,12 +41,16 @@ class ConfigurationInternalMapperTest {
     assertEquals("Test2", test2.getTitle());
     assertTrue(test2.getVariables().isEmpty());
     assertTrue(test2.getTags().isEmpty());
+
+    assertEquals("1", result.getGroup());
   }
 
   @Test
   void build_withAllParamsDifferentOrder() {
     var content =
-        "describe('Suite1', function() { "
+        "// use group-for-parallelization-0040"
+            + System.lineSeparator()
+            + "describe('Suite1', function() { "
             + "  it('Test1', {tags: ['tag1'], variables: ['variableTest1']}, function() { /* test code */ });"
             + "  it('Test2', function() { /* test code */ });"
             + "  it('Test3', function() { /* test code */ });"
@@ -88,12 +95,16 @@ class ConfigurationInternalMapperTest {
 
     var test7 = suite.getTests().get(6);
     assertEquals("Test7", test7.getTitle());
+
+    assertEquals("0040", result.getGroup());
   }
 
   @Test
   void build_withDisableTest() {
     var content =
-        "describe('Suite1', function() { "
+        "/* use group-for-parallelization-0040 */"
+            + System.lineSeparator()
+            + "describe('Suite1', function() { "
             + "  it('Test1', {tags: ['testTag1']}, function() { /* test code */ });"
             + "  it('Test2', {variables: ['testVariable1'], tags: ['disable-on-e2e-testing-manager']}, function() { /* test code */ });"
             + "});";
@@ -111,17 +122,22 @@ class ConfigurationInternalMapperTest {
     assertTrue(test1.getVariables().isEmpty());
     assertFalse(test1.getTags().isEmpty());
     assertEquals("testTag1", test1.getTags().getFirst());
+
+    assertEquals("0040", result.getGroup());
   }
 
   @Test
   void build_withDisableSuite() {
     var content =
-        "describe('Suite1', {tags: ['disable-on-e2e-testing-manager']}, function() { "
+        "// group-for-parallelization-aasa"
+            + System.lineSeparator()
+            + "describe('Suite1', {tags: ['disable-on-e2e-testing-manager']}, function() { "
             + "  it('Test1', {tags: ['testTag1']}, function() { /* test code */ });"
             + "});";
 
     var result = ConfigurationInternalMapper.build(content, "fullPath");
 
     assertTrue(result.getSuites().isEmpty());
+    assertNull(result.getGroup());
   }
 }
