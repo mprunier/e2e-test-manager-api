@@ -8,13 +8,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Builder
 public class ConfigurationInternal {
 
-  @Builder.Default @Setter private List<ConfigurationTestInternal> tests = new ArrayList<>();
+  @Builder.Default private List<ConfigurationTestInternal> tests = new ArrayList<>();
 
-  @Builder.Default @Setter private List<ConfigurationSuiteInternal> suites = new ArrayList<>();
+  @Builder.Default private List<ConfigurationSuiteInternal> suites = new ArrayList<>();
+
+  private String group;
 }

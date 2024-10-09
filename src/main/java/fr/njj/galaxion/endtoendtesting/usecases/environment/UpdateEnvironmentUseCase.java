@@ -46,6 +46,7 @@ public class UpdateEnvironmentUseCase {
     environment.getVariables().clear();
     environment.setDescription(request.getDescription());
     environment.setBranch(request.getBranch());
+    environment.setMaxParallelTestNumber(request.getMaxParallelTestNumber());
     if (!request.getToken().contains("****")) {
       environment.setToken(request.getToken());
     }

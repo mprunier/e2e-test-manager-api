@@ -1,7 +1,7 @@
 package fr.njj.galaxion.endtoendtesting.controller;
 
-import fr.njj.galaxion.endtoendtesting.domain.response.SyncErrorResponse;
-import fr.njj.galaxion.endtoendtesting.usecases.error.RetrieveErrorUseCase;
+import fr.njj.galaxion.endtoendtesting.domain.response.SyncEnvironmentErrorResponse;
+import fr.njj.galaxion.endtoendtesting.usecases.environment.RetrieveEnvironmentErrorUseCase;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -15,11 +15,11 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ErrorController {
 
-  private final RetrieveErrorUseCase retrieveErrorUseCase;
+  private final RetrieveEnvironmentErrorUseCase retrieveEnvironmentErrorUseCase;
 
   @GET
-  public List<SyncErrorResponse> retrieveErrors(
+  public List<SyncEnvironmentErrorResponse> retrieveErrors(
       @NotNull @QueryParam("environmentId") Long environmentId) {
-    return retrieveErrorUseCase.execute(environmentId);
+    return retrieveEnvironmentErrorUseCase.execute(environmentId);
   }
 }

@@ -1,6 +1,7 @@
 package fr.njj.galaxion.endtoendtesting.domain.event;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,5 +14,5 @@ import lombok.experimental.SuperBuilder;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "eventType")
 public abstract class AbstractEvent {
 
-  private Long environmentId;
+  @NotNull private Long environmentId;
 }

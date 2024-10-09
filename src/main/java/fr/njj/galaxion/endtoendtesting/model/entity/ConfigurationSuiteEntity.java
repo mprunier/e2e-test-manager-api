@@ -81,7 +81,7 @@ public class ConfigurationSuiteEntity extends PanacheEntityBase {
       fetch = FetchType.LAZY,
       cascade = CascadeType.ALL,
       orphanRemoval = true)
-  @OrderBy("id ASC")
+  @OrderBy("position ASC")
   private List<ConfigurationTestEntity> configurationTests;
 
   @Setter
@@ -109,9 +109,4 @@ public class ConfigurationSuiteEntity extends PanacheEntityBase {
   @Setter
   @Column(name = "last_played_at")
   private ZonedDateTime lastPlayedAt;
-
-  //    public void setStatus(ConfigurationStatus status) {
-  //        this.lastPlayedAt = ZonedDateTime.now();
-  //        this.status = status;
-  //    }
 }

@@ -2,7 +2,8 @@ package fr.njj.galaxion.endtoendtesting.model.converter;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Converter
@@ -15,11 +16,18 @@ public class StringListConverter implements AttributeConverter<List<String>, Str
     if (stringList == null || stringList.isEmpty()) {
       return null;
     }
-    return String.join(SPLIT_CHAR, stringList);
+    List<String> sortedList = new ArrayList<>(stringList);
+    Collections.sort(sortedList);
+    return String.join(SPLIT_CHAR, sortedList);
   }
 
   @Override
   public List<String> convertToEntityAttribute(String string) {
-    return string != null ? Arrays.asList(string.split(SPLIT_CHAR)) : null;
+    if (string == null) {
+      return null;
+    }
+    List<String> list = new ArrayList<>(List.of(string.split(SPLIT_CHAR)));
+    Collections.sort(list);
+    return list;
   }
 }

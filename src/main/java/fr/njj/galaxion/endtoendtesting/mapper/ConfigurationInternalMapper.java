@@ -1,6 +1,7 @@
 package fr.njj.galaxion.endtoendtesting.mapper;
 
 import static fr.njj.galaxion.endtoendtesting.domain.constant.CommonConstant.DISABLE_TAG;
+import static fr.njj.galaxion.endtoendtesting.domain.constant.CommonConstant.GROUP_FOR_PARALLELIZATION;
 
 import fr.njj.galaxion.endtoendtesting.domain.exception.SubSuiteException;
 import fr.njj.galaxion.endtoendtesting.domain.internal.ConfigurationInternal;
@@ -8,7 +9,11 @@ import fr.njj.galaxion.endtoendtesting.domain.internal.ConfigurationSuiteInterna
 import fr.njj.galaxion.endtoendtesting.domain.internal.ConfigurationTestInternal;
 import fr.njj.galaxion.endtoendtesting.lib.exception.CustomException;
 import jakarta.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +23,8 @@ import org.mozilla.javascript.EvaluatorException;
 import org.mozilla.javascript.Parser;
 import org.mozilla.javascript.ast.ArrayLiteral;
 import org.mozilla.javascript.ast.AstNode;
+import org.mozilla.javascript.ast.AstRoot;
+import org.mozilla.javascript.ast.Comment;
 import org.mozilla.javascript.ast.ExpressionStatement;
 import org.mozilla.javascript.ast.FunctionCall;
 import org.mozilla.javascript.ast.FunctionNode;
@@ -41,11 +48,8 @@ public final class ConfigurationInternalMapper {
       var parser = new Parser(env);
       var astRoot = parser.parse(content, null, 0);
 
-      //      var sortedComments = new ArrayList<Comment>();
-      //      if (astRoot.getComments() != null) {
-      //        sortedComments.addAll(astRoot.getComments());
-      //      }
-      //      sortedComments.sort(Comparator.comparingInt(AstNode::getAbsolutePosition));
+      setGroupIfExist(astRoot, configurationInternal);
+
       processNode(astRoot, configurationInternal, null, fullPath);
     } catch (EvaluatorException e) {
       throw new CustomException(
@@ -56,6 +60,28 @@ public final class ConfigurationInternalMapper {
 
     removeDisabledItems(configurationInternal);
     return configurationInternal;
+  }
+
+  private static void setGroupIfExist(
+      AstRoot astRoot, ConfigurationInternal configurationInternal) {
+    var sortedComments = new ArrayList<Comment>();
+    if (astRoot.getComments() != null) {
+      sortedComments.addAll(astRoot.getComments());
+    }
+    sortedComments.sort(Comparator.comparingInt(AstNode::getAbsolutePosition));
+    if (!sortedComments.isEmpty()) {
+      var firstComment = sortedComments.getFirst();
+      var commentValue = firstComment.getValue();
+      if (commentValue != null) {
+        String groupPattern = "use\\s+" + GROUP_FOR_PARALLELIZATION + "(\\d+)";
+        Pattern pattern = Pattern.compile(groupPattern);
+        Matcher matcher = pattern.matcher(commentValue);
+        if (matcher.find()) {
+          String group = matcher.group(1);
+          configurationInternal.setGroup(group);
+        }
+      }
+    }
   }
 
   private static void removeDisabledItems(ConfigurationInternal config) {
@@ -161,13 +187,27 @@ public final class ConfigurationInternalMapper {
     var testCase = new ConfigurationTestInternal();
     testCase.setTitle(firstArg.getValue());
 
+    testCase.setPosition(node.getAbsolutePosition());
+
     extractTagsAndVariables(node, testCase);
 
     if (parentSuite == null && configurationInternal != null) {
-      configurationInternal.getTests().add(testCase);
+      insertTestInOrder(configurationInternal.getTests(), testCase);
     } else if (parentSuite != null) {
-      parentSuite.getTests().add(testCase);
+      insertTestInOrder(parentSuite.getTests(), testCase);
     }
+  }
+
+  private static void insertTestInOrder(
+      List<ConfigurationTestInternal> tests, ConfigurationTestInternal newTest) {
+    int insertIndex = 0;
+    for (ConfigurationTestInternal test : tests) {
+      if (test.getPosition() > newTest.getPosition()) {
+        break;
+      }
+      insertIndex++;
+    }
+    tests.add(insertIndex, newTest);
   }
 
   private static void extractTagsAndVariables(AstNode node, ConfigurationTestInternal testCase) {

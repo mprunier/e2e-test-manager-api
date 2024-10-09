@@ -41,6 +41,14 @@ public class TestEntity extends PanacheEntityBase {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @Column(name = "pipeline_id")
+  private String pipelineId;
+
+  @Setter
+  @Builder.Default
+  @Column(name = "is_waiting", nullable = false)
+  private boolean isWaiting = true;
+
   @ManyToOne
   @JoinColumn(
       name = "configuration_test_id",
@@ -53,10 +61,9 @@ public class TestEntity extends PanacheEntityBase {
   private Map<String, String> variables;
 
   @Setter
-  @Builder.Default
   @Enumerated(EnumType.STRING)
   @Column(name = "status", nullable = false)
-  private ConfigurationStatus status = ConfigurationStatus.IN_PROGRESS;
+  private ConfigurationStatus status;
 
   @Setter
   @Column(name = "reference")
@@ -95,14 +102,9 @@ public class TestEntity extends PanacheEntityBase {
       orphanRemoval = true)
   private List<TestScreenshotEntity> screenshots;
 
-  @Builder.Default
   @Column(name = "created_at", nullable = false)
-  private ZonedDateTime createdAt = ZonedDateTime.now();
+  private ZonedDateTime createdAt;
 
   @Column(name = "created_by", nullable = false)
   private String createdBy;
-
-  @Setter
-  @Column(name = "updated_at")
-  private ZonedDateTime updatedAt;
 }

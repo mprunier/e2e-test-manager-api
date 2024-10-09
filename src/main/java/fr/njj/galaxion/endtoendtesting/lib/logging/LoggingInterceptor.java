@@ -40,15 +40,14 @@ public class LoggingInterceptor {
     var logger = Logger.getLogger(context.getMethod().getDeclaringClass());
 
     if (monitored != null && monitored.logEntry()) {
-      logger.debugf("[%s] --> %s", context.getMethod().getName(), getArgumentsMessage(context));
+      logger.debugf("[%s] -->", context.getMethod().getName());
     }
 
     try {
       var result = context.proceed();
 
       if (monitored != null && monitored.logExit()) {
-        logger.debugf(
-            "[%s] <-- %s", context.getMethod().getName(), result != null ? result : "Nothing");
+        logger.debugf("[%s] <--", context.getMethod().getName());
       }
       return result;
     } catch (CustomException exception) {

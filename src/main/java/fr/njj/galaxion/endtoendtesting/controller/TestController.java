@@ -25,12 +25,6 @@ public class TestController {
   }
 
   @GET
-  @Path("/errors")
-  public List<TestResponse> getErrorResponses(@QueryParam("pipelineId") String pipelineId) {
-    return testRetrievalService.getErrorResponses(pipelineId);
-  }
-
-  @GET
   @Path("{id}")
   public TestResponse getResponse(@PathParam("id") Long id) {
     return testRetrievalService.getResponse(id);
