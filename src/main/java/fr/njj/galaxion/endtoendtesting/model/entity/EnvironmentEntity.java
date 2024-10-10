@@ -13,6 +13,8 @@ import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -99,5 +101,15 @@ public class EnvironmentEntity extends PanacheEntityBase {
 
   @Setter
   @Column(name = "last_all_tests_error")
-  private String lastALlTestsError;
+  private String lastAllTestsError;
+
+  @Setter
+  @Column(name = "max_parallel_test_number", nullable = false)
+  private Integer maxParallelTestNumber;
+
+  public Set<String> getFiles() {
+    return configurationSuites.stream()
+        .map(ConfigurationSuiteEntity::getFile)
+        .collect(Collectors.toSet());
+  }
 }

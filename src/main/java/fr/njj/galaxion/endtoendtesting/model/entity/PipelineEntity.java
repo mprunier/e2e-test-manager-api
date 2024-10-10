@@ -55,4 +55,10 @@ public class PipelineEntity extends PanacheEntityBase {
   @Setter
   @Column(name = "updated_at")
   private ZonedDateTime updatedAt;
+
+  @ManyToOne
+  @JoinColumn(
+      name = "parallel_pipeline_progress_id",
+      foreignKey = @ForeignKey(name = "fk__pipeline__parallel_pipeline_progress_id"))
+  private ParallelPipelineProgressEntity parallelPipelineProgress;
 }

@@ -24,7 +24,7 @@ public final class EnvironmentResponseMapper {
           .isEnabled(entity.getIsEnabled())
           .isLocked(entity.getIsLocked())
           .isRunningAllTests(entity.getIsRunningAllTests())
-          .lastAllTestsError(entity.getLastALlTestsError())
+          .lastAllTestsError(entity.getLastAllTestsError())
           .variables(variables)
           .createdAt(entity.getCreatedAt())
           .updatedAt(entity.getUpdatedAt())

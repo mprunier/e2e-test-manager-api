@@ -35,7 +35,7 @@ public class RunGitlabJobService {
                 VariableRequest.builder()
                     .key("CYPRESS_TEST_ENABLED")
                     .value("true")
-                    .build()) // Pour pas que le job tourne pour un commit lambda.
+                    .build()) // To avoid running the job for a random commit.
             .ref(branch);
     if (StringUtils.isNotBlank(spec)) {
       pipelineRequestBuilder.variable(

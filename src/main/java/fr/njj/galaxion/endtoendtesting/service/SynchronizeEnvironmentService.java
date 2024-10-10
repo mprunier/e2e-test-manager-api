@@ -212,7 +212,7 @@ public class SynchronizeEnvironmentService {
     if (suiteIds.isEmpty() && testIds.isEmpty()) {
       deleteFileGroupService.deleteByEnvAndFile(environmentId, file);
     } else {
-      var fileGroup = fileGroupRetrievalService.getByFileAndEnv(environmentId, file);
+      var fileGroup = fileGroupRetrievalService.getOptionalFileGroup(environmentId, file);
       if (fileGroup.isEmpty() && StringUtils.isNotBlank(configurationInternal.getGroup())) {
         FileGroupEntity.builder()
             .environment(environment)

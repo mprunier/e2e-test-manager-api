@@ -24,14 +24,14 @@ public class CompleteAllTestsRunService {
     var entity = environmentRetrievalService.get(environmentId);
     entity.setIsRunningAllTests(false);
     if (reportAllTestRanStatus != null) {
-      entity.setLastALlTestsError(reportAllTestRanStatus.getErrorMessage());
+      entity.setLastAllTestsError(reportAllTestRanStatus.getErrorMessage());
     } else {
-      entity.setLastALlTestsError(null);
+      entity.setLastAllTestsError(null);
     }
 
     allTestsRunCompletedEvent.fire(
         AllTestsRunCompletedEvent.builder()
-            .lastAllTestsError(entity.getLastALlTestsError())
+            .lastAllTestsError(entity.getLastAllTestsError())
             .environmentId(environmentId)
             .build());
   }
