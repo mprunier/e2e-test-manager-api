@@ -1,5 +1,6 @@
 package fr.njj.galaxion.endtoendtesting.domain.internal;
 
+import fr.njj.galaxion.endtoendtesting.domain.exception.SuiteShouldBeNotContainsSubSuiteException;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -27,7 +28,7 @@ public class ConfigurationSuiteInternal {
 
   @Builder.Default private boolean toDisable = false;
 
-  public boolean isExistSubSuite() {
-    return !suites.isEmpty();
+  public void assertNotExistSubSuite() {
+    throw new SuiteShouldBeNotContainsSubSuiteException();
   }
 }

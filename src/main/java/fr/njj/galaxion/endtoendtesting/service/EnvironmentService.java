@@ -1,4 +1,4 @@
-package fr.njj.galaxion.endtoendtesting.usecases.environment;
+package fr.njj.galaxion.endtoendtesting.service;
 
 import fr.njj.galaxion.endtoendtesting.service.retrieval.EnvironmentRetrievalService;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -9,17 +9,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor
-public class CleanEnvironmentOnStartupUseCase {
+public class EnvironmentService {
 
   private final EnvironmentRetrievalService environmentRetrievalService;
 
   @Transactional
-  public void execute() {
-    var environments = environmentRetrievalService.getEnvironments();
-    environments.forEach(
-        environment -> {
-          environment.setIsLocked(false);
-          environment.stopAllTests();
-        });
+  public void stopAllTests(Long id) {
+    var environment = environmentRetrievalService.get(id);
+    environment.stopAllTests();
   }
 }

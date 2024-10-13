@@ -61,4 +61,8 @@ public class PipelineEntity extends PanacheEntityBase {
       name = "parallel_pipeline_progress_id",
       foreignKey = @ForeignKey(name = "fk__pipeline__parallel_pipeline_progress_id"))
   private ParallelPipelineProgressEntity parallelPipelineProgress;
+
+  @Setter
+  @Column(name = "report_error")
+  private String reportError;
 }

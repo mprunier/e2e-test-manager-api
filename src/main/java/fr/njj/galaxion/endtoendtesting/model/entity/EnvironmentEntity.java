@@ -112,4 +112,12 @@ public class EnvironmentEntity extends PanacheEntityBase {
         .map(ConfigurationSuiteEntity::getFile)
         .collect(Collectors.toSet());
   }
+
+  public void startAllTests() {
+    isRunningAllTests = true;
+  }
+
+  public void stopAllTests() {
+    isRunningAllTests = false;
+  }
 }

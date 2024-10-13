@@ -40,7 +40,7 @@ public class RunAllTestsUseCase {
     log.info("[{}] ran all tests on Environment id [{}].", createdBy, environmentId);
     var environment = environmentRetrievalService.get(environmentId);
     assertSchedulerInProgress(environment);
-    environment.setIsRunningAllTests(true);
+    environment.startAllTests();
 
     if (environment.getMaxParallelTestNumber() > 1) {
       runWithMultiPipelines(environment);
@@ -168,7 +168,7 @@ public class RunAllTestsUseCase {
   }
 
   private static void assertSchedulerInProgress(EnvironmentEntity environment) {
-    if (Boolean.TRUE.equals(environment.getIsRunningAllTests())) {
+    if (environment.getIsRunningAllTests()) {
       throw new AllTestsAlreadyRunningException();
     }
   }

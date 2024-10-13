@@ -84,7 +84,7 @@ public class RunTestUseCase {
             file,
             variablesBuilder.toString(),
             grep.toString(),
-            null, // TODO
+            null,
             isVideo);
 
     var testIds = new ArrayList<String>();

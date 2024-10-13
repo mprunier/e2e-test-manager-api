@@ -1,6 +1,6 @@
 package fr.njj.galaxion.endtoendtesting.usecases.run;
 
-import fr.njj.galaxion.endtoendtesting.domain.enumeration.ReportAllTestRanStatus;
+import fr.njj.galaxion.endtoendtesting.domain.enumeration.ReportPipelineStatus;
 import fr.njj.galaxion.endtoendtesting.service.CompleteAllTestsRunService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.CancelGitlabPipelineService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.EnvironmentRetrievalService;
@@ -24,9 +24,9 @@ public class CancelAllTestsUseCase {
       var environment = environmentRetrievalService.get(environmentId);
       cancelGitlabPipelineService.cancelPipeline(
           environment.getToken(), environment.getProjectId(), pipelineId);
-      completeAllTestsRunService.complete(environmentId, ReportAllTestRanStatus.CANCELED);
+      completeAllTestsRunService.complete(environmentId, ReportPipelineStatus.CANCELED);
     } catch (Exception e) {
-      completeAllTestsRunService.complete(environmentId, ReportAllTestRanStatus.SYSTEM_ERROR);
+      completeAllTestsRunService.complete(environmentId, ReportPipelineStatus.SYSTEM_ERROR);
     }
   }
 }
