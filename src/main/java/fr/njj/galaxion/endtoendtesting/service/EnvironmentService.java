@@ -14,8 +14,8 @@ public class EnvironmentService {
   private final EnvironmentRetrievalService environmentRetrievalService;
 
   @Transactional
-  public void stopAllTests(Long id) {
+  public void endAllTestsRun(Long id) {
     var environment = environmentRetrievalService.get(id);
-    environment.stopAllTests();
+    environment.endAllTestsRun();
   }
 }

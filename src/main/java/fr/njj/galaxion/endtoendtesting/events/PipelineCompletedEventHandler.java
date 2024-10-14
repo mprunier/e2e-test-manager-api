@@ -31,7 +31,7 @@ public class PipelineCompletedEventHandler {
     parallelPipelineProgressService.incrementCompletedPipelines(pipeline.getId());
 
     if (parallelPipelineProgressService.isAllCompleted(pipeline.getId())) {
-      environmentService.stopAllTests(environment.getId());
+      environmentService.endAllTestsRun(environment.getId());
       allTestsRunCompletedEvent.fire(
           AllTestsRunCompletedEvent.builder().environmentId(environment.getId()).build());
     }

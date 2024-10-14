@@ -100,10 +100,6 @@ public class EnvironmentEntity extends PanacheEntityBase {
   private Boolean isRunningAllTests = false;
 
   @Setter
-  @Column(name = "last_all_tests_error")
-  private String lastAllTestsError;
-
-  @Setter
   @Column(name = "max_parallel_test_number", nullable = false)
   private Integer maxParallelTestNumber;
 
@@ -113,11 +109,11 @@ public class EnvironmentEntity extends PanacheEntityBase {
         .collect(Collectors.toSet());
   }
 
-  public void startAllTests() {
+  public void startAllTestsRun() {
     isRunningAllTests = true;
   }
 
-  public void stopAllTests() {
+  public void endAllTestsRun() {
     isRunningAllTests = false;
   }
 }
