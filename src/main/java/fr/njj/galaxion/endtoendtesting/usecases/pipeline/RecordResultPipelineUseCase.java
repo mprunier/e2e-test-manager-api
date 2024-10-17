@@ -4,7 +4,6 @@ import static fr.njj.galaxion.endtoendtesting.helper.TestHelper.updateStatus;
 
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.ConfigurationStatus;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.GitlabJobStatus;
-import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineStatus;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.ReportPipelineStatus;
 import fr.njj.galaxion.endtoendtesting.domain.event.TestRunCompletedEvent;
 import fr.njj.galaxion.endtoendtesting.domain.event.UpdateFinalMetricsEvent;
@@ -51,7 +50,6 @@ public class RecordResultPipelineUseCase {
     } else {
       partialUpdate(jobId, status, pipeline, environment);
     }
-    pipeline.setStatus(PipelineStatus.FINISH);
     updateFinalMetricsEvent.fire(
         UpdateFinalMetricsEvent.builder()
             .environmentId(environment.getId())

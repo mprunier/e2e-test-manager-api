@@ -7,6 +7,7 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,5 +31,15 @@ public class FileGroupRetrievalService {
             Collectors.groupingBy(
                 FileGroupEntity::getGroup,
                 Collectors.mapping(FileGroupEntity::getFile, Collectors.toList())));
+  }
+
+  public Set<String> getAllGroups(long environmentId) {
+    return fileGroupRepository.findAllByEnv(environmentId).stream()
+        .map(FileGroupEntity::getGroup)
+        .collect(Collectors.toSet());
+  }
+
+  public Set<String> getAllFiles(long environmentId, String group) {
+    return fileGroupRepository.findAllFilesByGroup(environmentId, group);
   }
 }

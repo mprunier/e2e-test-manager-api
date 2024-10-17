@@ -34,7 +34,7 @@ public class CreateEnvironmentUseCase {
             .branch(request.getBranch())
             .token(request.getToken())
             .projectId(request.getProjectId())
-            .maxParallelFileSize(request.getMaxParallelTestNumber())
+            .maxParallelTestNumber(request.getMaxParallelTestNumber())
             .isLocked(true)
             .createdBy(username)
             .build();

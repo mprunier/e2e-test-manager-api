@@ -1,6 +1,7 @@
 package fr.njj.galaxion.endtoendtesting.service.retrieval;
 
 import fr.njj.galaxion.endtoendtesting.domain.exception.JobNotFoundException;
+import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.PipelineEntity;
 import fr.njj.galaxion.endtoendtesting.model.repository.PipelineRepository;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -27,7 +28,17 @@ public class PipelineRetrievalService {
   }
 
   @Transactional
+  public EnvironmentEntity getEnvironment(String id) {
+    return get(id).getEnvironment();
+  }
+
+  @Transactional
   public long countInProgress() {
     return pipelineRepository.countInProgress();
+  }
+
+  @Transactional
+  public boolean isAllTestRunning(long environmentId) {
+    return pipelineRepository.isAllTestRunning(environmentId);
   }
 }

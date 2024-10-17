@@ -3,14 +3,16 @@ package fr.njj.galaxion.endtoendtesting.usecases.run;
 import static fr.njj.galaxion.endtoendtesting.helper.EnvironmentHelper.buildVariablesEnvironment;
 
 import fr.njj.galaxion.endtoendtesting.client.gitlab.response.GitlabResponse;
+import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineType;
 import fr.njj.galaxion.endtoendtesting.domain.event.AllTestsRunInProgressEvent;
 import fr.njj.galaxion.endtoendtesting.domain.exception.AllTestsAlreadyRunningException;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
-import fr.njj.galaxion.endtoendtesting.model.entity.ParallelPipelineProgressEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.PipelineEntity;
+import fr.njj.galaxion.endtoendtesting.model.entity.PipelineGroupEntity;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.RunGitlabJobService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.EnvironmentRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.FileGroupRetrievalService;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.PipelineRetrievalService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.transaction.Transactional;
@@ -32,6 +34,7 @@ public class RunAllTestsUseCase {
   private final EnvironmentRetrievalService environmentRetrievalService;
   private final RunGitlabJobService runGitlabJobService;
   private final FileGroupRetrievalService fileGroupRetrievalService;
+  private final PipelineRetrievalService pipelineRetrievalService;
 
   private final Event<AllTestsRunInProgressEvent> allTestsRunInProgressEvent;
 
@@ -40,7 +43,6 @@ public class RunAllTestsUseCase {
     log.info("[{}] ran all tests on Environment id [{}].", createdBy, environmentId);
     var environment = environmentRetrievalService.get(environmentId);
     assertSchedulerInProgress(environment);
-    environment.startAllTestsRun();
 
     if (environment.getMaxParallelTestNumber() > 1) {
       runWithMultiPipelines(environment);
@@ -66,7 +68,7 @@ public class RunAllTestsUseCase {
             null,
             false);
 
-    createPipeline(gitlabResponse, environment, null);
+    createPipeline(gitlabResponse, environment, null, PipelineType.ALL);
   }
 
   private void runWithMultiPipelines(EnvironmentEntity environment) {
@@ -83,15 +85,15 @@ public class RunAllTestsUseCase {
     int actualPipelineCount = (int) pipelines.stream().filter(p -> !p.isEmpty()).count();
 
     if (actualPipelineCount > 1) {
-      var parallelPipelineProgress =
-          ParallelPipelineProgressEntity.builder()
+      var pipelineGroup =
+          PipelineGroupEntity.builder()
               .environment(environment)
               .totalPipelines(actualPipelineCount)
               .build();
 
-      parallelPipelineProgress.persist();
+      pipelineGroup.persist();
 
-      executePipelines(pipelines, environment, parallelPipelineProgress);
+      executePipelines(pipelines, environment, pipelineGroup);
     } else {
       runWithOnePipeline(environment);
     }
@@ -132,7 +134,7 @@ public class RunAllTestsUseCase {
   private void executePipelines(
       List<List<String>> pipelines,
       EnvironmentEntity environment,
-      ParallelPipelineProgressEntity parallelPipelineProgress) {
+      PipelineGroupEntity pipelineGroup) {
     pipelines.stream()
         .filter(pipelineFiles -> !pipelineFiles.isEmpty())
         .forEach(
@@ -151,24 +153,27 @@ public class RunAllTestsUseCase {
                       null,
                       false);
 
-              createPipeline(gitlabResponse, environment, parallelPipelineProgress);
+              createPipeline(
+                  gitlabResponse, environment, pipelineGroup, PipelineType.ALL_IN_PARALLEL);
             });
   }
 
   private static void createPipeline(
       GitlabResponse gitlabResponse,
       EnvironmentEntity environment,
-      ParallelPipelineProgressEntity parallelPipelineProgress) {
+      PipelineGroupEntity pipelineGroup,
+      PipelineType pipelineType) {
     PipelineEntity.builder()
         .id(gitlabResponse.getId())
+        .type(pipelineType)
         .environment(environment)
-        .parallelPipelineProgress(parallelPipelineProgress)
+        .pipelineGroup(pipelineGroup)
         .build()
         .persist();
   }
 
-  private static void assertSchedulerInProgress(EnvironmentEntity environment) {
-    if (environment.getIsRunningAllTests()) {
+  private void assertSchedulerInProgress(EnvironmentEntity environment) {
+    if (pipelineRetrievalService.isAllTestRunning(environment.getId())) {
       throw new AllTestsAlreadyRunningException();
     }
   }

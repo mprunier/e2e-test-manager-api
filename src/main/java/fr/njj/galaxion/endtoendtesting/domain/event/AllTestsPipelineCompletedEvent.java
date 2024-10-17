@@ -8,8 +8,8 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @SuperBuilder
 @AllArgsConstructor
-@JsonTypeName("PIPELINE_COMPLETED_EVENT")
-public class PipelineCompletedEvent extends AbstractEvent {
+@JsonTypeName("ALL_TESTS_PIPELINE_COMPLETED_EVENT")
+public class AllTestsPipelineCompletedEvent extends AbstractEvent {
 
   private String pipelineId;
 }

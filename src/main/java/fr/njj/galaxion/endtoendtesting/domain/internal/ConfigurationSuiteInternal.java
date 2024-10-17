@@ -29,6 +29,8 @@ public class ConfigurationSuiteInternal {
   @Builder.Default private boolean toDisable = false;
 
   public void assertNotExistSubSuite() {
-    throw new SuiteShouldBeNotContainsSubSuiteException();
+    if (!suites.isEmpty()) {
+      throw new SuiteShouldBeNotContainsSubSuiteException();
+    }
   }
 }

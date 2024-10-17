@@ -4,6 +4,7 @@ import static fr.njj.galaxion.endtoendtesting.domain.constant.CommonConstant.NO_
 import static fr.njj.galaxion.endtoendtesting.helper.EnvironmentHelper.buildVariablesEnvironment;
 
 import fr.njj.galaxion.endtoendtesting.client.gitlab.response.GitlabResponse;
+import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineType;
 import fr.njj.galaxion.endtoendtesting.domain.event.TestRunInProgressEvent;
 import fr.njj.galaxion.endtoendtesting.domain.exception.RunParameterException;
 import fr.njj.galaxion.endtoendtesting.domain.request.RunTestOrSuiteRequest;
@@ -47,12 +48,14 @@ public class RunTestUseCase {
     assertPipelineReachedService.assertPipeline();
     assertOnlyOneParameterInRequest(request);
 
+    PipelineType pipelineType;
     String file;
     EnvironmentEntity environment;
     var configurationTests = new ArrayList<ConfigurationTestEntity>();
     StringBuilder grep = new StringBuilder();
 
     if (request.getConfigurationTestId() != null) {
+      pipelineType = PipelineType.TEST;
       var configurationTest =
           configurationTestRetrievalService.get(request.getConfigurationTestId());
       environment = configurationTest.getEnvironment();
@@ -64,6 +67,7 @@ public class RunTestUseCase {
       }
       grep.append(configurationTest.getTitle());
     } else {
+      pipelineType = PipelineType.SUITE;
       var configurationSuite = searchSuiteRetrievalService.get(request.getConfigurationSuiteId());
       environment = configurationSuite.getEnvironment();
       file = configurationSuite.getFile();
@@ -103,7 +107,7 @@ public class RunTestUseCase {
           testIds.add(String.valueOf(test.getId()));
         });
     if (!testIds.isEmpty()) {
-      createPipeline(gitlabResponse, environment, testIds);
+      createPipeline(gitlabResponse, environment, testIds, pipelineType);
     }
     testRunInProgressEvent.fire(
         TestRunInProgressEvent.builder()
@@ -114,9 +118,13 @@ public class RunTestUseCase {
   }
 
   private void createPipeline(
-      GitlabResponse gitlabResponse, EnvironmentEntity environment, ArrayList<String> testIds) {
+      GitlabResponse gitlabResponse,
+      EnvironmentEntity environment,
+      ArrayList<String> testIds,
+      PipelineType pipelineType) {
     PipelineEntity.builder()
         .id(gitlabResponse.getId())
+        .type(pipelineType)
         .environment(environment)
         .testIds(testIds)
         .build()

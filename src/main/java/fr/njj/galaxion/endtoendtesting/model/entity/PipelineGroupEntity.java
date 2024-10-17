@@ -1,5 +1,6 @@
 package fr.njj.galaxion.endtoendtesting.model.entity;
 
+import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineStatus;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -12,6 +13,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.time.ZonedDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,8 +27,8 @@ import org.hibernate.annotations.FetchMode;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "parallel_pipeline_progress")
-public class ParallelPipelineProgressEntity extends PanacheEntityBase {
+@Table(name = "pipeline_group")
+public class PipelineGroupEntity extends PanacheEntityBase {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,23 +41,20 @@ public class ParallelPipelineProgressEntity extends PanacheEntityBase {
   @Column(name = "total_pipelines", nullable = false)
   private int totalPipelines;
 
-  @Builder.Default
-  @Column(name = "completed_pipelines", nullable = false)
-  private int completedPipelines = 0;
-
   @Fetch(FetchMode.SUBSELECT)
   @OneToMany(
-      mappedBy = "parallelPipelineProgress",
+      mappedBy = "pipelineGroup",
       fetch = FetchType.LAZY,
       cascade = CascadeType.ALL,
       orphanRemoval = true)
   private List<PipelineEntity> pipelines;
 
-  public boolean isAllCompleted() {
-    return totalPipelines == completedPipelines;
-  }
+  @Builder.Default
+  @Column(name = "created_at", nullable = false)
+  private ZonedDateTime createdAt = ZonedDateTime.now();
 
-  public void incrementCompletedPipelines() {
-    completedPipelines++;
+  public boolean isAllCompleted() {
+    return pipelines.stream()
+        .noneMatch(pipeline -> PipelineStatus.IN_PROGRESS.equals(pipeline.getStatus()));
   }
 }

@@ -22,6 +22,7 @@ public class SecuredConfigurationSyncController {
 
   @POST
   public void synchronize(@NotNull @QueryParam("environmentId") Long environmentId) {
+    log.debug("--> Synchronize environment {}", environmentId);
     lockEnvironmentSynchronizationUseCase.execute(environmentId);
     CompletableFuture.runAsync(
         () -> {

@@ -7,6 +7,7 @@ import fr.njj.galaxion.endtoendtesting.domain.response.SearchConfigurationSuiteR
 import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationSuiteTagRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationTestRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationTestTagRetrievalService;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.FileGroupRetrievalService;
 import fr.njj.galaxion.endtoendtesting.usecases.search.RetrieveAllFilesUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.search.RetrieveSuitesUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.search.SearchSuiteOrTestUseCase;
@@ -33,6 +34,7 @@ public class ConfigurationController {
   private final ConfigurationSuiteTagRetrievalService configurationSuiteTagRetrievalService;
   private final RetrieveAllFilesUseCase retrieveAllFilesUseCase;
   private final RetrieveSuitesUseCase retrieveSuitesUseCase;
+  private final FileGroupRetrievalService fileGroupRetrievalService;
 
   @GET
   @Path("/search/suites")
@@ -73,6 +75,7 @@ public class ConfigurationController {
       @NotNull @QueryParam("environmentId") Long environmentId) {
     var tags = configurationSuiteTagRetrievalService.getAllTags(environmentId);
     tags.addAll(configurationTestTagRetrievalService.getAllTags(environmentId));
+    tags.addAll(fileGroupRetrievalService.getAllGroups(environmentId));
     return tags;
   }
 }

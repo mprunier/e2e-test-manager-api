@@ -6,9 +6,11 @@ import fr.njj.galaxion.endtoendtesting.domain.request.SearchConfigurationRequest
 import fr.njj.galaxion.endtoendtesting.domain.response.SearchConfigurationSuiteResponse;
 import fr.njj.galaxion.endtoendtesting.mapper.ConfigurationSuiteResponseMapper;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationSuiteRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationSuiteTagRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationTestRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationTestTagRetrievalService;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.FileGroupRetrievalService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
@@ -27,6 +29,8 @@ public class SearchSuiteOrTestUseCase {
   private final ConfigurationTestRetrievalService configurationTestRetrievalService;
   private final ConfigurationTestTagRetrievalService configurationTestTagRetrievalService;
   private final ConfigurationSuiteTagRetrievalService configurationSuiteTagRetrievalService;
+  private final FileGroupRetrievalService fileGroupRetrievalService;
+  private final ConfigurationSuiteRetrievalService configurationSuiteRetrievalService;
 
   @Transactional
   public SearchConfigurationSuiteResponse execute(
@@ -40,6 +44,9 @@ public class SearchSuiteOrTestUseCase {
           configurationTestTagRetrievalService.getSuiteIds(environmentId, request.getTag());
       configurationSuiteIds.addAll(
           configurationSuiteTagRetrievalService.getSuiteIds(environmentId, request.getTag()));
+      var files = fileGroupRetrievalService.getAllFiles(environmentId, request.getTag());
+      configurationSuiteIds.addAll(
+          configurationSuiteRetrievalService.getSuiteIds(environmentId, files));
       request.setConfigurationSuiteIds(configurationSuiteIds);
     }
 

@@ -24,9 +24,9 @@ public class CancelAllTestsUseCase {
       var environment = environmentRetrievalService.get(environmentId);
       cancelGitlabPipelineService.cancelPipeline(
           environment.getToken(), environment.getProjectId(), pipelineId);
-      completeAllTestsRunService.complete(environmentId, ReportPipelineStatus.CANCELED);
+      completeAllTestsRunService.complete(pipelineId, ReportPipelineStatus.CANCELED);
     } catch (Exception e) {
-      completeAllTestsRunService.complete(environmentId, ReportPipelineStatus.SYSTEM_ERROR);
+      completeAllTestsRunService.complete(pipelineId, ReportPipelineStatus.SYSTEM_ERROR);
     }
   }
 }

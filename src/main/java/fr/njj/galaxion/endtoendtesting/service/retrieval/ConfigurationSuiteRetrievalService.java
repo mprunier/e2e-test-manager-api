@@ -5,6 +5,7 @@ import fr.njj.galaxion.endtoendtesting.model.repository.ConfigurationSuiteReposi
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,5 +24,9 @@ public class ConfigurationSuiteRetrievalService {
   @Transactional
   public List<String> getAllFilesByEnvironment(long environmentId) {
     return configurationSuiteRepository.findAllFilesBy(environmentId);
+  }
+
+  public Set<Long> getSuiteIds(Long environmentId, Set<String> files) {
+    return configurationSuiteRepository.findAllByFiles(environmentId, files);
   }
 }

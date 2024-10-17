@@ -94,11 +94,6 @@ public class EnvironmentEntity extends PanacheEntityBase {
   @Column(name = "is_locked", nullable = false)
   private Boolean isLocked = false;
 
-  @Builder.Default
-  @Setter
-  @Column(name = "is_running_all_tests", nullable = false)
-  private Boolean isRunningAllTests = false;
-
   @Setter
   @Column(name = "max_parallel_test_number", nullable = false)
   private Integer maxParallelTestNumber;
@@ -107,13 +102,5 @@ public class EnvironmentEntity extends PanacheEntityBase {
     return configurationSuites.stream()
         .map(ConfigurationSuiteEntity::getFile)
         .collect(Collectors.toSet());
-  }
-
-  public void startAllTestsRun() {
-    isRunningAllTests = true;
-  }
-
-  public void endAllTestsRun() {
-    isRunningAllTests = false;
   }
 }
