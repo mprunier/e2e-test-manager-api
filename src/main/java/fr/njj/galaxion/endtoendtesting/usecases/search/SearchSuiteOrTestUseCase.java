@@ -11,6 +11,7 @@ import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationSuiteTagRe
 import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationTestRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationTestTagRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.FileGroupRetrievalService;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.PipelineRetrievalService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ public class SearchSuiteOrTestUseCase {
   private final ConfigurationSuiteTagRetrievalService configurationSuiteTagRetrievalService;
   private final FileGroupRetrievalService fileGroupRetrievalService;
   private final ConfigurationSuiteRetrievalService configurationSuiteRetrievalService;
+  private final PipelineRetrievalService pipelineRetrievalService;
 
   @Transactional
   public SearchConfigurationSuiteResponse execute(
@@ -67,6 +69,8 @@ public class SearchSuiteOrTestUseCase {
               .collect(Collectors.toSet()));
     }
 
+    var inProgressTests = pipelineRetrievalService.getAllInProgressTests(environmentId);
+
     var baseQuery = buildConfigurationSuiteSearchQuery(environmentId, request, params, conditions);
     var filteredQuery =
         ConfigurationSuiteEntity.find(baseQuery, params).page(request.getPage(), request.getSize());
@@ -74,7 +78,7 @@ public class SearchSuiteOrTestUseCase {
     long total = filteredQuery.count();
 
     return new SearchConfigurationSuiteResponse(
-        ConfigurationSuiteResponseMapper.builds(configurationSuites),
+        ConfigurationSuiteResponseMapper.builds(configurationSuites, inProgressTests),
         request.getPage(),
         (int) Math.ceil((double) total / request.getSize()),
         request.getSize(),

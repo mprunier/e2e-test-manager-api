@@ -1,8 +1,7 @@
 package fr.njj.galaxion.endtoendtesting.service;
 
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineStatus;
-import fr.njj.galaxion.endtoendtesting.domain.enumeration.ReportPipelineStatus;
-import fr.njj.galaxion.endtoendtesting.domain.event.AllTestsPipelineCompletedEvent;
+import fr.njj.galaxion.endtoendtesting.domain.event.TestRunCompletedEvent;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.PipelineRetrievalService;
 import io.quarkus.cache.CacheManager;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -14,32 +13,23 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor
-public class CompleteAllTestsRunService {
+public class CompleteTestRunService {
 
   private final PipelineRetrievalService pipelineRetrievalService;
 
-  private final Event<AllTestsPipelineCompletedEvent> allTestsRunCompletedEvent;
+  private final Event<TestRunCompletedEvent> testRunCompletedEvent;
 
   private final CacheManager cacheManager;
 
   @Transactional
-  public void complete(String pipelineId, ReportPipelineStatus reportPipelineStatus) {
+  public void complete(String pipelineId) {
 
     var pipeline = pipelineRetrievalService.get(pipelineId);
 
     pipeline.setStatus(PipelineStatus.FINISH);
 
-    if (reportPipelineStatus != null) {
-      pipeline.setReportError(reportPipelineStatus.getErrorMessage());
-    } else {
-      pipeline.setReportError(null);
-    }
-
-    allTestsRunCompletedEvent.fire(
-        AllTestsPipelineCompletedEvent.builder()
-            .environmentId(pipeline.getEnvironment().getId())
-            .pipelineId(pipelineId)
-            .build());
+    testRunCompletedEvent.fire(
+        TestRunCompletedEvent.builder().environmentId(pipeline.getEnvironment().getId()).build());
 
     cacheManager
         .getCache("in_progress_pipelines")

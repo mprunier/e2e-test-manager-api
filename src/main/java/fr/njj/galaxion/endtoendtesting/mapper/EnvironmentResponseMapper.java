@@ -23,6 +23,7 @@ public final class EnvironmentResponseMapper {
           .branch(entity.getBranch())
           .isEnabled(entity.getIsEnabled())
           .isLocked(entity.getIsLocked())
+          .maxParallelTestNumber(entity.getMaxParallelTestNumber())
           .variables(variables)
           .createdAt(entity.getCreatedAt())
           .updatedAt(entity.getUpdatedAt())

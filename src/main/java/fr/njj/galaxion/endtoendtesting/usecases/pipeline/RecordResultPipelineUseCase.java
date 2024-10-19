@@ -5,12 +5,12 @@ import static fr.njj.galaxion.endtoendtesting.helper.TestHelper.updateStatus;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.ConfigurationStatus;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.GitlabJobStatus;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.ReportPipelineStatus;
-import fr.njj.galaxion.endtoendtesting.domain.event.TestRunCompletedEvent;
 import fr.njj.galaxion.endtoendtesting.domain.event.UpdateFinalMetricsEvent;
 import fr.njj.galaxion.endtoendtesting.lib.logging.Monitored;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.PipelineEntity;
 import fr.njj.galaxion.endtoendtesting.service.CompleteAllTestsRunService;
+import fr.njj.galaxion.endtoendtesting.service.CompleteTestRunService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.RetrieveGitlabJobArtifactsService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.PipelineRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.TestRetrievalService;
@@ -28,13 +28,13 @@ public class RecordResultPipelineUseCase {
   private final GenerateTestReportUseCase generateTestReportUseCase;
   private final GenerateAllTestsReportUseCase generateAllTestsReportUseCase;
   private final CompleteAllTestsRunService completeAllTestsRunService;
+  private final CompleteTestRunService completeTestRunService;
 
   private final PipelineRetrievalService pipelineRetrievalService;
   private final TestRetrievalService testRetrievalService;
   private final RetrieveGitlabJobArtifactsService retrieveGitlabJobArtifactsService;
 
   private final Event<UpdateFinalMetricsEvent> updateFinalMetricsEvent;
-  private final Event<TestRunCompletedEvent> testRunCompletedEvent;
 
   @Monitored(logExit = false)
   @Transactional
@@ -109,8 +109,7 @@ public class RecordResultPipelineUseCase {
       log.error(e.getMessage());
       updateStatus(tests, ConfigurationStatus.SYSTEM_ERROR);
     } finally {
-      testRunCompletedEvent.fire(
-          TestRunCompletedEvent.builder().environmentId(environment.getId()).build());
+      completeTestRunService.complete(pipeline.getId());
     }
   }
 }

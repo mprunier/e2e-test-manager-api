@@ -28,6 +28,7 @@ public class CreateEnvironmentUseCase {
   @Transactional
   public EnvironmentResponse execute(CreateUpdateEnvironmentRequest request) {
     var username = identity.getPrincipal().getName();
+    log.info("[{}] created a new environment.", username);
     var environment =
         EnvironmentEntity.builder()
             .description(request.getDescription())

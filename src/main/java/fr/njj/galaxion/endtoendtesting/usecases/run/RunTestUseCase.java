@@ -17,6 +17,7 @@ import fr.njj.galaxion.endtoendtesting.service.AssertPipelineReachedService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.RunGitlabJobService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationTestRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.SearchSuiteRetrievalService;
+import io.quarkus.cache.CacheManager;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
@@ -42,9 +43,16 @@ public class RunTestUseCase {
   private final Event<TestRunInProgressEvent> testRunInProgressEvent;
 
   private final SecurityIdentity identity;
+  private final CacheManager cacheManager;
 
   @Transactional
   public void execute(RunTestOrSuiteRequest request) {
+    var createdBy =
+        identity != null && identity.getPrincipal() != null
+            ? identity.getPrincipal().getName()
+            : "Unknown";
+    log.info("[{}] ran a test or suite.", createdBy);
+
     assertPipelineReachedService.assertPipeline();
     assertOnlyOneParameterInRequest(request);
 
@@ -98,10 +106,7 @@ public class RunTestUseCase {
               TestEntity.builder()
                   .configurationTest(configurationTest)
                   .variables(variablesWithValueMap)
-                  .createdBy(
-                      identity != null && identity.getPrincipal() != null
-                          ? identity.getPrincipal().getName()
-                          : "Unknown")
+                  .createdBy(createdBy)
                   .build();
           test.persist();
           testIds.add(String.valueOf(test.getId()));
@@ -115,6 +120,9 @@ public class RunTestUseCase {
             .testId(request.getConfigurationTestId())
             .suiteId(request.getConfigurationSuiteId())
             .build());
+    cacheManager
+        .getCache("in_progress_pipelines")
+        .ifPresent(cache -> cache.invalidateAll().await().indefinitely());
   }
 
   private void createPipeline(

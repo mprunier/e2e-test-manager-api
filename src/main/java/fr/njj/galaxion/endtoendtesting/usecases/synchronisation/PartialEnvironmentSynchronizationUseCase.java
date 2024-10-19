@@ -5,6 +5,7 @@ import static fr.njj.galaxion.endtoendtesting.domain.constant.CommonConstant.STA
 import static fr.njj.galaxion.endtoendtesting.helper.FileHelper.cleanRepo;
 
 import fr.njj.galaxion.endtoendtesting.domain.event.SyncEnvironmentCompletedEvent;
+import fr.njj.galaxion.endtoendtesting.lib.exception.CustomException;
 import fr.njj.galaxion.endtoendtesting.lib.logging.Monitored;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.service.CleanEnvironmentSynchronizationErrorService;
@@ -58,16 +59,25 @@ public class PartialEnvironmentSynchronizationUseCase {
   private void updateFilesToSynchronize(
       Set<String> filesToSynchronize, EnvironmentEntity environment) {
     var errors = new HashMap<String, String>();
-    var projectFolder =
-        cloneGitlabRepositoryService.cloneRepo(
-            environment.getProjectId(),
-            environment.getId().toString(),
-            environment.getToken(),
-            environment.getBranch());
 
     try {
+      var projectFolder =
+          cloneGitlabRepositoryService.cloneRepo(
+              environment.getProjectId(),
+              environment.getId().toString(),
+              environment.getToken(),
+              environment.getBranch());
+
       synchronizeEnvironmentService.synchronize(
           environment, filesToSynchronize, projectFolder, errors);
+
+      cleanRepo(environment.getId(), projectFolder, errors);
+    } catch (CustomException exception) {
+      errors.put(GLOBAL_ENVIRONMENT_ERROR, exception.getDetail());
+      log.error(
+          "Error during synchronization for Environment id [{}] : {}.",
+          environment.getId(),
+          exception.getDetail());
     } catch (Exception exception) {
       errors.put(GLOBAL_ENVIRONMENT_ERROR, exception.getMessage());
       log.error(
@@ -76,7 +86,6 @@ public class PartialEnvironmentSynchronizationUseCase {
           exception.getMessage());
     }
 
-    cleanRepo(environment, projectFolder, errors);
     errors.forEach(
         (file, error) ->
             createOrUpdateEnvironmentSynchronizationErrorService.createOrUpdateSynchronizationError(

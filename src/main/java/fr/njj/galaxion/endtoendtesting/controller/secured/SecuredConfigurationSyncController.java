@@ -3,6 +3,7 @@ package fr.njj.galaxion.endtoendtesting.controller.secured;
 import fr.njj.galaxion.endtoendtesting.usecases.environment.LockEnvironmentSynchronizationUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.synchronisation.GlobalEnvironmentSynchronizationUseCase;
 import io.quarkus.security.Authenticated;
+import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -19,10 +20,15 @@ public class SecuredConfigurationSyncController {
 
   private final GlobalEnvironmentSynchronizationUseCase globalEnvironmentSynchronizationUseCase;
   private final LockEnvironmentSynchronizationUseCase lockEnvironmentSynchronizationUseCase;
+  private final SecurityIdentity identity;
 
   @POST
   public void synchronize(@NotNull @QueryParam("environmentId") Long environmentId) {
-    log.debug("--> Synchronize environment {}", environmentId);
+    var createdBy =
+        identity != null && identity.getPrincipal() != null
+            ? identity.getPrincipal().getName()
+            : "Unknown";
+    log.info("[{}] ran synchronization on Environment id [{}].", createdBy, environmentId);
     lockEnvironmentSynchronizationUseCase.execute(environmentId);
     CompletableFuture.runAsync(
         () -> {

@@ -32,4 +32,6 @@ public class ConfigurationSuiteResponse {
   private ZonedDateTime lastPlayedAt;
 
   private boolean hasNewTest;
+
+  private int pipelineInProgress;
 }

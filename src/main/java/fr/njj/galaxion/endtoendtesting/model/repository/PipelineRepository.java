@@ -31,4 +31,8 @@ public class PipelineRepository implements PanacheRepositoryBase<PipelineEntity,
             PipelineType.ALL_IN_PARALLEL)
         > 0;
   }
+
+  public List<PipelineEntity> getAllInProgress(long environmentId) {
+    return list("environment.id = ?1 AND status = ?2", environmentId, PipelineStatus.IN_PROGRESS);
+  }
 }

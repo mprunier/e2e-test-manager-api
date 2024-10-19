@@ -27,4 +27,5 @@ public class EnvironmentResponse {
   private ZonedDateTime createdAt;
   private ZonedDateTime updatedAt;
   private Boolean isLocked;
+  private Integer maxParallelTestNumber;
 }

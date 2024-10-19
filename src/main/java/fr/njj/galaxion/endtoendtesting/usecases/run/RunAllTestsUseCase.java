@@ -13,6 +13,7 @@ import fr.njj.galaxion.endtoendtesting.service.gitlab.RunGitlabJobService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.EnvironmentRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.FileGroupRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.PipelineRetrievalService;
+import io.quarkus.cache.CacheManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.transaction.Transactional;
@@ -38,6 +39,8 @@ public class RunAllTestsUseCase {
 
   private final Event<AllTestsRunInProgressEvent> allTestsRunInProgressEvent;
 
+  private final CacheManager cacheManager;
+
   @Transactional
   public void execute(Long environmentId, String createdBy) {
     log.info("[{}] ran all tests on Environment id [{}].", createdBy, environmentId);
@@ -52,6 +55,9 @@ public class RunAllTestsUseCase {
 
     allTestsRunInProgressEvent.fire(
         AllTestsRunInProgressEvent.builder().environmentId(environmentId).build());
+    cacheManager
+        .getCache("in_progress_pipelines")
+        .ifPresent(cache -> cache.invalidateAll().await().indefinitely());
   }
 
   private void runWithOnePipeline(EnvironmentEntity environment) {
@@ -147,9 +153,9 @@ public class RunAllTestsUseCase {
                       environment.getBranch(),
                       environment.getToken(),
                       environment.getProjectId(),
-                      null,
-                      variablesBuilder.toString(),
                       files,
+                      variablesBuilder.toString(),
+                      null,
                       null,
                       false);
 
