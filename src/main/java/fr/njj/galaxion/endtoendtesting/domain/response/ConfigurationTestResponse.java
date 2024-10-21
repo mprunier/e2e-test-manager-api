@@ -35,5 +35,5 @@ public class ConfigurationTestResponse {
 
   private ZonedDateTime lastPlayedAt;
 
-  private int pipelineInProgress;
+  private List<PipelineDetailsResponse> pipelinesInProgress;
 }

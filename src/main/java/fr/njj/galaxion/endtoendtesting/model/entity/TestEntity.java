@@ -53,10 +53,9 @@ public class TestEntity extends PanacheEntityBase {
   private Map<String, String> variables;
 
   @Setter
-  @Builder.Default
   @Enumerated(EnumType.STRING)
   @Column(name = "status", nullable = false)
-  private ConfigurationStatus status = ConfigurationStatus.IN_PROGRESS;
+  private ConfigurationStatus status;
 
   @Setter
   @Column(name = "reference")
@@ -104,5 +103,5 @@ public class TestEntity extends PanacheEntityBase {
 
   @Setter
   @Column(name = "updated_at")
-  private ZonedDateTime updatedAt;
+  private ZonedDateTime updatedAt; // TODO TO remove
 }

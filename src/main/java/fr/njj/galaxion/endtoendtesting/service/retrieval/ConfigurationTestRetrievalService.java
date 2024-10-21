@@ -22,6 +22,11 @@ public class ConfigurationTestRetrievalService {
   private final ConfigurationTestRepository configurationTestRepository;
 
   @Transactional
+  public Optional<ConfigurationTestEntity> getOptional(Long id) {
+    return configurationTestRepository.findByIdOptional(id);
+  }
+
+  @Transactional
   public ConfigurationTestEntity get(Long id) {
     return configurationTestRepository
         .findByIdOptional(id)
@@ -44,5 +49,10 @@ public class ConfigurationTestRetrievalService {
   public List<ConfigurationTestResponse> getResponses(Long environmentId) {
     var configurationTests = configurationTestRepository.findAllBy(environmentId);
     return buildTitles(configurationTests);
+  }
+
+  @Transactional
+  public List<ConfigurationTestEntity> getAllByIds(List<Long> configurationTestIds) {
+    return configurationTestRepository.findAllByIds(configurationTestIds);
   }
 }

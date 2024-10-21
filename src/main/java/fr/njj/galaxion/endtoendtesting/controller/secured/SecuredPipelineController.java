@@ -1,30 +1,32 @@
 package fr.njj.galaxion.endtoendtesting.controller.secured;
 
-import fr.njj.galaxion.endtoendtesting.usecases.run.RunAllTestsUseCase;
+import fr.njj.galaxion.endtoendtesting.usecases.pipeline.CancelPipelineUseCase;
 import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
-import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.POST;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.PathParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Authenticated
-@Path("/auth/scheduler")
+@Path("/auth/pipelines")
 @RequiredArgsConstructor
-public class SecuredSchedulerController {
+public class SecuredPipelineController {
 
-  private final RunAllTestsUseCase runAllTestsUseCase;
   private final SecurityIdentity identity;
 
-  @POST
-  public void run(@NotNull @QueryParam("environmentId") Long environmentId) {
+  private final CancelPipelineUseCase cancelPipelineUseCase;
+
+  @DELETE
+  @Path("{id}")
+  public void cancel(@PathParam("id") String id) {
     var createdBy =
         identity != null && identity.getPrincipal() != null
             ? identity.getPrincipal().getName()
             : "Unknown";
-    runAllTestsUseCase.execute(environmentId, createdBy);
+    log.info("[{}] cancel a pipeline.", createdBy);
+    cancelPipelineUseCase.execute(id);
   }
 }

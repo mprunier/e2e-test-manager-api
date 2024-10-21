@@ -3,12 +3,19 @@ package fr.njj.galaxion.endtoendtesting.domain.event;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 @Getter
-@ToString
 @SuperBuilder
 @AllArgsConstructor
-@JsonTypeName("ALL_TESTS_RUN_COMPLETED_EVENT")
-public class AllTestsRunCompletedEvent extends AbstractEvent {}
+@JsonTypeName("RUN_IN_PROGRESS_EVENT")
+public class RunInProgressEvent extends AbstractEvent {
+
+  // ALL TESTS
+  private boolean isAllTests;
+
+  // SUITE OR TEST
+  private Long suiteId;
+
+  private Long testId;
+}

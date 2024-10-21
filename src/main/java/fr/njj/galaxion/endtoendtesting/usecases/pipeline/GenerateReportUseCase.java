@@ -7,7 +7,6 @@ import static fr.njj.galaxion.endtoendtesting.domain.constant.CommonConstant.STA
 import com.fasterxml.jackson.core.JsonProcessingException;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.ConfigurationStatus;
 import fr.njj.galaxion.endtoendtesting.domain.internal.ArtifactDataInternal;
-import fr.njj.galaxion.endtoendtesting.domain.internal.MochaReportResultInternal;
 import fr.njj.galaxion.endtoendtesting.domain.internal.MochaReportSuiteInternal;
 import fr.njj.galaxion.endtoendtesting.domain.internal.MochaReportTestInternal;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
@@ -26,34 +25,38 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor
-public class GenerateAllTestsReportUseCase {
+public class GenerateReportUseCase {
 
   private final SearchSuiteRetrievalService searchSuiteRetrievalService;
   private final ConfigurationTestRetrievalService configurationTestRetrievalService;
 
   @Transactional
-  public void execute(ArtifactDataInternal artifactData, long environmentId) {
+  public void execute(
+      ArtifactDataInternal artifactData,
+      long environmentId,
+      List<String> configurationTestIdsFilter) {
     var screenshots = artifactData.getScreenshots();
     var report = artifactData.getReport();
     var results = report.getResults();
-    createSuitesAndTests(environmentId, results, screenshots);
-  }
-
-  private void createSuitesAndTests(
-      long environmentId,
-      List<MochaReportResultInternal> results,
-      Map<String, byte[]> screenshots) {
     results.forEach(
         result -> {
           var file = result.getFile().replaceAll(START_PATH, "");
-          processTestsWithoutSuite(environmentId, file, result.getTests(), screenshots);
-          processSuites(environmentId, file, result.getSuites(), null, screenshots);
+          processTestsWithoutSuite(
+              environmentId, file, configurationTestIdsFilter, result.getTests(), screenshots);
+          processSuites(
+              environmentId,
+              file,
+              configurationTestIdsFilter,
+              result.getSuites(),
+              null,
+              screenshots);
         });
   }
 
   private void processTestsWithoutSuite(
       long environmentId,
       String file,
+      List<String> configurationTestIdsFilter,
       List<MochaReportTestInternal> tests,
       Map<String, byte[]> screenshots) {
     if (tests != null) {
@@ -66,28 +69,14 @@ public class GenerateAllTestsReportUseCase {
                   configurationTestRetrievalService.getBy(
                       environmentId, file, mochaTest.getTitle(), configurationSuiteOptional.get());
               configurationTestOptional.ifPresent(
-                  configurationTestEntity ->
-                      saveTest(mochaTest, configurationTestEntity, screenshots));
+                  configurationTestEntity -> {
+                    if (configurationTestIdsFilter == null
+                        || configurationTestIdsFilter.contains(
+                            configurationTestEntity.getId().toString())) {
+                      saveTest(mochaTest, configurationTestEntity, screenshots);
+                    }
+                  });
             }
-          });
-    }
-  }
-
-  private void processTests(
-      long environmentId,
-      String file,
-      List<MochaReportTestInternal> tests,
-      ConfigurationSuiteEntity suite,
-      Map<String, byte[]> screenshots) {
-    if (tests != null) {
-      tests.forEach(
-          mochaTest -> {
-            var configurationTestOptional =
-                configurationTestRetrievalService.getBy(
-                    environmentId, file, mochaTest.getTitle(), suite);
-            configurationTestOptional.ifPresent(
-                configurationTestEntity ->
-                    saveTest(mochaTest, configurationTestEntity, screenshots));
           });
     }
   }
@@ -95,6 +84,7 @@ public class GenerateAllTestsReportUseCase {
   private void processSuites(
       long environmentId,
       String file,
+      List<String> configurationTestIdsFilter,
       List<MochaReportSuiteInternal> suites,
       ConfigurationSuiteEntity parentSuite,
       Map<String, byte[]> screenshots) {
@@ -111,16 +101,43 @@ public class GenerateAllTestsReportUseCase {
               processTests(
                   environmentId,
                   file,
+                  configurationTestIdsFilter,
                   mochaSuite.getTests(),
                   configurationSuiteOptional.get(),
                   screenshots);
               processSuites(
                   environmentId,
                   file,
+                  configurationTestIdsFilter,
                   mochaSuite.getSuites(),
                   configurationSuiteOptional.get(),
                   screenshots);
             }
+          });
+    }
+  }
+
+  private void processTests(
+      long environmentId,
+      String file,
+      List<String> configurationTestIdsFilter,
+      List<MochaReportTestInternal> tests,
+      ConfigurationSuiteEntity suite,
+      Map<String, byte[]> screenshots) {
+    if (tests != null) {
+      tests.forEach(
+          mochaTest -> {
+            var configurationTestOptional =
+                configurationTestRetrievalService.getBy(
+                    environmentId, file, mochaTest.getTitle(), suite);
+            configurationTestOptional.ifPresent(
+                configurationTestEntity -> {
+                  if (configurationTestIdsFilter == null
+                      || configurationTestIdsFilter.contains(
+                          configurationTestEntity.getId().toString())) {
+                    saveTest(mochaTest, configurationTestEntity, screenshots);
+                  }
+                });
           });
     }
   }
@@ -197,14 +214,15 @@ public class GenerateAllTestsReportUseCase {
       String screenshotFilename, Map<String, byte[]> screenshots, TestEntity test) {
     byte[] screenshot = screenshots.get(screenshotFilename);
 
-    //    if (screenshot != null) {
-    TestScreenshotEntity.builder()
-        .test(test)
-        .filename(screenshotFilename.replace(SCREENSHOT_PATH, ""))
-        .screenshot(screenshot)
-        .build()
-        .persist();
-    //    } else {
+    if (screenshot != null) {
+      TestScreenshotEntity.builder()
+          .test(test)
+          .filename(screenshotFilename.replace(SCREENSHOT_PATH, ""))
+          .screenshot(screenshot)
+          .build()
+          .persist();
+    }
+    //    else {
     //      var modifiedScreenshotFilename = removeTextBetweenSlashes(screenshotFilename);
     //      if (!modifiedScreenshotFilename.equals(screenshotFilename)) {
     //        handleScreenshot(modifiedScreenshotFilename, screenshots, test);

@@ -9,7 +9,7 @@ install_skip_test:
 	mvn clean install -DskipTests
 
 run_quarkus:
-	java -Xmx256m -Xms256m -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=60005 -jar target/quarkus-app/quarkus-run.jar -Dprocess.name=Test_Quarkus
+	java -Xmx512m -Xms512m -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=60005 -jar target/quarkus-app/quarkus-run.jar -Dprocess.name=Test_Quarkus
 
 build:
 	docker build -f Dockerfile -t itsffr-docker/tools/e2e-testing-manager-api:1.0.0 --platform=linux/amd64 .

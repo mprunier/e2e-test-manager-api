@@ -5,8 +5,6 @@ import fr.njj.galaxion.endtoendtesting.service.gitlab.RetrieveGitlabJobService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.PipelineRetrievalService;
 import fr.njj.galaxion.endtoendtesting.usecases.pipeline.CancelPipelineUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.pipeline.RecordResultPipelineUseCase;
-import fr.njj.galaxion.endtoendtesting.usecases.run.CancelAllTestsUseCase;
-import fr.njj.galaxion.endtoendtesting.usecases.run.CancelTestUseCase;
 import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.control.ActivateRequestContext;
@@ -21,10 +19,10 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @RequiredArgsConstructor
 public class VerifyPipelineScheduler {
 
-  private final CancelTestUseCase cancelTestUseCase;
-  private final CancelAllTestsUseCase cancelAllTestsUseCase;
-  private final PipelineRetrievalService pipelineRetrievalService;
+  //  private final CancelTestUseCase cancelTestUseCase;
   private final CancelPipelineUseCase cancelPipelineUseCase;
+  private final PipelineRetrievalService pipelineRetrievalService;
+  //  private final CancelPipelineUseCase cancelPipelineUseCase;
   private final RecordResultPipelineUseCase recordResultPipelineUseCase;
   private final RetrieveGitlabJobService retrieveGitlabJobService;
 
@@ -42,9 +40,9 @@ public class VerifyPipelineScheduler {
   @ActivateRequestContext
   public void schedule() {
     if (inVerifyProgress.compareAndSet(false, true)) {
+      log.trace("In progress pipelines verification scheduler started.");
       try {
         verifyPipeline();
-
         cancelOldPipelines();
       } catch (Exception e) {
         log.error(
@@ -75,12 +73,13 @@ public class VerifyPipelineScheduler {
   private void cancelOldPipelines() {
     var oldJPipelines = pipelineRetrievalService.getOldInProgress(oldPipelineToCancelInMinutes);
     for (var pipeline : oldJPipelines) {
-      if (pipeline.getTestIds() != null) {
-        cancelTestUseCase.execute(pipeline.getId(), pipeline.getTestIds());
-      } else {
-        cancelAllTestsUseCase.execute(pipeline.getEnvironment().getId(), pipeline.getId());
-      }
+      //      if (pipeline.getConfigurationTestIdsFilter() != null) {
+      //        cancelTestUseCase.execute(pipeline.getId(),
+      // pipeline.getConfigurationTestIdsFilter());
+      //      } else {
       cancelPipelineUseCase.execute(pipeline.getId());
+      //      }
+      //      cancelPipelineUseCase.execute(pipeline.getId());
       log.info("Pipeline id [{}] canceled.", pipeline.getId());
     }
   }

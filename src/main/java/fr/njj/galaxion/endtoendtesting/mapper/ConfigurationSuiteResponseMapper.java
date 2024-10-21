@@ -4,8 +4,10 @@ import fr.njj.galaxion.endtoendtesting.domain.enumeration.ConfigurationStatus;
 import fr.njj.galaxion.endtoendtesting.domain.internal.InProgressTestInternal;
 import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationSuiteResponse;
 import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationTestResponse;
+import fr.njj.galaxion.endtoendtesting.domain.response.PipelineDetailsResponse;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -18,7 +20,7 @@ public final class ConfigurationSuiteResponseMapper {
         ConfigurationTestResponseMapper.builds(entity.getConfigurationTests(), inProgressTests);
     var hasNewTest =
         tests.stream().anyMatch(test -> ConfigurationStatus.NEW.equals(test.getStatus()));
-    var pipelineInProgress = getPipelineInProgress(tests);
+    var pipelinesInProgress = getPipelinesInProgress(tests);
     return ConfigurationSuiteResponse.builder()
         .id(entity.getId())
         .title(entity.getTitle())
@@ -26,18 +28,17 @@ public final class ConfigurationSuiteResponseMapper {
         .status(entity.getStatus())
         .variables(entity.getVariables())
         .tests(tests)
-        .pipelineInProgress(pipelineInProgress)
+        .pipelinesInProgress(pipelinesInProgress)
         .lastPlayedAt(entity.getLastPlayedAt())
         .hasNewTest(hasNewTest)
         .build();
   }
 
-  private static int getPipelineInProgress(List<ConfigurationTestResponse> tests) {
-    var pipelineInProgress = 0;
-    for (ConfigurationTestResponse test : tests) {
-      pipelineInProgress = Math.max(pipelineInProgress, test.getPipelineInProgress());
-    }
-    return pipelineInProgress;
+  private static List<PipelineDetailsResponse> getPipelinesInProgress(
+      List<ConfigurationTestResponse> tests) {
+    return tests.stream()
+        .flatMap(test -> test.getPipelinesInProgress().stream())
+        .collect(Collectors.toList());
   }
 
   public static List<ConfigurationSuiteResponse> builds(

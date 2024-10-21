@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum ReportPipelineStatus {
+  FINISH(null),
   CANCELED("This pipeline was cancelled."),
   SYSTEM_ERROR(
       "This pipeline has failed due to an internal error in the tool. Contact an administrator."),

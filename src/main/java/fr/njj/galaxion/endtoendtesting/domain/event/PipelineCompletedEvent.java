@@ -8,5 +8,8 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @SuperBuilder
 @AllArgsConstructor
-@JsonTypeName("ALL_TESTS_RUN_IN_PROGRESS_EVENT")
-public class AllTestsRunInProgressEvent extends AbstractEvent {}
+@JsonTypeName("PIPELINE_COMPLETED_EVENT")
+public class PipelineCompletedEvent extends AbstractEvent {
+
+  private String pipelineId;
+}

@@ -12,6 +12,7 @@ import fr.njj.galaxion.endtoendtesting.usecases.search.RetrieveAllFilesUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.search.RetrieveSuitesUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.search.SearchSuiteOrTestUseCase;
 import io.quarkus.cache.CacheResult;
+import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.BeanParam;
@@ -38,6 +39,7 @@ public class ConfigurationController {
 
   @GET
   @Path("/search/suites")
+  @RunOnVirtualThread
   public SearchConfigurationSuiteResponse searchBySuite(
       @NotNull @QueryParam("environmentId") Long environmentId,
       @Valid @BeanParam SearchConfigurationRequest request) {

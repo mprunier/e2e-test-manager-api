@@ -2,7 +2,7 @@ package fr.njj.galaxion.endtoendtesting.service;
 
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineStatus;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.ReportPipelineStatus;
-import fr.njj.galaxion.endtoendtesting.domain.event.AllTestsPipelineCompletedEvent;
+import fr.njj.galaxion.endtoendtesting.domain.event.PipelineCompletedEvent;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.PipelineRetrievalService;
 import io.quarkus.cache.CacheManager;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -14,29 +14,27 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor
-public class CompleteAllTestsRunService {
+public class CompleteRunService {
 
   private final PipelineRetrievalService pipelineRetrievalService;
 
-  private final Event<AllTestsPipelineCompletedEvent> allTestsRunCompletedEvent;
+  private final Event<PipelineCompletedEvent> allTestsRunCompletedEvent;
 
   private final CacheManager cacheManager;
 
   @Transactional
-  public void complete(String pipelineId, ReportPipelineStatus reportPipelineStatus) {
+  public void execute(String pipelineId, ReportPipelineStatus reportPipelineStatus) {
 
     var pipeline = pipelineRetrievalService.get(pipelineId);
 
-    pipeline.setStatus(PipelineStatus.FINISH);
-
-    if (reportPipelineStatus != null) {
-      pipeline.setReportError(reportPipelineStatus.getErrorMessage());
-    } else {
-      pipeline.setReportError(null);
-    }
+    pipeline.setStatus(
+        reportPipelineStatus.equals(ReportPipelineStatus.CANCELED)
+            ? PipelineStatus.CANCELED
+            : PipelineStatus.FINISH);
+    pipeline.setReportError(reportPipelineStatus.getErrorMessage());
 
     allTestsRunCompletedEvent.fire(
-        AllTestsPipelineCompletedEvent.builder()
+        PipelineCompletedEvent.builder()
             .environmentId(pipeline.getEnvironment().getId())
             .pipelineId(pipelineId)
             .build());

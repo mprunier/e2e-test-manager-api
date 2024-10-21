@@ -3,12 +3,14 @@ package fr.njj.galaxion.endtoendtesting.service.retrieval;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineType;
 import fr.njj.galaxion.endtoendtesting.domain.exception.JobNotFoundException;
 import fr.njj.galaxion.endtoendtesting.domain.internal.InProgressTestInternal;
+import fr.njj.galaxion.endtoendtesting.domain.internal.PipelineDetailsInternal;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.PipelineEntity;
 import fr.njj.galaxion.endtoendtesting.model.repository.PipelineRepository;
 import io.quarkus.cache.CacheResult;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PipelineRetrievalService {
 
   private final PipelineRepository pipelineRepository;
-  private final TestRetrievalService testRetrievalService;
+  private final ConfigurationTestRetrievalService configurationTestRetrievalService;
 
   @Transactional
   public List<PipelineEntity> getOldInProgress(Integer oldMinutes) {
@@ -47,33 +49,42 @@ public class PipelineRetrievalService {
     return pipelineRepository.isAllTestRunning(environmentId);
   }
 
-  @CacheResult(cacheName = "in_progress_pipelines")
+  @CacheResult(cacheName = "in_progress_pipelines") // TODO : add by environment
   @Transactional
   public InProgressTestInternal getAllInProgressTests(long environmentId) {
     var pipelines = pipelineRepository.getAllInProgress(environmentId);
-    boolean isAllTestsInProgress = false;
-    var numberOfTestInProgressById = new HashMap<Long, Integer>();
+    String allTestsPipelineId = null;
+    var pipelinesByConfigurationTestId = new HashMap<Long, List<PipelineDetailsInternal>>();
 
     for (PipelineEntity pipeline : pipelines) {
       if (PipelineType.ALL.equals(pipeline.getType())
           || PipelineType.ALL_IN_PARALLEL.equals(pipeline.getType())) {
-        isAllTestsInProgress = true;
+        allTestsPipelineId = pipeline.getId();
       } else {
-        var testIds = pipeline.getTestIds().stream().map(Long::valueOf).toList();
-        var tests = testRetrievalService.getAll(testIds);
-        tests.forEach(
-            test -> {
-              long configurationTestId = test.getConfigurationTest().getId();
-              numberOfTestInProgressById.put(
-                  configurationTestId,
-                  numberOfTestInProgressById.getOrDefault(configurationTestId, 0) + 1);
+        var configurationTestIds =
+            pipeline.getConfigurationTestIdsFilter().stream().map(Long::valueOf).toList();
+        var configurationTests =
+            configurationTestRetrievalService.getAllByIds(configurationTestIds);
+        configurationTests.forEach(
+            configurationTest -> {
+              var pipelineIds =
+                  new ArrayList<>(
+                      pipelinesByConfigurationTestId.getOrDefault(
+                          configurationTest.getId(), new ArrayList<>()));
+              pipelineIds.add(
+                  PipelineDetailsInternal.builder()
+                      .id(pipeline.getId())
+                      .createdAt(pipeline.getCreatedAt())
+                      .createdBy(pipeline.getCreatedBy())
+                      .build());
+              pipelinesByConfigurationTestId.put(configurationTest.getId(), pipelineIds);
             });
       }
     }
 
     return InProgressTestInternal.builder()
-        .numberOfTestInProgressById(numberOfTestInProgressById)
-        .isAllTestsInProgress(isAllTestsInProgress)
+        .pipelinesByConfigurationTestId(pipelinesByConfigurationTestId)
+        .allTestsPipelineId(allTestsPipelineId)
         .build();
   }
 }

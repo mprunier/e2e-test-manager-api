@@ -3,22 +3,19 @@ package fr.njj.galaxion.endtoendtesting.usecases.run;
 import static fr.njj.galaxion.endtoendtesting.domain.constant.CommonConstant.NO_SUITE;
 import static fr.njj.galaxion.endtoendtesting.helper.EnvironmentHelper.buildVariablesEnvironment;
 
-import fr.njj.galaxion.endtoendtesting.client.gitlab.response.GitlabResponse;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineType;
-import fr.njj.galaxion.endtoendtesting.domain.event.TestRunInProgressEvent;
+import fr.njj.galaxion.endtoendtesting.domain.event.RunInProgressEvent;
 import fr.njj.galaxion.endtoendtesting.domain.exception.RunParameterException;
 import fr.njj.galaxion.endtoendtesting.domain.request.RunTestOrSuiteRequest;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.PipelineEntity;
-import fr.njj.galaxion.endtoendtesting.model.entity.TestEntity;
 import fr.njj.galaxion.endtoendtesting.service.AssertPipelineReachedService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.RunGitlabJobService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationTestRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.SearchSuiteRetrievalService;
 import io.quarkus.cache.CacheManager;
-import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.transaction.Transactional;
@@ -40,18 +37,12 @@ public class RunTestUseCase {
   private final SearchSuiteRetrievalService searchSuiteRetrievalService;
   private final RunGitlabJobService runGitlabJobService;
 
-  private final Event<TestRunInProgressEvent> testRunInProgressEvent;
+  private final Event<RunInProgressEvent> testRunInProgressEvent;
 
-  private final SecurityIdentity identity;
   private final CacheManager cacheManager;
 
   @Transactional
-  public void execute(RunTestOrSuiteRequest request) {
-    var createdBy =
-        identity != null && identity.getPrincipal() != null
-            ? identity.getPrincipal().getName()
-            : "Unknown";
-    log.info("[{}] ran a test or suite.", createdBy);
+  public void execute(RunTestOrSuiteRequest request, String createdBy) {
 
     assertPipelineReachedService.assertPipeline();
     assertOnlyOneParameterInRequest(request);
@@ -99,44 +90,31 @@ public class RunTestUseCase {
             null,
             isVideo);
 
-    var testIds = new ArrayList<String>();
-    configurationTests.forEach(
-        configurationTest -> {
-          var test =
-              TestEntity.builder()
-                  .configurationTest(configurationTest)
-                  .variables(variablesWithValueMap)
-                  .createdBy(createdBy)
-                  .build();
-          test.persist();
-          testIds.add(String.valueOf(test.getId()));
-        });
-    if (!testIds.isEmpty()) {
-      createPipeline(gitlabResponse, environment, testIds, pipelineType);
-    }
-    testRunInProgressEvent.fire(
-        TestRunInProgressEvent.builder()
-            .environmentId(environment.getId())
-            .testId(request.getConfigurationTestId())
-            .suiteId(request.getConfigurationSuiteId())
-            .build());
-    cacheManager
-        .getCache("in_progress_pipelines")
-        .ifPresent(cache -> cache.invalidateAll().await().indefinitely());
-  }
-
-  private void createPipeline(
-      GitlabResponse gitlabResponse,
-      EnvironmentEntity environment,
-      ArrayList<String> testIds,
-      PipelineType pipelineType) {
+    var configurationTestsIds =
+        configurationTests.stream()
+            .map(ConfigurationTestEntity::getId)
+            .map(Object::toString)
+            .toList();
     PipelineEntity.builder()
         .id(gitlabResponse.getId())
         .type(pipelineType)
         .environment(environment)
-        .testIds(testIds)
+        .configurationTestIdsFilter(configurationTestsIds)
+        .variables(variablesWithValueMap)
+        .createdBy(createdBy)
         .build()
         .persist();
+
+    testRunInProgressEvent.fire(
+        RunInProgressEvent.builder()
+            .environmentId(environment.getId())
+            .testId(request.getConfigurationTestId())
+            .suiteId(request.getConfigurationSuiteId())
+            .build());
+
+    cacheManager
+        .getCache("in_progress_pipelines")
+        .ifPresent(cache -> cache.invalidateAll().await().indefinitely());
   }
 
   private void assertOnlyOneParameterInRequest(RunTestOrSuiteRequest request) {

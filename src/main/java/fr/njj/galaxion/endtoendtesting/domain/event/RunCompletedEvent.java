@@ -8,9 +8,13 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @SuperBuilder
 @AllArgsConstructor
-@JsonTypeName("TEST_RUN_IN_PROGRESS_EVENT")
-public class TestRunInProgressEvent extends AbstractEvent {
+@JsonTypeName("RUN_COMPLETED_EVENT")
+public class RunCompletedEvent extends AbstractEvent {
 
+  // ALL TESTS
+  private boolean isAllTests;
+
+  // SUITE OR TEST
   private Long suiteId;
 
   private Long testId;

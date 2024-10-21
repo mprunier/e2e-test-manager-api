@@ -1,13 +1,17 @@
 package fr.njj.galaxion.endtoendtesting.mapper;
 
 import fr.njj.galaxion.endtoendtesting.domain.internal.InProgressTestInternal;
+import fr.njj.galaxion.endtoendtesting.domain.internal.PipelineDetailsInternal;
 import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationTestResponse;
+import fr.njj.galaxion.endtoendtesting.domain.response.PipelineDetailsResponse;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestTagEntity;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ConfigurationTestResponseMapper {
@@ -21,14 +25,14 @@ public final class ConfigurationTestResponseMapper {
     if (entity.getConfigurationSuite().getVariables() != null) {
       variables.addAll(entity.getConfigurationSuite().getVariables());
     }
-    int pipelineInProgress = getPipelineInProgress(entity, inProgressTests);
+    var pipelinesInProgress = getPipelinesInProgress(entity, inProgressTests);
     var configurationTestResponseBuilder =
         ConfigurationTestResponse.builder()
             .id(entity.getId())
             .title(entity.getTitle())
             .status(entity.getStatus())
             .variables(variables)
-            .pipelineInProgress(pipelineInProgress)
+            .pipelinesInProgress(pipelinesInProgress)
             .tags(
                 entity.getConfigurationTags() != null
                     ? entity.getConfigurationTags().stream()
@@ -40,17 +44,26 @@ public final class ConfigurationTestResponseMapper {
     return configurationTestResponseBuilder.build();
   }
 
-  private static int getPipelineInProgress(
-      ConfigurationTestEntity entity, InProgressTestInternal inProgressTests) {
-    int pipelineInProgress = 0;
-    if (inProgressTests.isAllTestsInProgress()) {
-      pipelineInProgress++;
+  private static List<PipelineDetailsResponse> getPipelinesInProgress(
+      ConfigurationTestEntity configurationTest, InProgressTestInternal inProgressTests) {
+    var pipelinesInProgress = new ArrayList<PipelineDetailsResponse>();
+    if (StringUtils.isNotBlank(inProgressTests.allTestsPipelineId())) {
+      pipelinesInProgress.add(PipelineDetailsResponse.builder().isAllTests(true).build());
     }
-    var number = inProgressTests.numberOfTestInProgressById().get(entity.getId());
-    if (number != null) {
-      pipelineInProgress += number;
+    for (var entry : inProgressTests.pipelinesByConfigurationTestId().entrySet()) {
+      if (configurationTest.getId().equals(entry.getKey())) {
+        List<PipelineDetailsInternal> pipelineDetails = entry.getValue();
+        pipelineDetails.forEach(
+            pipelineDetail ->
+                pipelinesInProgress.add(
+                    PipelineDetailsResponse.builder()
+                        .id(pipelineDetail.id())
+                        .createdAt(pipelineDetail.createdAt())
+                        .createdBy(pipelineDetail.createdBy())
+                        .build()));
+      }
     }
-    return pipelineInProgress;
+    return pipelinesInProgress;
   }
 
   public static List<ConfigurationTestResponse> builds(

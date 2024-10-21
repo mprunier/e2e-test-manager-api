@@ -38,4 +38,8 @@ public class ConfigurationTestRepository
       long environmentId, String file, List<Long> testIds) {
     delete("environment.id IN ?1 AND file = ?2 AND id NOT IN ?3", environmentId, file, testIds);
   }
+
+  public List<ConfigurationTestEntity> findAllByIds(List<Long> configurationTestIds) {
+    return list("id IN ?1", configurationTestIds);
+  }
 }

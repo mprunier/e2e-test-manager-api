@@ -33,5 +33,5 @@ public class ConfigurationSuiteResponse {
 
   private boolean hasNewTest;
 
-  private int pipelineInProgress;
+  private List<PipelineDetailsResponse> pipelinesInProgress;
 }

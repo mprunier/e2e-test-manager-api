@@ -41,24 +41,10 @@ public class SearchSuiteOrTestUseCase {
     var params = new HashMap<String, Object>();
     var conditions = new ArrayList<String>();
 
-    if (StringUtils.isNotBlank(request.getTag())) {
-      var configurationSuiteIds =
-          configurationTestTagRetrievalService.getSuiteIds(environmentId, request.getTag());
-      configurationSuiteIds.addAll(
-          configurationSuiteTagRetrievalService.getSuiteIds(environmentId, request.getTag()));
-      var files = fileGroupRetrievalService.getAllFiles(environmentId, request.getTag());
-      configurationSuiteIds.addAll(
-          configurationSuiteRetrievalService.getSuiteIds(environmentId, files));
-      request.setConfigurationSuiteIds(configurationSuiteIds);
-    }
+    addSuiteByTag(environmentId, request);
+    addSuiteByTest(request);
 
-    if (request.getConfigurationTestId() != null) {
-      var configurationTest =
-          configurationTestRetrievalService.get(request.getConfigurationTestId());
-      request.setConfigurationSuiteId(configurationTest.getConfigurationSuite().getId());
-    }
-
-    if (Boolean.TRUE.equals(request.getAllNotSuccess())) {
+    if (Boolean.TRUE.equals(request.getAllNotSuccess())) { // TODO wtf ?
       var configurationTest =
           configurationTestRetrievalService.getAllNewByEnvironment(environmentId);
       request.setNewConfigurationSuiteIds(
@@ -83,5 +69,26 @@ public class SearchSuiteOrTestUseCase {
         (int) Math.ceil((double) total / request.getSize()),
         request.getSize(),
         total);
+  }
+
+  private void addSuiteByTest(SearchConfigurationRequest request) {
+    if (request.getConfigurationTestId() != null) {
+      var configurationTest =
+          configurationTestRetrievalService.get(request.getConfigurationTestId());
+      request.setConfigurationSuiteId(configurationTest.getConfigurationSuite().getId());
+    }
+  }
+
+  private void addSuiteByTag(Long environmentId, SearchConfigurationRequest request) {
+    if (StringUtils.isNotBlank(request.getTag())) {
+      var configurationSuiteIds =
+          configurationTestTagRetrievalService.getSuiteIds(environmentId, request.getTag());
+      configurationSuiteIds.addAll(
+          configurationSuiteTagRetrievalService.getSuiteIds(environmentId, request.getTag()));
+      var files = fileGroupRetrievalService.getAllFiles(environmentId, request.getTag());
+      configurationSuiteIds.addAll(
+          configurationSuiteRetrievalService.getSuiteIds(environmentId, files));
+      request.setConfigurationSuiteIds(configurationSuiteIds);
+    }
   }
 }

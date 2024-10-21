@@ -2,8 +2,8 @@ package fr.njj.galaxion.endtoendtesting.events;
 
 import static fr.njj.galaxion.endtoendtesting.websocket.WebSocketEventHandler.sendEventToEnvironmentSessions;
 
-import fr.njj.galaxion.endtoendtesting.domain.event.AllTestsPipelineCompletedEvent;
-import fr.njj.galaxion.endtoendtesting.domain.event.AllTestsRunCompletedEvent;
+import fr.njj.galaxion.endtoendtesting.domain.event.PipelineCompletedEvent;
+import fr.njj.galaxion.endtoendtesting.domain.event.RunCompletedEvent;
 import fr.njj.galaxion.endtoendtesting.service.PipelineGroupService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.PipelineRetrievalService;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -21,17 +21,17 @@ public class PipelineCompletedEventHandler {
   private final PipelineRetrievalService pipelineRetrievalService;
   private final PipelineGroupService pipelineGroupService;
 
-  private final Event<AllTestsRunCompletedEvent> allTestsRunCompletedEvent;
+  private final Event<RunCompletedEvent> allTestsRunCompletedEvent;
 
   public void send(
-      @Observes(during = TransactionPhase.AFTER_SUCCESS) AllTestsPipelineCompletedEvent event) {
+      @Observes(during = TransactionPhase.AFTER_SUCCESS) PipelineCompletedEvent event) {
 
     var pipelineGroup = pipelineGroupService.get(event.getPipelineId());
 
-    if (pipelineGroup.isAllCompleted()) {
+    if (pipelineGroup == null || pipelineGroup.isAllCompleted()) {
       var environment = pipelineRetrievalService.getEnvironment(event.getPipelineId());
       allTestsRunCompletedEvent.fire(
-          AllTestsRunCompletedEvent.builder().environmentId(environment.getId()).build());
+          RunCompletedEvent.builder().environmentId(environment.getId()).build());
     } else {
       sendEventToEnvironmentSessions(event);
     }
