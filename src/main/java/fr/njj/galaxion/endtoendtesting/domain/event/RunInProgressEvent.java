@@ -1,6 +1,7 @@
 package fr.njj.galaxion.endtoendtesting.domain.event;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationSuiteResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
@@ -15,7 +16,5 @@ public class RunInProgressEvent extends AbstractEvent {
   private boolean isAllTests;
 
   // SUITE OR TEST
-  private Long suiteId;
-
-  private Long testId;
+  private ConfigurationSuiteResponse configurationSuite;
 }

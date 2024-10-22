@@ -13,6 +13,7 @@ import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.PipelineEntity;
 import fr.njj.galaxion.endtoendtesting.service.AssertPipelineReachedService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.RunGitlabJobService;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationSuiteRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationTestRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.SearchSuiteRetrievalService;
 import io.quarkus.cache.CacheManager;
@@ -36,6 +37,7 @@ public class RunTestUseCase {
   private final ConfigurationTestRetrievalService configurationTestRetrievalService;
   private final SearchSuiteRetrievalService searchSuiteRetrievalService;
   private final RunGitlabJobService runGitlabJobService;
+  private final ConfigurationSuiteRetrievalService configurationSuiteRetrievalService;
 
   private final Event<RunInProgressEvent> testRunInProgressEvent;
 
@@ -105,16 +107,23 @@ public class RunTestUseCase {
         .build()
         .persist();
 
+    cacheManager
+        .getCache("in_progress_pipelines")
+        .ifPresent(cache -> cache.invalidate(environment.getId()).await().indefinitely());
+
+    buildAndSendRunInProgressEvent(environment, configurationTestsIds);
+  }
+
+  private void buildAndSendRunInProgressEvent(
+      EnvironmentEntity environment, List<String> configurationTestsIds) {
+    var configurationSuite =
+        configurationSuiteRetrievalService.getConfigurationSuiteResponse(
+            environment.getId(), Long.valueOf(configurationTestsIds.getFirst()));
     testRunInProgressEvent.fire(
         RunInProgressEvent.builder()
             .environmentId(environment.getId())
-            .testId(request.getConfigurationTestId())
-            .suiteId(request.getConfigurationSuiteId())
+            .configurationSuite(configurationSuite)
             .build());
-
-    cacheManager
-        .getCache("in_progress_pipelines")
-        .ifPresent(cache -> cache.invalidateAll().await().indefinitely());
   }
 
   private void assertOnlyOneParameterInRequest(RunTestOrSuiteRequest request) {

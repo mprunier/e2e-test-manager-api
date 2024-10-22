@@ -14,11 +14,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor
-public class CompleteRunService {
+public class CompletePipelineService {
 
   private final PipelineRetrievalService pipelineRetrievalService;
 
-  private final Event<PipelineCompletedEvent> allTestsRunCompletedEvent;
+  private final Event<PipelineCompletedEvent> pipelineCompletedEvent;
 
   private final CacheManager cacheManager;
 
@@ -26,6 +26,7 @@ public class CompleteRunService {
   public void execute(String pipelineId, ReportPipelineStatus reportPipelineStatus) {
 
     var pipeline = pipelineRetrievalService.get(pipelineId);
+    var environmentId = pipeline.getEnvironment().getId();
 
     pipeline.setStatus(
         reportPipelineStatus.equals(ReportPipelineStatus.CANCELED)
@@ -33,14 +34,17 @@ public class CompleteRunService {
             : PipelineStatus.FINISH);
     pipeline.setReportError(reportPipelineStatus.getErrorMessage());
 
-    allTestsRunCompletedEvent.fire(
-        PipelineCompletedEvent.builder()
-            .environmentId(pipeline.getEnvironment().getId())
-            .pipelineId(pipelineId)
-            .build());
-
     cacheManager
         .getCache("in_progress_pipelines")
-        .ifPresent(cache -> cache.invalidateAll().await().indefinitely());
+        .ifPresent(cache -> cache.invalidate(environmentId).await().indefinitely());
+
+    pipelineCompletedEvent.fire(
+        PipelineCompletedEvent.builder()
+            .environmentId(environmentId)
+            .pipelineId(pipelineId)
+            .type(pipeline.getType())
+            .status(pipeline.getStatus())
+            .configurationTestIdsFilter(pipeline.getConfigurationTestIdsFilter())
+            .build());
   }
 }

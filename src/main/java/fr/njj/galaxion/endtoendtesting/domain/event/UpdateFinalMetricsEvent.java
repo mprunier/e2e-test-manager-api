@@ -16,5 +16,5 @@ public class UpdateFinalMetricsEvent extends AbstractEvent {
 
   private MetricsResponse metrics;
 
-  private boolean isAllTestsRun; // TODO : to remove
+  private boolean isAllTestsRun;
 }

@@ -1,6 +1,6 @@
 package fr.njj.galaxion.endtoendtesting.mapper;
 
-import fr.njj.galaxion.endtoendtesting.domain.internal.InProgressTestInternal;
+import fr.njj.galaxion.endtoendtesting.domain.internal.InProgressPipelinesInternal;
 import fr.njj.galaxion.endtoendtesting.domain.internal.PipelineDetailsInternal;
 import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationTestResponse;
 import fr.njj.galaxion.endtoendtesting.domain.response.PipelineDetailsResponse;
@@ -17,7 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 public final class ConfigurationTestResponseMapper {
 
   public static ConfigurationTestResponse build(
-      ConfigurationTestEntity entity, InProgressTestInternal inProgressTests) {
+      ConfigurationTestEntity entity, InProgressPipelinesInternal inProgressPipelines) {
     var variables = new HashSet<String>();
     if (entity.getVariables() != null) {
       variables.addAll(entity.getVariables());
@@ -25,7 +25,7 @@ public final class ConfigurationTestResponseMapper {
     if (entity.getConfigurationSuite().getVariables() != null) {
       variables.addAll(entity.getConfigurationSuite().getVariables());
     }
-    var pipelinesInProgress = getPipelinesInProgress(entity, inProgressTests);
+    var pipelinesInProgress = getPipelinesInProgress(entity, inProgressPipelines);
     var configurationTestResponseBuilder =
         ConfigurationTestResponse.builder()
             .id(entity.getId())
@@ -45,12 +45,12 @@ public final class ConfigurationTestResponseMapper {
   }
 
   private static List<PipelineDetailsResponse> getPipelinesInProgress(
-      ConfigurationTestEntity configurationTest, InProgressTestInternal inProgressTests) {
+      ConfigurationTestEntity configurationTest, InProgressPipelinesInternal inProgressPipelines) {
     var pipelinesInProgress = new ArrayList<PipelineDetailsResponse>();
-    if (StringUtils.isNotBlank(inProgressTests.allTestsPipelineId())) {
+    if (StringUtils.isNotBlank(inProgressPipelines.allTestsPipelineId())) {
       pipelinesInProgress.add(PipelineDetailsResponse.builder().isAllTests(true).build());
     }
-    for (var entry : inProgressTests.pipelinesByConfigurationTestId().entrySet()) {
+    for (var entry : inProgressPipelines.pipelinesByConfigurationTestId().entrySet()) {
       if (configurationTest.getId().equals(entry.getKey())) {
         List<PipelineDetailsInternal> pipelineDetails = entry.getValue();
         pipelineDetails.forEach(
@@ -67,8 +67,8 @@ public final class ConfigurationTestResponseMapper {
   }
 
   public static List<ConfigurationTestResponse> builds(
-      List<ConfigurationTestEntity> entities, InProgressTestInternal inProgressTests) {
-    return entities.stream().map(entity -> build(entity, inProgressTests)).toList();
+      List<ConfigurationTestEntity> entities, InProgressPipelinesInternal inProgressPipelines) {
+    return entities.stream().map(entity -> build(entity, inProgressPipelines)).toList();
   }
 
   public static ConfigurationTestResponse buildTitle(ConfigurationTestEntity entity) {

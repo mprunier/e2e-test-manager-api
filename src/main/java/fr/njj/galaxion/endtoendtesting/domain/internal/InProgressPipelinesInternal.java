@@ -5,6 +5,6 @@ import java.util.Map;
 import lombok.Builder;
 
 @Builder
-public record InProgressTestInternal(
+public record InProgressPipelinesInternal(
     Map<Long, List<PipelineDetailsInternal>> pipelinesByConfigurationTestId,
     String allTestsPipelineId) {}

@@ -2,11 +2,11 @@ package fr.njj.galaxion.endtoendtesting.service.retrieval;
 
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineType;
 import fr.njj.galaxion.endtoendtesting.domain.exception.JobNotFoundException;
-import fr.njj.galaxion.endtoendtesting.domain.internal.InProgressTestInternal;
+import fr.njj.galaxion.endtoendtesting.domain.internal.InProgressPipelinesInternal;
 import fr.njj.galaxion.endtoendtesting.domain.internal.PipelineDetailsInternal;
-import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.PipelineEntity;
 import fr.njj.galaxion.endtoendtesting.model.repository.PipelineRepository;
+import io.quarkus.cache.CacheKey;
 import io.quarkus.cache.CacheResult;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -35,11 +35,6 @@ public class PipelineRetrievalService {
   }
 
   @Transactional
-  public EnvironmentEntity getEnvironment(String id) {
-    return get(id).getEnvironment();
-  }
-
-  @Transactional
   public long countInProgress() {
     return pipelineRepository.countInProgress();
   }
@@ -49,9 +44,9 @@ public class PipelineRetrievalService {
     return pipelineRepository.isAllTestRunning(environmentId);
   }
 
-  @CacheResult(cacheName = "in_progress_pipelines") // TODO : add by environment
+  @CacheResult(cacheName = "in_progress_pipelines")
   @Transactional
-  public InProgressTestInternal getAllInProgressTests(long environmentId) {
+  public InProgressPipelinesInternal getInProgressPipelines(@CacheKey long environmentId) {
     var pipelines = pipelineRepository.getAllInProgress(environmentId);
     String allTestsPipelineId = null;
     var pipelinesByConfigurationTestId = new HashMap<Long, List<PipelineDetailsInternal>>();
@@ -82,7 +77,7 @@ public class PipelineRetrievalService {
       }
     }
 
-    return InProgressTestInternal.builder()
+    return InProgressPipelinesInternal.builder()
         .pipelinesByConfigurationTestId(pipelinesByConfigurationTestId)
         .allTestsPipelineId(allTestsPipelineId)
         .build();

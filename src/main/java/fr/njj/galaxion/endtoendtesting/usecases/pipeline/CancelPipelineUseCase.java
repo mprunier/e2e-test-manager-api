@@ -4,7 +4,7 @@ import fr.njj.galaxion.endtoendtesting.domain.enumeration.ConfigurationStatus;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.ReportPipelineStatus;
 import fr.njj.galaxion.endtoendtesting.model.entity.PipelineEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.TestEntity;
-import fr.njj.galaxion.endtoendtesting.service.CompleteRunService;
+import fr.njj.galaxion.endtoendtesting.service.CompletePipelineService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.CancelGitlabPipelineService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationTestRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.PipelineRetrievalService;
@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class CancelPipelineUseCase {
 
-  private final CompleteRunService completeRunService;
+  private final CompletePipelineService completePipelineService;
   private final CancelGitlabPipelineService cancelGitlabPipelineService;
   private final PipelineRetrievalService pipelineRetrievalService;
   private final ConfigurationTestRetrievalService configurationTestRetrievalService;
@@ -35,11 +35,11 @@ public class CancelPipelineUseCase {
           environment.getToken(), environment.getProjectId(), pipelineId);
 
       //      saveTestResult(pipeline, ConfigurationStatus.CANCELED, ReportPipelineStatus.CANCELED);
-      completeRunService.execute(pipelineId, ReportPipelineStatus.CANCELED);
+      completePipelineService.execute(pipelineId, ReportPipelineStatus.CANCELED);
 
     } catch (Exception e) {
       saveTestResult(pipeline, ConfigurationStatus.SYSTEM_ERROR, ReportPipelineStatus.SYSTEM_ERROR);
-      completeRunService.execute(pipelineId, ReportPipelineStatus.SYSTEM_ERROR);
+      completePipelineService.execute(pipelineId, ReportPipelineStatus.SYSTEM_ERROR);
     }
   }
 

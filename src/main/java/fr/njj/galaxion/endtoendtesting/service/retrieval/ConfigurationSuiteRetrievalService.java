@@ -1,5 +1,7 @@
 package fr.njj.galaxion.endtoendtesting.service.retrieval;
 
+import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationSuiteResponse;
+import fr.njj.galaxion.endtoendtesting.mapper.ConfigurationSuiteResponseMapper;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
 import fr.njj.galaxion.endtoendtesting.model.repository.ConfigurationSuiteRepository;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -15,6 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 public class ConfigurationSuiteRetrievalService {
 
   private final ConfigurationSuiteRepository configurationSuiteRepository;
+  private final PipelineRetrievalService pipelineRetrievalService;
+  private final ConfigurationTestRetrievalService configurationTestRetrievalService;
 
   @Transactional
   public List<ConfigurationSuiteEntity> getAllByEnvironment(long environmentId) {
@@ -26,7 +30,16 @@ public class ConfigurationSuiteRetrievalService {
     return configurationSuiteRepository.findAllFilesBy(environmentId);
   }
 
+  @Transactional
   public Set<Long> getSuiteIds(Long environmentId, Set<String> files) {
     return configurationSuiteRepository.findAllByFiles(environmentId, files);
+  }
+
+  @Transactional
+  public ConfigurationSuiteResponse getConfigurationSuiteResponse(Long environmentId, Long testId) {
+    var configurationTest = configurationTestRetrievalService.get(testId);
+    var inProgressPipelines = pipelineRetrievalService.getInProgressPipelines(environmentId);
+    return ConfigurationSuiteResponseMapper.build(
+        configurationTest.getConfigurationSuite(), inProgressPipelines);
   }
 }

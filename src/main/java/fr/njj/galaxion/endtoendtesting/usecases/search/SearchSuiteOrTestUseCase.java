@@ -55,7 +55,7 @@ public class SearchSuiteOrTestUseCase {
               .collect(Collectors.toSet()));
     }
 
-    var inProgressTests = pipelineRetrievalService.getAllInProgressTests(environmentId);
+    var inProgressPipelines = pipelineRetrievalService.getInProgressPipelines(environmentId);
 
     var baseQuery = buildConfigurationSuiteSearchQuery(environmentId, request, params, conditions);
     var filteredQuery =
@@ -64,7 +64,7 @@ public class SearchSuiteOrTestUseCase {
     long total = filteredQuery.count();
 
     return new SearchConfigurationSuiteResponse(
-        ConfigurationSuiteResponseMapper.builds(configurationSuites, inProgressTests),
+        ConfigurationSuiteResponseMapper.builds(configurationSuites, inProgressPipelines),
         request.getPage(),
         (int) Math.ceil((double) total / request.getSize()),
         request.getSize(),
