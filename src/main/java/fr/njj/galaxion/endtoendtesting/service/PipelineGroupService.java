@@ -23,6 +23,6 @@ public class PipelineGroupService {
   }
 
   public PipelineGroupEntity getLastPipelineGroup(Long environmentId) {
-    return pipelineGroupRepository.findLastPipelineGroupByEnvironmentI(environmentId);
+    return pipelineGroupRepository.findLastPipelineGroupByEnvironmentId(environmentId);
   }
 }

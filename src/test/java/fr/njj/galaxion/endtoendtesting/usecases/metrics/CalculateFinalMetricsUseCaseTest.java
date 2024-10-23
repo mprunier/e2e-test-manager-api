@@ -79,7 +79,6 @@ class CalculateFinalMetricsUseCaseTest {
   private EnvironmentEntity createEnvironmentWithSomeFailingTests() {
     var passingTest = ConfigurationTestEntity.builder().status(ConfigurationStatus.SUCCESS).build();
     var failingTest = ConfigurationTestEntity.builder().status(ConfigurationStatus.FAILED).build();
-    var failingTest2 = ConfigurationTestEntity.builder().status(ConfigurationStatus.FAILED).build();
     var suite =
         ConfigurationSuiteEntity.builder()
             .configurationTests(Arrays.asList(passingTest, failingTest, failingTest))
