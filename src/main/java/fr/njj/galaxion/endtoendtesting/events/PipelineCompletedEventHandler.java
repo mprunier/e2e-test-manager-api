@@ -5,10 +5,12 @@ import static fr.njj.galaxion.endtoendtesting.websocket.WebSocketEventHandler.se
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineType;
 import fr.njj.galaxion.endtoendtesting.domain.event.PipelineCompletedEvent;
 import fr.njj.galaxion.endtoendtesting.domain.event.RunCompletedEvent;
+import fr.njj.galaxion.endtoendtesting.domain.event.UpdateFinalMetricsEvent;
 import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationSuiteResponse;
 import fr.njj.galaxion.endtoendtesting.service.PipelineGroupService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationSuiteRetrievalService;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.event.TransactionPhase;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,8 @@ public class PipelineCompletedEventHandler {
   private final PipelineGroupService pipelineGroupService;
   private final ConfigurationSuiteRetrievalService configurationSuiteRetrievalService;
 
+  private final Event<UpdateFinalMetricsEvent> updateFinalMetricsEvent;
+
   public void send(
       @Observes(during = TransactionPhase.AFTER_SUCCESS)
           PipelineCompletedEvent pipelineCompletedEvent) {
@@ -33,6 +37,12 @@ public class PipelineCompletedEventHandler {
           PipelineType.ALL_IN_PARALLEL.equals(pipelineCompletedEvent.getType())
               || PipelineType.ALL.equals(pipelineCompletedEvent.getType());
       buildAndSendRunCompletedEvent(pipelineCompletedEvent, isAllTests);
+
+      updateFinalMetricsEvent.fire(
+          UpdateFinalMetricsEvent.builder()
+              .environmentId(pipelineCompletedEvent.getEnvironmentId())
+              .isAllTestsRun(isAllTests)
+              .build());
     } else {
       sendEventToEnvironmentSessions(pipelineCompletedEvent);
     }

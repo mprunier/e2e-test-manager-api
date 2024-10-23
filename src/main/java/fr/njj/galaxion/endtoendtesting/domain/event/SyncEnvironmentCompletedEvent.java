@@ -2,7 +2,7 @@ package fr.njj.galaxion.endtoendtesting.domain.event;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import fr.njj.galaxion.endtoendtesting.domain.response.EnvironmentResponse;
-import fr.njj.galaxion.endtoendtesting.domain.response.SyncErrorResponse;
+import fr.njj.galaxion.endtoendtesting.domain.response.SyncEnvironmentErrorResponse;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,5 +17,5 @@ import lombok.experimental.SuperBuilder;
 public class SyncEnvironmentCompletedEvent extends AbstractEvent {
 
   private EnvironmentResponse environment;
-  private List<SyncErrorResponse> syncErrors;
+  private List<SyncEnvironmentErrorResponse> syncErrors;
 }

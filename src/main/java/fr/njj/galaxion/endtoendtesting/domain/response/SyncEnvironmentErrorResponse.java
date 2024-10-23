@@ -12,7 +12,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @Getter
 @Builder
-public class SyncErrorResponse {
+public class SyncEnvironmentErrorResponse {
 
   private String file;
 

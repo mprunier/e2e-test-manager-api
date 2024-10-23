@@ -4,8 +4,8 @@ import static fr.njj.galaxion.endtoendtesting.websocket.WebSocketEventHandler.se
 
 import fr.njj.galaxion.endtoendtesting.domain.event.SyncEnvironmentCompletedEvent;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.EnvironmentRetrievalService;
+import fr.njj.galaxion.endtoendtesting.usecases.environment.RetrieveEnvironmentErrorUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.environment.UnLockEnvironmentSynchronizationUseCase;
-import fr.njj.galaxion.endtoendtesting.usecases.error.RetrieveErrorUseCase;
 import io.quarkus.cache.CacheManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class SyncEnvironmentCompletedEventHandler {
 
-  private final RetrieveErrorUseCase retrieveErrorUseCase;
+  private final RetrieveEnvironmentErrorUseCase retrieveEnvironmentErrorUseCase;
   private final EnvironmentRetrievalService environmentRetrievalService;
   private final UnLockEnvironmentSynchronizationUseCase unLockEnvironmentSynchronizationUseCase;
   private final CacheManager cacheManager;
@@ -28,7 +28,7 @@ public class SyncEnvironmentCompletedEventHandler {
   public void send(
       @Observes(during = TransactionPhase.AFTER_SUCCESS) SyncEnvironmentCompletedEvent event) {
     try {
-      var allErrors = retrieveErrorUseCase.execute(event.getEnvironmentId());
+      var allErrors = retrieveEnvironmentErrorUseCase.execute(event.getEnvironmentId());
       event.setSyncErrors(allErrors);
 
       unLockEnvironmentSynchronizationUseCase.execute(event.getEnvironmentId());

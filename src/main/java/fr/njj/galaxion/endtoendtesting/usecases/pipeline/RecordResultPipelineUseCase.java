@@ -7,9 +7,7 @@ import static fr.njj.galaxion.endtoendtesting.domain.constant.CommonConstant.STA
 import com.fasterxml.jackson.core.JsonProcessingException;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.ConfigurationStatus;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.GitlabJobStatus;
-import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineType;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.ReportPipelineStatus;
-import fr.njj.galaxion.endtoendtesting.domain.event.UpdateFinalMetricsEvent;
 import fr.njj.galaxion.endtoendtesting.domain.internal.ArtifactDataInternal;
 import fr.njj.galaxion.endtoendtesting.domain.internal.MochaReportSuiteInternal;
 import fr.njj.galaxion.endtoendtesting.domain.internal.MochaReportTestInternal;
@@ -23,7 +21,6 @@ import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationTestRetrie
 import fr.njj.galaxion.endtoendtesting.service.retrieval.PipelineRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.SearchSuiteRetrievalService;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Event;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Map;
@@ -42,15 +39,10 @@ public class RecordResultPipelineUseCase {
   private final PipelineRetrievalService pipelineRetrievalService;
   private final RetrieveGitlabJobArtifactsService retrieveGitlabJobArtifactsService;
 
-  private final Event<UpdateFinalMetricsEvent> updateFinalMetricsEvent;
-
   @Transactional
   public void execute(String pipelineId, String jobId, GitlabJobStatus status) {
 
     var pipeline = pipelineRetrievalService.get(pipelineId);
-    var isAllTestsRun =
-        PipelineType.ALL.equals(pipeline.getType())
-            || PipelineType.ALL_IN_PARALLEL.equals(pipeline.getType());
     var environment = pipeline.getEnvironment();
 
     var environmentId = pipeline.getEnvironment().getId();
@@ -74,12 +66,6 @@ public class RecordResultPipelineUseCase {
     } catch (Exception e) {
       log.error("Error while recording pipeline result.", e);
       completePipelineService.execute(pipeline.getId(), ReportPipelineStatus.SYSTEM_ERROR);
-    } finally {
-      updateFinalMetricsEvent.fire(
-          UpdateFinalMetricsEvent.builder()
-              .environmentId(environment.getId())
-              .isAllTestsRun(isAllTestsRun)
-              .build());
     }
   }
 

@@ -1,6 +1,6 @@
-package fr.njj.galaxion.endtoendtesting.usecases.error;
+package fr.njj.galaxion.endtoendtesting.usecases.environment;
 
-import fr.njj.galaxion.endtoendtesting.domain.response.SyncErrorResponse;
+import fr.njj.galaxion.endtoendtesting.domain.response.SyncEnvironmentErrorResponse;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.EnvironmentSynchronizationErrorRetrievalService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -12,21 +12,21 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @ApplicationScoped
 @RequiredArgsConstructor
-public class RetrieveErrorUseCase {
+public class RetrieveEnvironmentErrorUseCase {
 
   private final EnvironmentSynchronizationErrorRetrievalService
       environmentSynchronizationErrorRetrievalService;
 
   @Transactional
-  public List<SyncErrorResponse> execute(long environmentId) {
+  public List<SyncEnvironmentErrorResponse> execute(long environmentId) {
 
     var entities = environmentSynchronizationErrorRetrievalService.getByEnvironment(environmentId);
 
-    var environmentErrors = new ArrayList<SyncErrorResponse>();
+    var environmentErrors = new ArrayList<SyncEnvironmentErrorResponse>();
     entities.forEach(
         entity ->
             environmentErrors.add(
-                SyncErrorResponse.builder()
+                SyncEnvironmentErrorResponse.builder()
                     .file(entity.getFile())
                     .error(entity.getError())
                     .at(entity.getAt())
