@@ -4,6 +4,8 @@ import static fr.njj.galaxion.endtoendtesting.websocket.WebSocketEventHandler.se
 
 import fr.njj.galaxion.endtoendtesting.domain.event.UpdateFinalMetricsEvent;
 import fr.njj.galaxion.endtoendtesting.domain.response.MetricsResponse;
+import fr.njj.galaxion.endtoendtesting.model.entity.MetricsEntity;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.MetricRetrievalService;
 import fr.njj.galaxion.endtoendtesting.usecases.metrics.AddMetricsUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.metrics.CalculateFinalMetricsUseCase;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -20,6 +22,7 @@ public class UpdateFinalMetricsEventHandler {
 
   private final CalculateFinalMetricsUseCase calculateFinalMetricsUseCase;
   private final AddMetricsUseCase addMetricsUseCase;
+  private final MetricRetrievalService metricRetrievalService;
 
   @Transactional(Transactional.TxType.REQUIRES_NEW)
   public void send(
@@ -27,6 +30,8 @@ public class UpdateFinalMetricsEventHandler {
     try {
       var finalMetrics = calculateFinalMetricsUseCase.execute(event.getEnvironmentId());
       addMetricsUseCase.execute(event.getEnvironmentId(), finalMetrics, event.isAllTestsRun());
+      var optionalLastMetricsWithAllTestsRun =
+          metricRetrievalService.getOptionalLastMetricsWithAllTestsRun(event.getEnvironmentId());
       var metricsResponse =
           MetricsResponse.builder()
               .at(finalMetrics.at())
@@ -37,6 +42,8 @@ public class UpdateFinalMetricsEventHandler {
               .failures(finalMetrics.failures())
               .skipped(finalMetrics.skipped())
               .isAllTestsRun(event.isAllTestsRun())
+              .lastAllTestsRunAt(
+                  optionalLastMetricsWithAllTestsRun.map(MetricsEntity::getCreatedAt).orElse(null))
               .build();
       event.setMetrics(metricsResponse);
       sendEventToEnvironmentSessions(event);
