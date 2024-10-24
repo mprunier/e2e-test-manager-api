@@ -38,7 +38,6 @@ public class CompletePipelineService {
             .environmentId(environmentId)
             .pipelineId(pipelineId)
             .type(pipeline.getType())
-            .status(pipeline.getStatus())
             .configurationTestIdsFilter(pipeline.getConfigurationTestIdsFilter())
             .build());
   }

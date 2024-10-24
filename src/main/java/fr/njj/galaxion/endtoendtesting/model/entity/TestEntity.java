@@ -100,8 +100,4 @@ public class TestEntity extends PanacheEntityBase {
 
   @Column(name = "created_by", nullable = false)
   private String createdBy;
-
-  @Setter
-  @Column(name = "updated_at")
-  private ZonedDateTime updatedAt; // TODO TO remove
 }

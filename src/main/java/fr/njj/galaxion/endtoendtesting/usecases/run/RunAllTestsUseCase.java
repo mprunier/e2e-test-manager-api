@@ -81,7 +81,7 @@ public class RunAllTestsUseCase {
             null,
             false);
 
-    createPipeline(gitlabResponse, environment, pipelineGroup, PipelineType.ALL, createdBy);
+    createPipeline(gitlabResponse, environment, pipelineGroup, PipelineType.ALL, null, createdBy);
   }
 
   private void runWithMultiPipelines(EnvironmentEntity environment, String createdBy) {
@@ -177,6 +177,7 @@ public class RunAllTestsUseCase {
                   environment,
                   pipelineGroup,
                   PipelineType.ALL_IN_PARALLEL,
+                  pipelineFiles,
                   createdBy);
             });
   }
@@ -186,12 +187,14 @@ public class RunAllTestsUseCase {
       EnvironmentEntity environment,
       PipelineGroupEntity pipelineGroup,
       PipelineType pipelineType,
+      List<String> files,
       String createdBy) {
     PipelineEntity.builder()
         .id(gitlabResponse.getId())
         .type(pipelineType)
         .environment(environment)
         .pipelineGroup(pipelineGroup)
+        .filesFilter(files)
         .createdBy(createdBy)
         .build()
         .persist();

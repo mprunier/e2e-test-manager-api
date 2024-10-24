@@ -5,4 +5,4 @@ import lombok.Builder;
 
 @Builder
 public record ConfigurationSuiteOrTestPipelineResponse(
-    String id, ZonedDateTime createdAt, String createdBy, boolean isAllTests) {}
+    String id, ZonedDateTime createdAt, String createdBy, Boolean isAllTests) {}

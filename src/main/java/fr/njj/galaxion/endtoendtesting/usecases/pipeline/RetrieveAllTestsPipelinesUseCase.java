@@ -26,6 +26,8 @@ public class RetrieveAllTestsPipelinesUseCase {
                   PipelineResponse.builder()
                       .id(pipeline.getId())
                       .status(pipeline.getStatus())
+                      .statusDescription(pipeline.getStatus().getErrorMessage())
+                      .filesFilter(pipeline.getFilesFilter())
                       .build())
           .toList();
     }

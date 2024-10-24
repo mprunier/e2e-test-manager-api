@@ -44,7 +44,9 @@ public class SearchSuiteOrTestUseCase {
     addSuiteByTag(environmentId, request);
     addSuiteByTest(request);
 
-    if (Boolean.TRUE.equals(request.getAllNotSuccess())) { // TODO wtf ?
+    // To retrieve all the configuration suites that are not successful but also the new tests
+    // (Suite is not set to new if only just one new test).
+    if (Boolean.TRUE.equals(request.getAllNotSuccess())) {
       var configurationTest =
           configurationTestRetrievalService.getAllNewByEnvironment(environmentId);
       request.setNewConfigurationSuiteIds(

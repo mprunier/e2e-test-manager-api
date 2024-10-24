@@ -13,7 +13,7 @@ import lombok.experimental.SuperBuilder;
 public class RunCompletedEvent extends AbstractEvent {
 
   // ALL TESTS
-  private boolean isAllTests;
+  private Boolean isAllTests;
 
   // SUITE OR TEST
   private ConfigurationSuiteResponse configurationSuite;

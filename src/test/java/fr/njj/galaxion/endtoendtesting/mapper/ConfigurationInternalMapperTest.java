@@ -106,7 +106,7 @@ class ConfigurationInternalMapperTest {
             + System.lineSeparator()
             + "describe('Suite1', function() { "
             + "  it('Test1', {tags: ['testTag1']}, function() { /* test code */ });"
-            + "  it('Test2', {variables: ['testVariable1'], tags: ['disable-on-e2e-testing-manager']}, function() { /* test code */ });"
+            + "  it('Test2', {variables: ['testVariable1'], tags: ['disable-on-e2e-testing-queue']}, function() { /* test code */ });"
             + "});";
 
     var result = ConfigurationInternalMapper.build(content, "fullPath");
@@ -131,7 +131,7 @@ class ConfigurationInternalMapperTest {
     var content =
         "// group-for-parallelization-aasa"
             + System.lineSeparator()
-            + "describe('Suite1', {tags: ['disable-on-e2e-testing-manager']}, function() { "
+            + "describe('Suite1', {tags: ['disable-on-e2e-testing-queue']}, function() { "
             + "  it('Test1', {tags: ['testTag1']}, function() { /* test code */ });"
             + "});";
 

@@ -56,6 +56,7 @@ public class VerifyPipelineScheduler {
   private void verifyPipeline() {
     var pipelines = pipelineRetrievalService.getOldInProgress(oldPipelineToVerifyInMinutes);
     for (var pipeline : pipelines) {
+      log.debug("Verifying pipeline id [{}].", pipeline.getId());
       var environment = pipeline.getEnvironment();
       var gitlabJobResponse =
           retrieveGitlabJobService.getJob(
@@ -66,7 +67,7 @@ public class VerifyPipelineScheduler {
           && !GitlabJobStatus.running.equals(status)) {
         recordResultPipelineUseCase.execute(pipeline.getId(), gitlabJobResponse.getId(), status);
       }
-      log.info("Pipeline id [{}] verified.", pipeline.getId());
+      log.debug("Pipeline id [{}] verified.", pipeline.getId());
     }
   }
 

@@ -35,6 +35,12 @@ public class PipelineRetrievalService {
   }
 
   @Transactional
+  public boolean isPipelinesGroupFinish(String id) {
+    var pipelineGroup = get(id).getPipelineGroup();
+    return pipelineGroup == null || pipelineGroup.isAllCompleted();
+  }
+
+  @Transactional
   public long countInProgress() {
     return pipelineRepository.countInProgress();
   }

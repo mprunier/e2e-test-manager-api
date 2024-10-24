@@ -42,4 +42,8 @@ public class ConfigurationTestRepository
   public List<ConfigurationTestEntity> findAllByIds(List<Long> configurationTestIds) {
     return list("id IN ?1", configurationTestIds);
   }
+
+  public List<ConfigurationTestEntity> findAllByFiles(List<String> files) {
+    return list("file IN ?1", files);
+  }
 }

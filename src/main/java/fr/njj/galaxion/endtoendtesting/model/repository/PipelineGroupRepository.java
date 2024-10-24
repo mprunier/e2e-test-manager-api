@@ -8,6 +8,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 public class PipelineGroupRepository implements PanacheRepositoryBase<PipelineGroupEntity, Long> {
 
   public PipelineGroupEntity findLastPipelineGroupByEnvironmentId(Long environmentId) {
-    return find("environment.id = ?1 ORDER BY created_at DESC", environmentId).firstResult();
+    return find("environment.id = ?1 ORDER BY createdAt DESC", environmentId).firstResult();
   }
 }

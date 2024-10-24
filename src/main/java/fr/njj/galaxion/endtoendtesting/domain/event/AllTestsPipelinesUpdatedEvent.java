@@ -10,8 +10,8 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @SuperBuilder
 @AllArgsConstructor
-@JsonTypeName("UPDATE_ALL_TESTS_PIPELINES")
-public class UpdateAllTestsPipelinesEvent extends AbstractEvent {
+@JsonTypeName("ALL_TESTS_PIPELINES_UPDATED")
+public class AllTestsPipelinesUpdatedEvent extends AbstractEvent {
 
   private List<PipelineResponse> pipelines;
 }

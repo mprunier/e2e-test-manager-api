@@ -91,15 +91,6 @@
             <artifactId>quarkus-liquibase</artifactId>
         </dependency>
 
-
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-opentelemetry</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-extension-trace-propagators</artifactId>
-        </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-logging-json</artifactId>
@@ -114,10 +105,6 @@
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-micrometer-registry-prometheus</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
             <artifactId>quarkus-junit5</artifactId>
             <scope>test</scope>
         </dependency>
@@ -127,6 +114,12 @@
             <scope>test</scope>
         </dependency>
 
+
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-opentelemetry</artifactId>
+        </dependency>
+        
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -148,7 +141,6 @@
             <artifactId>org.eclipse.jgit</artifactId>
             <version>${org.eclipse.jgit-version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.mozilla</groupId>
             <artifactId>rhino</artifactId>

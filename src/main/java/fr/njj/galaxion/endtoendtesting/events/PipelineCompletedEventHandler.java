@@ -3,14 +3,16 @@ package fr.njj.galaxion.endtoendtesting.events;
 import static fr.njj.galaxion.endtoendtesting.websocket.WebSocketEventHandler.sendEventToEnvironmentSessions;
 
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineType;
+import fr.njj.galaxion.endtoendtesting.domain.event.AllTestsPipelinesUpdatedEvent;
 import fr.njj.galaxion.endtoendtesting.domain.event.PipelineCompletedEvent;
 import fr.njj.galaxion.endtoendtesting.domain.event.RunCompletedEvent;
-import fr.njj.galaxion.endtoendtesting.domain.event.UpdateAllTestsPipelinesEvent;
 import fr.njj.galaxion.endtoendtesting.domain.event.UpdateFinalMetricsEvent;
 import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationSuiteResponse;
-import fr.njj.galaxion.endtoendtesting.service.PipelineGroupService;
+import fr.njj.galaxion.endtoendtesting.events.queue.PipelineEventQueueManager;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationSuiteRetrievalService;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.PipelineRetrievalService;
 import fr.njj.galaxion.endtoendtesting.usecases.pipeline.RetrieveAllTestsPipelinesUseCase;
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
@@ -24,51 +26,68 @@ import lombok.extern.slf4j.Slf4j;
 public class PipelineCompletedEventHandler {
 
   private final RetrieveAllTestsPipelinesUseCase retrieveAllTestsPipelinesUseCase;
-
-  private final PipelineGroupService pipelineGroupService;
+  private final PipelineRetrievalService pipelineRetrievalService;
   private final ConfigurationSuiteRetrievalService configurationSuiteRetrievalService;
-
   private final Event<UpdateFinalMetricsEvent> updateFinalMetricsEvent;
+  private final PipelineEventQueueManager queueManager;
 
-  public void send(
-      @Observes(during = TransactionPhase.AFTER_SUCCESS)
-          PipelineCompletedEvent pipelineCompletedEvent) {
+  @PostConstruct
+  public void init() {
+    queueManager.setEventProcessor(this::processEvent);
+  }
 
-    var pipelineGroup = pipelineGroupService.get(pipelineCompletedEvent.getPipelineId());
+  public void onPipelineCompleted(
+      @Observes(during = TransactionPhase.AFTER_SUCCESS) PipelineCompletedEvent event) {
+    queueManager.submitEvent(event.getEnvironmentId(), event);
+  }
 
-    if (pipelineGroup == null || pipelineGroup.isAllCompleted()) {
-      var isAllTests = isAllTests(pipelineCompletedEvent);
-      buildAndSendRunCompletedEvent(pipelineCompletedEvent, isAllTests(pipelineCompletedEvent));
+  private void processEvent(PipelineCompletedEvent event) {
+    try {
+      var isPipelinesGroupFinish =
+          pipelineRetrievalService.isPipelinesGroupFinish(event.getPipelineId());
 
-      updateFinalMetricsEvent.fire(
-          UpdateFinalMetricsEvent.builder()
-              .environmentId(pipelineCompletedEvent.getEnvironmentId())
-              .isAllTestsRun(isAllTests)
-              .build());
+      if (isPipelinesGroupFinish) {
+        var isAllTests = isAllTests(event);
+        buildAndSendRunCompletedEvent(event, isAllTests);
+        fireUpdateFinalMetricsEvent(event, isAllTests);
+      }
+
+      buildAndSendUpdateAllTestsPipelinesEvent(event);
+    } catch (Exception e) {
+      log.error(
+          "Error processing pipeline event for environment: {}, pipeline ID: {}",
+          event.getEnvironmentId(),
+          event.getPipelineId(),
+          e);
+      throw e;
     }
-
-    buildAndSendUpdateAllTestsPipelinesEvent(pipelineCompletedEvent);
   }
 
-  private static boolean isAllTests(PipelineCompletedEvent pipelineCompletedEvent) {
-    return PipelineType.ALL_IN_PARALLEL.equals(pipelineCompletedEvent.getType())
-        || PipelineType.ALL.equals(pipelineCompletedEvent.getType());
+  private void fireUpdateFinalMetricsEvent(PipelineCompletedEvent event, boolean isAllTests) {
+    updateFinalMetricsEvent.fire(
+        UpdateFinalMetricsEvent.builder()
+            .environmentId(event.getEnvironmentId())
+            .isAllTestsRun(isAllTests)
+            .build());
   }
 
-  private void buildAndSendRunCompletedEvent(
-      PipelineCompletedEvent pipelineCompletedEvent, boolean isAllTests) {
+  private static boolean isAllTests(PipelineCompletedEvent event) {
+    return PipelineType.ALL_IN_PARALLEL.equals(event.getType())
+        || PipelineType.ALL.equals(event.getType());
+  }
 
+  private void buildAndSendRunCompletedEvent(PipelineCompletedEvent event, boolean isAllTests) {
     ConfigurationSuiteResponse configurationSuiteResponse = null;
     if (!isAllTests) {
       configurationSuiteResponse =
           configurationSuiteRetrievalService.getConfigurationSuiteResponse(
-              pipelineCompletedEvent.getEnvironmentId(),
-              Long.valueOf(pipelineCompletedEvent.getConfigurationTestIdsFilter().getFirst()));
+              event.getEnvironmentId(),
+              Long.valueOf(event.getConfigurationTestIdsFilter().getFirst()));
     }
 
     var runCompletedEvent =
         RunCompletedEvent.builder()
-            .environmentId(pipelineCompletedEvent.getEnvironmentId())
+            .environmentId(event.getEnvironmentId())
             .isAllTests(isAllTests)
             .configurationSuite(configurationSuiteResponse)
             .build();
@@ -76,13 +95,11 @@ public class PipelineCompletedEventHandler {
     sendEventToEnvironmentSessions(runCompletedEvent);
   }
 
-  private void buildAndSendUpdateAllTestsPipelinesEvent(
-      PipelineCompletedEvent pipelineCompletedEvent) {
-    var pipelines =
-        retrieveAllTestsPipelinesUseCase.execute(pipelineCompletedEvent.getEnvironmentId());
+  private void buildAndSendUpdateAllTestsPipelinesEvent(PipelineCompletedEvent event) {
+    var pipelines = retrieveAllTestsPipelinesUseCase.execute(event.getEnvironmentId());
     var updateAllTestsPipelinesEvent =
-        UpdateAllTestsPipelinesEvent.builder()
-            .environmentId(pipelineCompletedEvent.getEnvironmentId())
+        AllTestsPipelinesUpdatedEvent.builder()
+            .environmentId(event.getEnvironmentId())
             .pipelines(pipelines)
             .build();
     sendEventToEnvironmentSessions(updateAllTestsPipelinesEvent);

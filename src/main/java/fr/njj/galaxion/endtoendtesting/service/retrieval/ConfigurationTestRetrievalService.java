@@ -55,4 +55,9 @@ public class ConfigurationTestRetrievalService {
   public List<ConfigurationTestEntity> getAllByIds(List<Long> configurationTestIds) {
     return configurationTestRepository.findAllByIds(configurationTestIds);
   }
+
+  @Transactional
+  public List<ConfigurationTestEntity> getAllByFiles(List<String> files) {
+    return configurationTestRepository.findAllByFiles(files);
+  }
 }

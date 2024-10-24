@@ -38,6 +38,7 @@ public final class ConfigurationSuiteResponseMapper {
       List<ConfigurationTestResponse> tests) {
     return tests.stream()
         .flatMap(test -> test.getPipelinesInProgress().stream())
+        .distinct()
         .collect(Collectors.toList());
   }
 

@@ -2,11 +2,9 @@ package fr.njj.galaxion.endtoendtesting.usecases.pipeline;
 
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.ConfigurationStatus;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineStatus;
-import fr.njj.galaxion.endtoendtesting.model.entity.PipelineEntity;
-import fr.njj.galaxion.endtoendtesting.model.entity.TestEntity;
 import fr.njj.galaxion.endtoendtesting.service.CompletePipelineService;
+import fr.njj.galaxion.endtoendtesting.service.SaveCancelResultTestService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.CancelGitlabPipelineService;
-import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationTestRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.PipelineRetrievalService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -21,7 +19,7 @@ public class CancelPipelineUseCase {
   private final CompletePipelineService completePipelineService;
   private final CancelGitlabPipelineService cancelGitlabPipelineService;
   private final PipelineRetrievalService pipelineRetrievalService;
-  private final ConfigurationTestRetrievalService configurationTestRetrievalService;
+  private final SaveCancelResultTestService saveCancelResultTestService;
 
   @Transactional
   public void execute(String pipelineId, boolean isSaveTestResult) {
@@ -32,38 +30,17 @@ public class CancelPipelineUseCase {
           environment.getToken(), environment.getProjectId(), pipelineId);
 
       if (isSaveTestResult) {
-        saveTestResult(pipeline, ConfigurationStatus.CANCELED, PipelineStatus.CANCELED);
+        saveCancelResultTestService.saveTestResult(
+            pipeline, ConfigurationStatus.CANCELED, PipelineStatus.CANCELED.getErrorMessage());
       }
       completePipelineService.execute(pipelineId, PipelineStatus.CANCELED);
 
     } catch (Exception e) {
-      saveTestResult(pipeline, ConfigurationStatus.SYSTEM_ERROR, PipelineStatus.SYSTEM_ERROR);
+      saveCancelResultTestService.saveTestResult(
+          pipeline,
+          ConfigurationStatus.SYSTEM_ERROR,
+          PipelineStatus.SYSTEM_ERROR.getErrorMessage());
       completePipelineService.execute(pipelineId, PipelineStatus.SYSTEM_ERROR);
-    }
-  }
-
-  // We create a test result only for the run suite or test, not for with run all tests.
-  private void saveTestResult(
-      PipelineEntity pipeline, ConfigurationStatus status, PipelineStatus pipelineStatus) {
-    if (pipeline.getConfigurationTestIdsFilter() != null
-        && !pipeline.getConfigurationTestIdsFilter().isEmpty()) {
-      var configurationTestIdsToCancel =
-          pipeline.getConfigurationTestIdsFilter().stream().map(Long::valueOf).toList();
-      configurationTestIdsToCancel.forEach(
-          configurationTestId -> {
-            var configurationTestOptional =
-                configurationTestRetrievalService.getOptional(configurationTestId);
-            configurationTestOptional.ifPresent(
-                configurationTestEntity ->
-                    TestEntity.builder()
-                        .configurationTest(configurationTestEntity)
-                        .status(status)
-                        .variables(pipeline.getVariables())
-                        .createdBy(pipeline.getCreatedBy())
-                        .errorMessage(pipelineStatus.getErrorMessage())
-                        .build()
-                        .persist());
-          });
     }
   }
 }

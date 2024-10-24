@@ -31,10 +31,10 @@ public class SyncEnvironmentCompletedEventHandler {
       var allErrors = retrieveEnvironmentErrorUseCase.execute(event.getEnvironmentId());
       event.setSyncErrors(allErrors);
 
-      unLockEnvironmentSynchronizationUseCase.execute(event.getEnvironmentId());
-
       var environmentResponse = environmentRetrievalService.getResponse(event.getEnvironmentId());
       event.setEnvironment(environmentResponse);
+
+      unLockEnvironmentSynchronizationUseCase.execute(event.getEnvironmentId());
 
       cacheManager
           .getCache("suites")

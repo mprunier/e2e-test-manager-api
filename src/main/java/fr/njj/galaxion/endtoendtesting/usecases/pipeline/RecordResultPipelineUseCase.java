@@ -16,6 +16,7 @@ import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.TestEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.TestScreenshotEntity;
 import fr.njj.galaxion.endtoendtesting.service.CompletePipelineService;
+import fr.njj.galaxion.endtoendtesting.service.SaveCancelResultTestService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.RetrieveGitlabJobArtifactsService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationTestRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.PipelineRetrievalService;
@@ -35,7 +36,7 @@ public class RecordResultPipelineUseCase {
   private final SearchSuiteRetrievalService searchSuiteRetrievalService;
   private final ConfigurationTestRetrievalService configurationTestRetrievalService;
   private final CompletePipelineService completePipelineService;
-
+  private final SaveCancelResultTestService saveCancelResultTestService;
   private final PipelineRetrievalService pipelineRetrievalService;
   private final RetrieveGitlabJobArtifactsService retrieveGitlabJobArtifactsService;
 
@@ -54,16 +55,16 @@ public class RecordResultPipelineUseCase {
         if (artifactData.getReport() != null
             && artifactData.getReport().getResults() != null
             && !artifactData.getReport().getResults().isEmpty()) {
-          generateReportAndSaveResult(
-              artifactData, environmentId, pipeline.getConfigurationTestIdsFilter());
+          saveTestResult(artifactData, environmentId, pipeline.getConfigurationTestIdsFilter());
           completePipelineService.execute(pipeline.getId(), PipelineStatus.FINISH);
         } else {
           completePipelineService.execute(pipeline.getId(), PipelineStatus.NO_REPORT_ERROR);
         }
       } else if (GitlabJobStatus.canceled.equals(status)
           || GitlabJobStatus.skipped.equals(status)) {
-        completePipelineService.execute(
-            pipeline.getId(), PipelineStatus.CANCELED); // TODO save test
+        saveCancelResultTestService.saveTestResult(
+            pipeline, ConfigurationStatus.CANCELED, PipelineStatus.CANCELED.getErrorMessage());
+        completePipelineService.execute(pipeline.getId(), PipelineStatus.CANCELED);
       }
     } catch (Exception e) {
       log.error("Error while recording pipeline result.", e);
@@ -72,7 +73,7 @@ public class RecordResultPipelineUseCase {
   }
 
   @Transactional
-  public void generateReportAndSaveResult(
+  public void saveTestResult(
       ArtifactDataInternal artifactData,
       long environmentId,
       List<String> configurationTestIdsFilter) {

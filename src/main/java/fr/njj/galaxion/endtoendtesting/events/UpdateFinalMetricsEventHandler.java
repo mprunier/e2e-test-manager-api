@@ -29,7 +29,7 @@ public class UpdateFinalMetricsEventHandler {
       @Observes(during = TransactionPhase.AFTER_SUCCESS) UpdateFinalMetricsEvent event) {
     try {
       var finalMetrics = calculateFinalMetricsUseCase.execute(event.getEnvironmentId());
-      addMetricsUseCase.execute(event.getEnvironmentId(), finalMetrics, event.isAllTestsRun());
+      addMetricsUseCase.execute(event.getEnvironmentId(), finalMetrics, event.getIsAllTestsRun());
       var optionalLastMetricsWithAllTestsRun =
           metricRetrievalService.getOptionalLastMetricsWithAllTestsRun(event.getEnvironmentId());
       var metricsResponse =
@@ -41,7 +41,7 @@ public class UpdateFinalMetricsEventHandler {
               .passes(finalMetrics.passes())
               .failures(finalMetrics.failures())
               .skipped(finalMetrics.skipped())
-              .isAllTestsRun(event.isAllTestsRun())
+              .isAllTestsRun(event.getIsAllTestsRun())
               .lastAllTestsRunAt(
                   optionalLastMetricsWithAllTestsRun.map(MetricsEntity::getCreatedAt).orElse(null))
               .build();

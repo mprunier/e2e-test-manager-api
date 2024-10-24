@@ -55,6 +55,11 @@ public class PipelineEntity extends PanacheEntityBase {
   @Column(name = "configuration_test_ids_filter")
   private List<String> configurationTestIdsFilter;
 
+  @Setter
+  @Convert(converter = StringListConverter.class)
+  @Column(name = "files_filter")
+  private List<String> filesFilter;
+
   @Builder.Default
   @Column(name = "created_at", nullable = false)
   private ZonedDateTime createdAt = ZonedDateTime.now();
@@ -75,4 +80,12 @@ public class PipelineEntity extends PanacheEntityBase {
 
   @Column(name = "created_by", nullable = false)
   private String createdBy;
+
+  public boolean hasTestIdsFilter() {
+    return configurationTestIdsFilter != null && !configurationTestIdsFilter.isEmpty();
+  }
+
+  public boolean hasFilesFilter() {
+    return filesFilter != null && !filesFilter.isEmpty();
+  }
 }
