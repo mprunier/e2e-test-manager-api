@@ -4,5 +4,5 @@ import java.time.ZonedDateTime;
 import lombok.Builder;
 
 @Builder
-public record PipelineDetailsResponse(
+public record ConfigurationSuiteOrTestPipelineResponse(
     String id, ZonedDateTime createdAt, String createdBy, boolean isAllTests) {}

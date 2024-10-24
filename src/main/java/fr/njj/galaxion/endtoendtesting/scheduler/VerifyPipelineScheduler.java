@@ -73,13 +73,7 @@ public class VerifyPipelineScheduler {
   private void cancelOldPipelines() {
     var oldJPipelines = pipelineRetrievalService.getOldInProgress(oldPipelineToCancelInMinutes);
     for (var pipeline : oldJPipelines) {
-      //      if (pipeline.getConfigurationTestIdsFilter() != null) {
-      //        cancelTestUseCase.execute(pipeline.getId(),
-      // pipeline.getConfigurationTestIdsFilter());
-      //      } else {
-      cancelPipelineUseCase.execute(pipeline.getId());
-      //      }
-      //      cancelPipelineUseCase.execute(pipeline.getId());
+      cancelPipelineUseCase.execute(pipeline.getId(), true);
       log.info("Pipeline id [{}] canceled.", pipeline.getId());
     }
   }

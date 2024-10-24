@@ -7,7 +7,6 @@ import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSchedulerEntity
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentVariableEntity;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.EnvironmentRetrievalService;
-import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.transaction.Transactional;
@@ -23,12 +22,8 @@ public class CreateEnvironmentUseCase {
 
   private final Event<EnvironmentCreatedEvent> environmentCreatedEvent;
 
-  private final SecurityIdentity identity;
-
   @Transactional
-  public EnvironmentResponse execute(CreateUpdateEnvironmentRequest request) {
-    var username = identity.getPrincipal().getName();
-    log.info("[{}] created a new environment.", username);
+  public EnvironmentResponse execute(CreateUpdateEnvironmentRequest request, String createdBy) {
     var environment =
         EnvironmentEntity.builder()
             .description(request.getDescription())
@@ -37,7 +32,7 @@ public class CreateEnvironmentUseCase {
             .projectId(request.getProjectId())
             .maxParallelTestNumber(request.getMaxParallelTestNumber())
             .isLocked(true)
-            .createdBy(username)
+            .createdBy(createdBy)
             .build();
     environment.persist();
     createVariables(request, environment);

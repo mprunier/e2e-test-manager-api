@@ -5,10 +5,12 @@ import static fr.njj.galaxion.endtoendtesting.websocket.WebSocketEventHandler.se
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineType;
 import fr.njj.galaxion.endtoendtesting.domain.event.PipelineCompletedEvent;
 import fr.njj.galaxion.endtoendtesting.domain.event.RunCompletedEvent;
+import fr.njj.galaxion.endtoendtesting.domain.event.UpdateAllTestsPipelinesEvent;
 import fr.njj.galaxion.endtoendtesting.domain.event.UpdateFinalMetricsEvent;
 import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationSuiteResponse;
 import fr.njj.galaxion.endtoendtesting.service.PipelineGroupService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationSuiteRetrievalService;
+import fr.njj.galaxion.endtoendtesting.usecases.pipeline.RetrieveAllTestsPipelinesUseCase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
@@ -20,6 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 @ApplicationScoped
 @RequiredArgsConstructor
 public class PipelineCompletedEventHandler {
+
+  private final RetrieveAllTestsPipelinesUseCase retrieveAllTestsPipelinesUseCase;
 
   private final PipelineGroupService pipelineGroupService;
   private final ConfigurationSuiteRetrievalService configurationSuiteRetrievalService;
@@ -33,19 +37,22 @@ public class PipelineCompletedEventHandler {
     var pipelineGroup = pipelineGroupService.get(pipelineCompletedEvent.getPipelineId());
 
     if (pipelineGroup == null || pipelineGroup.isAllCompleted()) {
-      var isAllTests =
-          PipelineType.ALL_IN_PARALLEL.equals(pipelineCompletedEvent.getType())
-              || PipelineType.ALL.equals(pipelineCompletedEvent.getType());
-      buildAndSendRunCompletedEvent(pipelineCompletedEvent, isAllTests);
+      var isAllTests = isAllTests(pipelineCompletedEvent);
+      buildAndSendRunCompletedEvent(pipelineCompletedEvent, isAllTests(pipelineCompletedEvent));
 
       updateFinalMetricsEvent.fire(
           UpdateFinalMetricsEvent.builder()
               .environmentId(pipelineCompletedEvent.getEnvironmentId())
               .isAllTestsRun(isAllTests)
               .build());
-    } else {
-      sendEventToEnvironmentSessions(pipelineCompletedEvent);
     }
+
+    buildAndSendUpdateAllTestsPipelinesEvent(pipelineCompletedEvent);
+  }
+
+  private static boolean isAllTests(PipelineCompletedEvent pipelineCompletedEvent) {
+    return PipelineType.ALL_IN_PARALLEL.equals(pipelineCompletedEvent.getType())
+        || PipelineType.ALL.equals(pipelineCompletedEvent.getType());
   }
 
   private void buildAndSendRunCompletedEvent(
@@ -67,5 +74,17 @@ public class PipelineCompletedEventHandler {
             .build();
 
     sendEventToEnvironmentSessions(runCompletedEvent);
+  }
+
+  private void buildAndSendUpdateAllTestsPipelinesEvent(
+      PipelineCompletedEvent pipelineCompletedEvent) {
+    var pipelines =
+        retrieveAllTestsPipelinesUseCase.execute(pipelineCompletedEvent.getEnvironmentId());
+    var updateAllTestsPipelinesEvent =
+        UpdateAllTestsPipelinesEvent.builder()
+            .environmentId(pipelineCompletedEvent.getEnvironmentId())
+            .pipelines(pipelines)
+            .build();
+    sendEventToEnvironmentSessions(updateAllTestsPipelinesEvent);
   }
 }

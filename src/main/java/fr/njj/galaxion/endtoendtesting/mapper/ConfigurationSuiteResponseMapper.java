@@ -2,9 +2,9 @@ package fr.njj.galaxion.endtoendtesting.mapper;
 
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.ConfigurationStatus;
 import fr.njj.galaxion.endtoendtesting.domain.internal.InProgressPipelinesInternal;
+import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationSuiteOrTestPipelineResponse;
 import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationSuiteResponse;
 import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationTestResponse;
-import fr.njj.galaxion.endtoendtesting.domain.response.PipelineDetailsResponse;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,7 +34,7 @@ public final class ConfigurationSuiteResponseMapper {
         .build();
   }
 
-  private static List<PipelineDetailsResponse> getPipelinesInProgress(
+  private static List<ConfigurationSuiteOrTestPipelineResponse> getPipelinesInProgress(
       List<ConfigurationTestResponse> tests) {
     return tests.stream()
         .flatMap(test -> test.getPipelinesInProgress().stream())

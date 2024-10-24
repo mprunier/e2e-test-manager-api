@@ -55,7 +55,8 @@ public class RunAllTestsUseCase {
     if (environment.getMaxParallelTestNumber() > 1) {
       runWithMultiPipelines(environment, createdBy);
     } else {
-      runWithOnePipeline(environment, createdBy);
+      var pipelineGroup = createPipelineGroup(environment, 1);
+      runWithOnePipeline(environment, pipelineGroup, createdBy);
     }
 
     allTestsRunInProgressEvent.fire(
@@ -65,7 +66,8 @@ public class RunAllTestsUseCase {
         .ifPresent(cache -> cache.invalidateAll().await().indefinitely());
   }
 
-  private void runWithOnePipeline(EnvironmentEntity environment, String createdBy) {
+  private void runWithOnePipeline(
+      EnvironmentEntity environment, PipelineGroupEntity pipelineGroup, String createdBy) {
     var variablesBuilder = new StringBuilder();
     buildVariablesEnvironment(environment.getVariables(), variablesBuilder);
     var gitlabResponse =
@@ -79,7 +81,7 @@ public class RunAllTestsUseCase {
             null,
             false);
 
-    createPipeline(gitlabResponse, environment, null, PipelineType.ALL, createdBy);
+    createPipeline(gitlabResponse, environment, pipelineGroup, PipelineType.ALL, createdBy);
   }
 
   private void runWithMultiPipelines(EnvironmentEntity environment, String createdBy) {
@@ -95,19 +97,24 @@ public class RunAllTestsUseCase {
 
     int actualPipelineCount = (int) pipelines.stream().filter(p -> !p.isEmpty()).count();
 
+    var pipelineGroup = createPipelineGroup(environment, actualPipelineCount);
+
     if (actualPipelineCount > 1) {
-      var pipelineGroup =
-          PipelineGroupEntity.builder()
-              .environment(environment)
-              .totalPipelines(actualPipelineCount)
-              .build();
-
-      pipelineGroup.persist();
-
       executePipelines(pipelines, environment, pipelineGroup, createdBy);
     } else {
-      runWithOnePipeline(environment, createdBy);
+      runWithOnePipeline(environment, pipelineGroup, createdBy);
     }
+  }
+
+  private static PipelineGroupEntity createPipelineGroup(
+      EnvironmentEntity environment, int actualPipelineCount) {
+    var pipelineGroup =
+        PipelineGroupEntity.builder()
+            .environment(environment)
+            .totalPipelines(actualPipelineCount)
+            .build();
+    pipelineGroup.persist();
+    return pipelineGroup;
   }
 
   private List<List<String>> initializePipelines(int pipelineCount) {

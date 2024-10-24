@@ -1,7 +1,6 @@
 package fr.njj.galaxion.endtoendtesting.service;
 
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineStatus;
-import fr.njj.galaxion.endtoendtesting.domain.enumeration.ReportPipelineStatus;
 import fr.njj.galaxion.endtoendtesting.domain.event.PipelineCompletedEvent;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.PipelineRetrievalService;
 import io.quarkus.cache.CacheManager;
@@ -23,16 +22,12 @@ public class CompletePipelineService {
   private final CacheManager cacheManager;
 
   @Transactional
-  public void execute(String pipelineId, ReportPipelineStatus reportPipelineStatus) {
+  public void execute(String pipelineId, PipelineStatus pipelineStatus) {
 
     var pipeline = pipelineRetrievalService.get(pipelineId);
     var environmentId = pipeline.getEnvironment().getId();
 
-    pipeline.setStatus(
-        reportPipelineStatus.equals(ReportPipelineStatus.CANCELED)
-            ? PipelineStatus.CANCELED
-            : PipelineStatus.FINISH);
-    pipeline.setReportError(reportPipelineStatus.getErrorMessage());
+    pipeline.setStatus(pipelineStatus);
 
     cacheManager
         .getCache("in_progress_pipelines")

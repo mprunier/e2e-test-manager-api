@@ -7,7 +7,7 @@ import static fr.njj.galaxion.endtoendtesting.domain.constant.CommonConstant.STA
 import com.fasterxml.jackson.core.JsonProcessingException;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.ConfigurationStatus;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.GitlabJobStatus;
-import fr.njj.galaxion.endtoendtesting.domain.enumeration.ReportPipelineStatus;
+import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineStatus;
 import fr.njj.galaxion.endtoendtesting.domain.internal.ArtifactDataInternal;
 import fr.njj.galaxion.endtoendtesting.domain.internal.MochaReportSuiteInternal;
 import fr.njj.galaxion.endtoendtesting.domain.internal.MochaReportTestInternal;
@@ -54,23 +54,25 @@ public class RecordResultPipelineUseCase {
         if (artifactData.getReport() != null
             && artifactData.getReport().getResults() != null
             && !artifactData.getReport().getResults().isEmpty()) {
-          generateReport(artifactData, environmentId, pipeline.getConfigurationTestIdsFilter());
-          completePipelineService.execute(pipeline.getId(), ReportPipelineStatus.FINISH);
+          generateReportAndSaveResult(
+              artifactData, environmentId, pipeline.getConfigurationTestIdsFilter());
+          completePipelineService.execute(pipeline.getId(), PipelineStatus.FINISH);
         } else {
-          completePipelineService.execute(pipeline.getId(), ReportPipelineStatus.NO_REPORT_ERROR);
+          completePipelineService.execute(pipeline.getId(), PipelineStatus.NO_REPORT_ERROR);
         }
       } else if (GitlabJobStatus.canceled.equals(status)
           || GitlabJobStatus.skipped.equals(status)) {
-        completePipelineService.execute(pipeline.getId(), ReportPipelineStatus.CANCELED);
+        completePipelineService.execute(
+            pipeline.getId(), PipelineStatus.CANCELED); // TODO save test
       }
     } catch (Exception e) {
       log.error("Error while recording pipeline result.", e);
-      completePipelineService.execute(pipeline.getId(), ReportPipelineStatus.SYSTEM_ERROR);
+      completePipelineService.execute(pipeline.getId(), PipelineStatus.SYSTEM_ERROR);
     }
   }
 
   @Transactional
-  public void generateReport(
+  public void generateReportAndSaveResult(
       ArtifactDataInternal artifactData,
       long environmentId,
       List<String> configurationTestIdsFilter) {

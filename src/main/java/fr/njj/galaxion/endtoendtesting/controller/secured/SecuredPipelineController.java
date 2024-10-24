@@ -27,6 +27,6 @@ public class SecuredPipelineController {
             ? identity.getPrincipal().getName()
             : "Unknown";
     log.info("[{}] cancel a pipeline.", createdBy);
-    cancelPipelineUseCase.execute(id);
+    cancelPipelineUseCase.execute(id, false);
   }
 }

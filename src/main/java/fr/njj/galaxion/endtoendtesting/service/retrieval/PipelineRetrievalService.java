@@ -48,13 +48,13 @@ public class PipelineRetrievalService {
   @Transactional
   public InProgressPipelinesInternal getInProgressPipelines(@CacheKey long environmentId) {
     var pipelines = pipelineRepository.getAllInProgress(environmentId);
-    String allTestsPipelineId = null;
+    boolean isAllTests = false;
     var pipelinesByConfigurationTestId = new HashMap<Long, List<PipelineDetailsInternal>>();
 
     for (PipelineEntity pipeline : pipelines) {
       if (PipelineType.ALL.equals(pipeline.getType())
           || PipelineType.ALL_IN_PARALLEL.equals(pipeline.getType())) {
-        allTestsPipelineId = pipeline.getId();
+        isAllTests = true;
       } else {
         var configurationTestIds =
             pipeline.getConfigurationTestIdsFilter().stream().map(Long::valueOf).toList();
@@ -79,7 +79,7 @@ public class PipelineRetrievalService {
 
     return InProgressPipelinesInternal.builder()
         .pipelinesByConfigurationTestId(pipelinesByConfigurationTestId)
-        .allTestsPipelineId(allTestsPipelineId)
+        .isAllTests(isAllTests)
         .build();
   }
 }

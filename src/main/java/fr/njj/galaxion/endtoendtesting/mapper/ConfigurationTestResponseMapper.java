@@ -2,8 +2,8 @@ package fr.njj.galaxion.endtoendtesting.mapper;
 
 import fr.njj.galaxion.endtoendtesting.domain.internal.InProgressPipelinesInternal;
 import fr.njj.galaxion.endtoendtesting.domain.internal.PipelineDetailsInternal;
+import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationSuiteOrTestPipelineResponse;
 import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationTestResponse;
-import fr.njj.galaxion.endtoendtesting.domain.response.PipelineDetailsResponse;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestTagEntity;
 import java.util.ArrayList;
@@ -11,7 +11,6 @@ import java.util.HashSet;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ConfigurationTestResponseMapper {
@@ -44,11 +43,12 @@ public final class ConfigurationTestResponseMapper {
     return configurationTestResponseBuilder.build();
   }
 
-  private static List<PipelineDetailsResponse> getPipelinesInProgress(
+  private static List<ConfigurationSuiteOrTestPipelineResponse> getPipelinesInProgress(
       ConfigurationTestEntity configurationTest, InProgressPipelinesInternal inProgressPipelines) {
-    var pipelinesInProgress = new ArrayList<PipelineDetailsResponse>();
-    if (StringUtils.isNotBlank(inProgressPipelines.allTestsPipelineId())) {
-      pipelinesInProgress.add(PipelineDetailsResponse.builder().isAllTests(true).build());
+    var pipelinesInProgress = new ArrayList<ConfigurationSuiteOrTestPipelineResponse>();
+    if (inProgressPipelines.isAllTests()) {
+      pipelinesInProgress.add(
+          ConfigurationSuiteOrTestPipelineResponse.builder().isAllTests(true).build());
     }
     for (var entry : inProgressPipelines.pipelinesByConfigurationTestId().entrySet()) {
       if (configurationTest.getId().equals(entry.getKey())) {
@@ -56,7 +56,7 @@ public final class ConfigurationTestResponseMapper {
         pipelineDetails.forEach(
             pipelineDetail ->
                 pipelinesInProgress.add(
-                    PipelineDetailsResponse.builder()
+                    ConfigurationSuiteOrTestPipelineResponse.builder()
                         .id(pipelineDetail.id())
                         .createdAt(pipelineDetail.createdAt())
                         .createdBy(pipelineDetail.createdBy())

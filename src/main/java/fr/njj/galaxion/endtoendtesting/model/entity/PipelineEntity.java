@@ -69,10 +69,6 @@ public class PipelineEntity extends PanacheEntityBase {
       foreignKey = @ForeignKey(name = "fk__pipeline__pipeline_group_id"))
   private PipelineGroupEntity pipelineGroup;
 
-  @Setter
-  @Column(name = "report_error")
-  private String reportError;
-
   @Convert(converter = StringMapConverter.class)
   @Column(name = "variables")
   private Map<String, String> variables;
