@@ -9,6 +9,6 @@ public class TestScreenshotNotFoundException extends CustomException {
     super(
         Response.Status.NOT_FOUND,
         "test-screenshot-not-found",
-        String.format("Screenshot on test ID %s not found.", id));
+        String.format("Screenshot ID [%s] not found.", id));
   }
 }

@@ -31,7 +31,10 @@ public class CancelPipelineUseCase {
 
       if (isSaveTestResult) {
         saveCancelResultTestService.saveTestResult(
-            pipeline, ConfigurationStatus.CANCELED, PipelineStatus.CANCELED.getErrorMessage());
+            pipeline,
+            ConfigurationStatus.CANCELED,
+            PipelineStatus.CANCELED.getErrorMessage(),
+            true);
       }
       completePipelineService.execute(pipelineId, PipelineStatus.CANCELED);
 
@@ -39,7 +42,8 @@ public class CancelPipelineUseCase {
       saveCancelResultTestService.saveTestResult(
           pipeline,
           ConfigurationStatus.SYSTEM_ERROR,
-          PipelineStatus.SYSTEM_ERROR.getErrorMessage());
+          PipelineStatus.SYSTEM_ERROR.getErrorMessage(),
+          false);
       completePipelineService.execute(pipelineId, PipelineStatus.SYSTEM_ERROR);
     }
   }

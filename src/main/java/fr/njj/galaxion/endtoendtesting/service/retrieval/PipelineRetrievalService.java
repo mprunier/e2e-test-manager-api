@@ -5,6 +5,7 @@ import fr.njj.galaxion.endtoendtesting.domain.exception.JobNotFoundException;
 import fr.njj.galaxion.endtoendtesting.domain.internal.InProgressPipelinesInternal;
 import fr.njj.galaxion.endtoendtesting.domain.internal.PipelineDetailsInternal;
 import fr.njj.galaxion.endtoendtesting.model.entity.PipelineEntity;
+import fr.njj.galaxion.endtoendtesting.model.entity.PipelineGroupEntity;
 import fr.njj.galaxion.endtoendtesting.model.repository.PipelineRepository;
 import io.quarkus.cache.CacheKey;
 import io.quarkus.cache.CacheResult;
@@ -35,9 +36,8 @@ public class PipelineRetrievalService {
   }
 
   @Transactional
-  public boolean isPipelinesGroupFinish(String id) {
-    var pipelineGroup = get(id).getPipelineGroup();
-    return pipelineGroup == null || pipelineGroup.isAllCompleted();
+  public PipelineGroupEntity getGroup(String id) {
+    return get(id).getPipelineGroup();
   }
 
   @Transactional

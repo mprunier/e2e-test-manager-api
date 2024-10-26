@@ -3,13 +3,11 @@ package fr.njj.galaxion.endtoendtesting.model.entity;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.ConfigurationStatus;
 import fr.njj.galaxion.endtoendtesting.model.converter.StringMapConverter;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -34,17 +32,20 @@ import org.hibernate.annotations.FetchMode;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "test")
-public class TestEntity extends PanacheEntityBase {
+@Table(name = "temporary_test")
+public class TemporaryTestEntity extends PanacheEntityBase {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @Column(name = "pipeline_id", nullable = false)
+  private String pipelineId;
+
   @ManyToOne
   @JoinColumn(
       name = "configuration_test_id",
-      foreignKey = @ForeignKey(name = "fk__test__configuration_test_id"),
+      foreignKey = @ForeignKey(name = "fk__temporary_test__configuration_test_id"),
       nullable = false)
   private ConfigurationTestEntity configurationTest;
 
@@ -87,11 +88,7 @@ public class TestEntity extends PanacheEntityBase {
 
   @Setter
   @Fetch(FetchMode.SUBSELECT)
-  @OneToMany(
-      mappedBy = "test",
-      fetch = FetchType.LAZY,
-      cascade = CascadeType.ALL,
-      orphanRemoval = true)
+  @OneToMany(mappedBy = "temporaryTest")
   private List<TestScreenshotEntity> screenshots;
 
   @Column(name = "created_at", nullable = false)

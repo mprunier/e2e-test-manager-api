@@ -13,7 +13,7 @@ import fr.njj.galaxion.endtoendtesting.domain.internal.MochaReportSuiteInternal;
 import fr.njj.galaxion.endtoendtesting.domain.internal.MochaReportTestInternal;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
-import fr.njj.galaxion.endtoendtesting.model.entity.TestEntity;
+import fr.njj.galaxion.endtoendtesting.model.entity.TemporaryTestEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.TestScreenshotEntity;
 import fr.njj.galaxion.endtoendtesting.service.CompletePipelineService;
 import fr.njj.galaxion.endtoendtesting.service.SaveCancelResultTestService;
@@ -23,6 +23,7 @@ import fr.njj.galaxion.endtoendtesting.service.retrieval.PipelineRetrievalServic
 import fr.njj.galaxion.endtoendtesting.service.retrieval.SearchSuiteRetrievalService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -44,7 +45,7 @@ public class RecordResultPipelineUseCase {
   public void execute(String pipelineId, String jobId, GitlabJobStatus status) {
 
     var pipeline = pipelineRetrievalService.get(pipelineId);
-    if (PipelineStatus.CANCELED.equals(pipeline.getStatus())) {
+    if (!PipelineStatus.IN_PROGRESS.equals(pipeline.getStatus())) {
       return;
     }
     var environment = pipeline.getEnvironment();
@@ -58,7 +59,8 @@ public class RecordResultPipelineUseCase {
         if (artifactData.getReport() != null
             && artifactData.getReport().getResults() != null
             && !artifactData.getReport().getResults().isEmpty()) {
-          saveTestResult(artifactData, environmentId, pipeline.getConfigurationTestIdsFilter());
+          saveTestResult(
+              artifactData, environmentId, pipelineId, pipeline.getConfigurationTestIdsFilter());
           completePipelineService.execute(pipeline.getId(), PipelineStatus.FINISH);
         } else {
           completePipelineService.execute(pipeline.getId(), PipelineStatus.NO_REPORT_ERROR);
@@ -66,7 +68,10 @@ public class RecordResultPipelineUseCase {
       } else if (GitlabJobStatus.canceled.equals(status)
           || GitlabJobStatus.skipped.equals(status)) {
         saveCancelResultTestService.saveTestResult(
-            pipeline, ConfigurationStatus.CANCELED, PipelineStatus.CANCELED.getErrorMessage());
+            pipeline,
+            ConfigurationStatus.CANCELED,
+            PipelineStatus.CANCELED.getErrorMessage(),
+            false);
         completePipelineService.execute(pipeline.getId(), PipelineStatus.CANCELED);
       }
     } catch (Exception e) {
@@ -79,6 +84,7 @@ public class RecordResultPipelineUseCase {
   public void saveTestResult(
       ArtifactDataInternal artifactData,
       long environmentId,
+      String pipelineId,
       List<String> configurationTestIdsFilter) {
     var screenshots = artifactData.getScreenshots();
     var report = artifactData.getReport();
@@ -87,9 +93,15 @@ public class RecordResultPipelineUseCase {
         result -> {
           var file = result.getFile().replaceAll(START_PATH, "");
           processTestsWithoutSuite(
-              environmentId, file, configurationTestIdsFilter, result.getTests(), screenshots);
+              environmentId,
+              pipelineId,
+              file,
+              configurationTestIdsFilter,
+              result.getTests(),
+              screenshots);
           processSuites(
               environmentId,
+              pipelineId,
               file,
               configurationTestIdsFilter,
               result.getSuites(),
@@ -100,6 +112,7 @@ public class RecordResultPipelineUseCase {
 
   private void processTestsWithoutSuite(
       long environmentId,
+      String pipelineId,
       String file,
       List<String> configurationTestIdsFilter,
       List<MochaReportTestInternal> tests,
@@ -118,7 +131,7 @@ public class RecordResultPipelineUseCase {
                     if (configurationTestIdsFilter == null
                         || configurationTestIdsFilter.contains(
                             configurationTestEntity.getId().toString())) {
-                      saveTest(mochaTest, configurationTestEntity, screenshots);
+                      saveTest(pipelineId, mochaTest, configurationTestEntity, screenshots);
                     }
                   });
             }
@@ -128,6 +141,7 @@ public class RecordResultPipelineUseCase {
 
   private void processSuites(
       long environmentId,
+      String pipelineId,
       String file,
       List<String> configurationTestIdsFilter,
       List<MochaReportSuiteInternal> suites,
@@ -145,6 +159,7 @@ public class RecordResultPipelineUseCase {
             if (configurationSuiteOptional.isPresent()) {
               processTests(
                   environmentId,
+                  pipelineId,
                   file,
                   configurationTestIdsFilter,
                   mochaSuite.getTests(),
@@ -152,6 +167,7 @@ public class RecordResultPipelineUseCase {
                   screenshots);
               processSuites(
                   environmentId,
+                  pipelineId,
                   file,
                   configurationTestIdsFilter,
                   mochaSuite.getSuites(),
@@ -164,6 +180,7 @@ public class RecordResultPipelineUseCase {
 
   private void processTests(
       long environmentId,
+      String pipelineId,
       String file,
       List<String> configurationTestIdsFilter,
       List<MochaReportTestInternal> tests,
@@ -180,7 +197,7 @@ public class RecordResultPipelineUseCase {
                   if (configurationTestIdsFilter == null
                       || configurationTestIdsFilter.contains(
                           configurationTestEntity.getId().toString())) {
-                    saveTest(mochaTest, configurationTestEntity, screenshots);
+                    saveTest(pipelineId, mochaTest, configurationTestEntity, screenshots);
                   }
                 });
           });
@@ -188,13 +205,15 @@ public class RecordResultPipelineUseCase {
   }
 
   private void saveTest(
+      String pipelineId,
       MochaReportTestInternal mochaTest,
       ConfigurationTestEntity configurationTest,
       Map<String, byte[]> screenshots) {
 
     var status = getConfigurationStatus(mochaTest);
     var test =
-        TestEntity.builder()
+        TemporaryTestEntity.builder()
+            .pipelineId(pipelineId)
             .configurationTest(configurationTest)
             .status(status)
             .errorMessage(mochaTest.getErr() != null ? mochaTest.getErr().getMessage() : null)
@@ -202,6 +221,7 @@ public class RecordResultPipelineUseCase {
             .code(mochaTest.getCode())
             .duration(mochaTest.getDuration())
             .createdBy("Scheduler")
+            .createdAt(ZonedDateTime.now())
             .build();
     try {
       var contextList = mochaTest.getContextParse();
@@ -238,7 +258,9 @@ public class RecordResultPipelineUseCase {
   }
 
   private void createTestScreenshot(
-      MochaReportTestInternal mochaTest, Map<String, byte[]> screenshots, TestEntity test) {
+      MochaReportTestInternal mochaTest,
+      Map<String, byte[]> screenshots,
+      TemporaryTestEntity test) {
     try {
       var contextList = mochaTest.getContextParse();
       if (contextList != null) {
@@ -256,45 +278,16 @@ public class RecordResultPipelineUseCase {
   }
 
   private void handleScreenshot(
-      String screenshotFilename, Map<String, byte[]> screenshots, TestEntity test) {
+      String screenshotFilename, Map<String, byte[]> screenshots, TemporaryTestEntity test) {
     byte[] screenshot = screenshots.get(screenshotFilename);
 
     if (screenshot != null) {
       TestScreenshotEntity.builder()
-          .test(test)
+          .temporaryTest(test)
           .filename(screenshotFilename.replace(SCREENSHOT_PATH, ""))
           .screenshot(screenshot)
           .build()
           .persist();
     }
-    //    else {
-    //      var modifiedScreenshotFilename = removeTextBetweenSlashes(screenshotFilename);
-    //      if (!modifiedScreenshotFilename.equals(screenshotFilename)) {
-    //        handleScreenshot(modifiedScreenshotFilename, screenshots, test);
-    //      }
-    //    }
   }
-
-  //  private static String removeTextBetweenSlashes(String input) {
-  //    int firstSlash = indexOfNthSlash(input, 2);
-  //    int secondSlash = indexOfNthSlash(input, 3);
-  //
-  //    if (firstSlash == -1 || secondSlash == -1) {
-  //      return input;
-  //    }
-  //
-  //    String before = input.substring(0, firstSlash);
-  //    String after = input.substring(secondSlash);
-  //
-  //    return before + after;
-  //  }
-  //
-  //  private static int indexOfNthSlash(String input, int n) {
-  //    int index = -1;
-  //    while (n > 0 && index < input.length() - 1) {
-  //      index = input.indexOf("/", index + 1);
-  //      n--;
-  //    }
-  //    return index;
-  //  }
 }

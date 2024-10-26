@@ -44,7 +44,7 @@ public class PipelineGroupEntity extends PanacheEntityBase {
   @Fetch(FetchMode.SUBSELECT)
   @OneToMany(
       mappedBy = "pipelineGroup",
-      fetch = FetchType.LAZY,
+      fetch = FetchType.EAGER,
       cascade = CascadeType.ALL,
       orphanRemoval = true)
   private List<PipelineEntity> pipelines;

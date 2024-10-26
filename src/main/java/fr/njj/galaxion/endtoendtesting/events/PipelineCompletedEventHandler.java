@@ -9,6 +9,8 @@ import fr.njj.galaxion.endtoendtesting.domain.event.send.RunCompletedEvent;
 import fr.njj.galaxion.endtoendtesting.domain.event.send.UpdateFinalMetricsEvent;
 import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationSuiteResponse;
 import fr.njj.galaxion.endtoendtesting.events.queue.PipelineCompletedEventQueueManager;
+import fr.njj.galaxion.endtoendtesting.model.entity.PipelineGroupEntity;
+import fr.njj.galaxion.endtoendtesting.service.TestTransformationService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationSuiteRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.PipelineRetrievalService;
 import fr.njj.galaxion.endtoendtesting.usecases.pipeline.RetrieveAllTestsPipelinesUseCase;
@@ -28,8 +30,11 @@ public class PipelineCompletedEventHandler {
   private final RetrieveAllTestsPipelinesUseCase retrieveAllTestsPipelinesUseCase;
   private final PipelineRetrievalService pipelineRetrievalService;
   private final ConfigurationSuiteRetrievalService configurationSuiteRetrievalService;
-  private final Event<UpdateFinalMetricsEvent> updateFinalMetricsEvent;
+  private final TestTransformationService testTransformationService;
+
   private final PipelineCompletedEventQueueManager queueManager;
+
+  private final Event<UpdateFinalMetricsEvent> updateFinalMetricsEvent;
 
   @PostConstruct
   public void init() {
@@ -47,15 +52,21 @@ public class PipelineCompletedEventHandler {
           "Processing pipeline event for environment: {}, pipeline ID: {}",
           event.getEnvironmentId(),
           event.getPipelineId());
-      var isPipelinesGroupFinish =
-          pipelineRetrievalService.isPipelinesGroupFinish(event.getPipelineId());
+      var pipelineGroup = pipelineRetrievalService.getGroup(event.getPipelineId());
 
       buildAndSendUpdateAllTestsPipelinesEvent(event);
 
-      if (isPipelinesGroupFinish) {
+      if (pipelineGroup == null || pipelineGroup.isAllCompleted()) {
         var isAllTests = isAllTests(event);
+
+        transformTemporaryTests(event, pipelineGroup);
+
         buildAndSendRunCompletedEvent(event, isAllTests);
-        fireUpdateFinalMetricsEvent(event, isAllTests);
+        updateFinalMetricsEvent.fire(
+            UpdateFinalMetricsEvent.builder()
+                .environmentId(event.getEnvironmentId())
+                .isAllTestsRun(isAllTests)
+                .build());
       }
 
     } catch (Exception e) {
@@ -68,12 +79,15 @@ public class PipelineCompletedEventHandler {
     }
   }
 
-  private void fireUpdateFinalMetricsEvent(PipelineCompletedEvent event, boolean isAllTests) {
-    updateFinalMetricsEvent.fire(
-        UpdateFinalMetricsEvent.builder()
-            .environmentId(event.getEnvironmentId())
-            .isAllTestsRun(isAllTests)
-            .build());
+  private void transformTemporaryTests(
+      PipelineCompletedEvent event, PipelineGroupEntity pipelineGroup) {
+    if (pipelineGroup != null) {
+      pipelineGroup
+          .getPipelines()
+          .forEach(p -> testTransformationService.transformAndPersistAll(p.getId()));
+    } else {
+      testTransformationService.transformAndPersistAll(event.getPipelineId());
+    }
   }
 
   private static boolean isAllTests(PipelineCompletedEvent event) {
