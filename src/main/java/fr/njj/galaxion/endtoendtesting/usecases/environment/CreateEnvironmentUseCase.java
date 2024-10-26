@@ -1,6 +1,6 @@
 package fr.njj.galaxion.endtoendtesting.usecases.environment;
 
-import fr.njj.galaxion.endtoendtesting.domain.event.EnvironmentCreatedEvent;
+import fr.njj.galaxion.endtoendtesting.domain.event.internal.EnvironmentCreatedEvent;
 import fr.njj.galaxion.endtoendtesting.domain.request.CreateUpdateEnvironmentRequest;
 import fr.njj.galaxion.endtoendtesting.domain.response.EnvironmentResponse;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSchedulerEntity;

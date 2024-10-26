@@ -2,8 +2,8 @@ package fr.njj.galaxion.endtoendtesting.events;
 
 import static fr.njj.galaxion.endtoendtesting.websocket.WebSocketEventHandler.sendEventToEnvironmentSessions;
 
-import fr.njj.galaxion.endtoendtesting.domain.event.AllTestsPipelinesUpdatedEvent;
-import fr.njj.galaxion.endtoendtesting.domain.event.RunInProgressEvent;
+import fr.njj.galaxion.endtoendtesting.domain.event.send.AllTestsPipelinesUpdatedEvent;
+import fr.njj.galaxion.endtoendtesting.domain.event.send.RunInProgressEvent;
 import fr.njj.galaxion.endtoendtesting.usecases.pipeline.RetrieveAllTestsPipelinesUseCase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;

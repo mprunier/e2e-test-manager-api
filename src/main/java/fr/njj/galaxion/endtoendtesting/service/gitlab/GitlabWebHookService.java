@@ -32,6 +32,10 @@ public class GitlabWebHookService {
   }
 
   private void jobHook(GitlabWebHookRequest request) {
+    log.trace(
+        "Gitlab WebHook - Job Hook received with pipeline [{}] and status [{}].",
+        request.getPipelineId(),
+        request.getStatus());
 
     var isFinish = request.getFinishedAt() != null;
     if (!isFinish) {

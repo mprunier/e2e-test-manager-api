@@ -1,10 +1,11 @@
 package fr.njj.galaxion.endtoendtesting.usecases.run;
 
 import static fr.njj.galaxion.endtoendtesting.domain.constant.CommonConstant.NO_SUITE;
+import static fr.njj.galaxion.endtoendtesting.domain.constant.CommonConstant.START_PATH;
 import static fr.njj.galaxion.endtoendtesting.helper.EnvironmentHelper.buildVariablesEnvironment;
 
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineType;
-import fr.njj.galaxion.endtoendtesting.domain.event.RunInProgressEvent;
+import fr.njj.galaxion.endtoendtesting.domain.event.send.RunInProgressEvent;
 import fr.njj.galaxion.endtoendtesting.domain.exception.RunParameterException;
 import fr.njj.galaxion.endtoendtesting.domain.request.RunTestOrSuiteRequest;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
@@ -86,7 +87,7 @@ public class RunTestUseCase {
             environment.getBranch(),
             environment.getToken(),
             environment.getProjectId(),
-            file,
+            START_PATH + file,
             variablesBuilder.toString(),
             grep.toString(),
             null,

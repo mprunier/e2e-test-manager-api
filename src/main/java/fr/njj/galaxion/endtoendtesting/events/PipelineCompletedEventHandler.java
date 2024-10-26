@@ -3,10 +3,10 @@ package fr.njj.galaxion.endtoendtesting.events;
 import static fr.njj.galaxion.endtoendtesting.websocket.WebSocketEventHandler.sendEventToEnvironmentSessions;
 
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineType;
-import fr.njj.galaxion.endtoendtesting.domain.event.AllTestsPipelinesUpdatedEvent;
-import fr.njj.galaxion.endtoendtesting.domain.event.PipelineCompletedEvent;
-import fr.njj.galaxion.endtoendtesting.domain.event.RunCompletedEvent;
-import fr.njj.galaxion.endtoendtesting.domain.event.UpdateFinalMetricsEvent;
+import fr.njj.galaxion.endtoendtesting.domain.event.internal.PipelineCompletedEvent;
+import fr.njj.galaxion.endtoendtesting.domain.event.send.AllTestsPipelinesUpdatedEvent;
+import fr.njj.galaxion.endtoendtesting.domain.event.send.RunCompletedEvent;
+import fr.njj.galaxion.endtoendtesting.domain.event.send.UpdateFinalMetricsEvent;
 import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationSuiteResponse;
 import fr.njj.galaxion.endtoendtesting.events.queue.PipelineEventQueueManager;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationSuiteRetrievalService;
@@ -38,13 +38,19 @@ public class PipelineCompletedEventHandler {
 
   public void onPipelineCompleted(
       @Observes(during = TransactionPhase.AFTER_SUCCESS) PipelineCompletedEvent event) {
-    queueManager.submitEvent(event.getEnvironmentId(), event);
+    queueManager.submitEvent(event);
   }
 
   private void processEvent(PipelineCompletedEvent event) {
     try {
+      log.info(
+          "Processing pipeline event for environment: {}, pipeline ID: {}",
+          event.getEnvironmentId(),
+          event.getPipelineId());
       var isPipelinesGroupFinish =
           pipelineRetrievalService.isPipelinesGroupFinish(event.getPipelineId());
+
+      buildAndSendUpdateAllTestsPipelinesEvent(event);
 
       if (isPipelinesGroupFinish) {
         var isAllTests = isAllTests(event);
@@ -52,7 +58,6 @@ public class PipelineCompletedEventHandler {
         fireUpdateFinalMetricsEvent(event, isAllTests);
       }
 
-      buildAndSendUpdateAllTestsPipelinesEvent(event);
     } catch (Exception e) {
       log.error(
           "Error processing pipeline event for environment: {}, pipeline ID: {}",

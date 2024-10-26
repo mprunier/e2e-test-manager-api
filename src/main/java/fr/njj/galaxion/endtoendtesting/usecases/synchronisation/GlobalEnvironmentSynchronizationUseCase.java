@@ -5,7 +5,7 @@ import static fr.njj.galaxion.endtoendtesting.domain.constant.CommonConstant.STA
 import static fr.njj.galaxion.endtoendtesting.helper.FileHelper.cleanRepo;
 import static fr.njj.galaxion.endtoendtesting.helper.GitHelper.getChangedFilesAfterDate;
 
-import fr.njj.galaxion.endtoendtesting.domain.event.SyncEnvironmentCompletedEvent;
+import fr.njj.galaxion.endtoendtesting.domain.event.send.SyncEnvironmentCompletedEvent;
 import fr.njj.galaxion.endtoendtesting.domain.exception.ConfigurationSynchronizationException;
 import fr.njj.galaxion.endtoendtesting.lib.exception.CustomException;
 import fr.njj.galaxion.endtoendtesting.lib.logging.Monitored;

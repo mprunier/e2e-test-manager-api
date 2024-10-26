@@ -2,7 +2,7 @@ package fr.njj.galaxion.endtoendtesting.events;
 
 import static fr.njj.galaxion.endtoendtesting.websocket.WebSocketEventHandler.sendEventToEnvironmentSessions;
 
-import fr.njj.galaxion.endtoendtesting.domain.event.SyncEnvironmentCompletedEvent;
+import fr.njj.galaxion.endtoendtesting.domain.event.send.SyncEnvironmentCompletedEvent;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.EnvironmentRetrievalService;
 import fr.njj.galaxion.endtoendtesting.usecases.environment.RetrieveEnvironmentErrorUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.environment.UnLockEnvironmentSynchronizationUseCase;
@@ -31,10 +31,10 @@ public class SyncEnvironmentCompletedEventHandler {
       var allErrors = retrieveEnvironmentErrorUseCase.execute(event.getEnvironmentId());
       event.setSyncErrors(allErrors);
 
+      unLockEnvironmentSynchronizationUseCase.execute(event.getEnvironmentId());
+
       var environmentResponse = environmentRetrievalService.getResponse(event.getEnvironmentId());
       event.setEnvironment(environmentResponse);
-
-      unLockEnvironmentSynchronizationUseCase.execute(event.getEnvironmentId());
 
       cacheManager
           .getCache("suites")

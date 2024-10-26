@@ -2,7 +2,7 @@ package fr.njj.galaxion.endtoendtesting.events;
 
 import static fr.njj.galaxion.endtoendtesting.websocket.WebSocketEventHandler.sendEventToEnvironmentSessions;
 
-import fr.njj.galaxion.endtoendtesting.domain.event.UpdateFinalMetricsEvent;
+import fr.njj.galaxion.endtoendtesting.domain.event.send.UpdateFinalMetricsEvent;
 import fr.njj.galaxion.endtoendtesting.domain.response.MetricsResponse;
 import fr.njj.galaxion.endtoendtesting.model.entity.MetricsEntity;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.MetricRetrievalService;
@@ -43,7 +43,11 @@ public class UpdateFinalMetricsEventHandler {
               .skipped(finalMetrics.skipped())
               .isAllTestsRun(event.getIsAllTestsRun())
               .lastAllTestsRunAt(
-                  optionalLastMetricsWithAllTestsRun.map(MetricsEntity::getCreatedAt).orElse(null))
+                  event.getIsAllTestsRun()
+                      ? finalMetrics.at()
+                      : optionalLastMetricsWithAllTestsRun
+                          .map(MetricsEntity::getCreatedAt)
+                          .orElse(null))
               .build();
       event.setMetrics(metricsResponse);
       sendEventToEnvironmentSessions(event);

@@ -1,6 +1,6 @@
 package fr.njj.galaxion.endtoendtesting.events;
 
-import fr.njj.galaxion.endtoendtesting.domain.event.EnvironmentCreatedEvent;
+import fr.njj.galaxion.endtoendtesting.domain.event.internal.EnvironmentCreatedEvent;
 import fr.njj.galaxion.endtoendtesting.usecases.synchronisation.GlobalEnvironmentSynchronizationUseCase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;

@@ -1,7 +1,6 @@
 package fr.njj.galaxion.endtoendtesting.service.gitlab;
 
 import static fr.njj.galaxion.endtoendtesting.domain.constant.CommonConstant.DISABLE_TAG;
-import static fr.njj.galaxion.endtoendtesting.domain.constant.CommonConstant.START_PATH;
 
 import fr.njj.galaxion.endtoendtesting.client.gitlab.GitlabClient;
 import fr.njj.galaxion.endtoendtesting.client.gitlab.request.PipelineRequest;
@@ -39,7 +38,7 @@ public class RunGitlabJobService {
             .ref(branch);
     if (StringUtils.isNotBlank(spec)) {
       pipelineRequestBuilder.variable(
-          VariableRequest.builder().key("CYPRESS_TEST_SPEC").value(START_PATH + spec).build());
+          VariableRequest.builder().key("CYPRESS_TEST_SPEC").value(spec).build());
     }
     if (StringUtils.isNotBlank(grep)) {
       pipelineRequestBuilder.variable(

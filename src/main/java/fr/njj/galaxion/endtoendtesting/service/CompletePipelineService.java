@@ -1,7 +1,7 @@
 package fr.njj.galaxion.endtoendtesting.service;
 
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineStatus;
-import fr.njj.galaxion.endtoendtesting.domain.event.PipelineCompletedEvent;
+import fr.njj.galaxion.endtoendtesting.domain.event.internal.PipelineCompletedEvent;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.PipelineRetrievalService;
 import io.quarkus.cache.CacheManager;
 import jakarta.enterprise.context.ApplicationScoped;

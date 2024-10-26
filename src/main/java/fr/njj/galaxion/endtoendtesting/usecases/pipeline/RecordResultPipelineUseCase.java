@@ -44,6 +44,9 @@ public class RecordResultPipelineUseCase {
   public void execute(String pipelineId, String jobId, GitlabJobStatus status) {
 
     var pipeline = pipelineRetrievalService.get(pipelineId);
+    if (PipelineStatus.CANCELED.equals(pipeline.getStatus())) {
+      return;
+    }
     var environment = pipeline.getEnvironment();
 
     var environmentId = pipeline.getEnvironment().getId();

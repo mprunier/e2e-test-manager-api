@@ -1,6 +1,7 @@
-package fr.njj.galaxion.endtoendtesting.domain.event;
+package fr.njj.galaxion.endtoendtesting.domain.event.send;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import fr.njj.galaxion.endtoendtesting.domain.event.AbstractEvent;
 import fr.njj.galaxion.endtoendtesting.domain.response.MetricsResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

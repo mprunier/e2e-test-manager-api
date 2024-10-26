@@ -1,10 +1,11 @@
 package fr.njj.galaxion.endtoendtesting.usecases.run;
 
+import static fr.njj.galaxion.endtoendtesting.domain.constant.CommonConstant.START_PATH;
 import static fr.njj.galaxion.endtoendtesting.helper.EnvironmentHelper.buildVariablesEnvironment;
 
 import fr.njj.galaxion.endtoendtesting.client.gitlab.response.GitlabResponse;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.PipelineType;
-import fr.njj.galaxion.endtoendtesting.domain.event.RunInProgressEvent;
+import fr.njj.galaxion.endtoendtesting.domain.event.send.RunInProgressEvent;
 import fr.njj.galaxion.endtoendtesting.domain.exception.AllTestsAlreadyRunningException;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.PipelineEntity;
@@ -158,7 +159,10 @@ public class RunAllTestsUseCase {
         .filter(pipelineFiles -> !pipelineFiles.isEmpty())
         .forEach(
             pipelineFiles -> {
-              var files = String.join(",", pipelineFiles);
+              var filesStr =
+                  pipelineFiles.stream()
+                      .map(file -> START_PATH + file)
+                      .collect(Collectors.joining(","));
               var variablesBuilder = new StringBuilder();
               buildVariablesEnvironment(environment.getVariables(), variablesBuilder);
               var gitlabResponse =
@@ -166,7 +170,7 @@ public class RunAllTestsUseCase {
                       environment.getBranch(),
                       environment.getToken(),
                       environment.getProjectId(),
-                      files,
+                      filesStr,
                       variablesBuilder.toString(),
                       null,
                       null,
