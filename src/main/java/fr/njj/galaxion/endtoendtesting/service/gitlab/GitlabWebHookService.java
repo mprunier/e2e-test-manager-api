@@ -56,6 +56,11 @@ public class GitlabWebHookService {
   }
 
   private void pushHook(GitlabWebHookRequest request) {
+    log.trace(
+        "Gitlab WebHook - Push Hook received for Project id [{}] and Branch name [{}].",
+        request.getProjectId(),
+        request.getRef());
+
     var projectId = request.getProjectId();
     var branch = request.getRef();
 

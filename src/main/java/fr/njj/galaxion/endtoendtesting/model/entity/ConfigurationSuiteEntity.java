@@ -81,7 +81,7 @@ public class ConfigurationSuiteEntity extends PanacheEntityBase {
       fetch = FetchType.LAZY,
       cascade = CascadeType.ALL,
       orphanRemoval = true)
-  @OrderBy("id ASC")
+  @OrderBy("position ASC")
   private List<ConfigurationTestEntity> configurationTests;
 
   @Setter

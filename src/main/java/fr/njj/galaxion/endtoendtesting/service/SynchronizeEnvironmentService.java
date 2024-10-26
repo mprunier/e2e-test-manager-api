@@ -277,11 +277,12 @@ public class SynchronizeEnvironmentService {
     }
     suiteIds.add(configurationSuite.getId());
 
-    suiteInternal
-        .getTests()
-        .forEach(
-            testInternal ->
-                updateOrCreateTest(environment, file, testInternal, configurationSuite, testIds));
+    for (int i = 0; i < suiteInternal.getTests().size(); i++) {
+      var testInternal = suiteInternal.getTests().get(i);
+      testInternal.setPosition(i);
+      updateOrCreateTest(environment, file, testInternal, configurationSuite, testIds);
+    }
+
     suiteInternal
         .getSuites()
         .forEach(
@@ -302,6 +303,7 @@ public class SynchronizeEnvironmentService {
             environment.getId(), file, testInternal.getTitle(), configurationSuite);
 
     var configurationTestTagEntities = new ArrayList<ConfigurationTestTagEntity>();
+
     if (configurationTestOptional.isEmpty()) {
       configurationTest =
           ConfigurationTestEntity.builder()
@@ -309,12 +311,14 @@ public class SynchronizeEnvironmentService {
               .configurationSuite(configurationSuite)
               .title(testInternal.getTitle())
               .file(file)
+              .position(testInternal.getPosition())
               .variables(
                   CollectionUtils.isEmpty(testInternal.getVariables())
                       ? null
                       : testInternal.getVariables())
               .build();
       configurationTest.persist();
+
       testInternal
           .getTags()
           .forEach(
@@ -349,6 +353,7 @@ public class SynchronizeEnvironmentService {
           CollectionUtils.isEmpty(testInternal.getVariables())
               ? null
               : testInternal.getVariables());
+      configurationTest.setPosition(testInternal.getPosition());
       configurationTest.setUpdatedAt(ZonedDateTime.now());
     }
     testIds.add(configurationTest.getId());

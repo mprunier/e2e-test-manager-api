@@ -14,6 +14,8 @@ import lombok.Setter;
 @Builder
 public class ConfigurationTestInternal {
 
+  @Setter private int position;
+
   @Setter private String title;
 
   @Builder.Default @Setter private List<String> variables = new ArrayList<>();

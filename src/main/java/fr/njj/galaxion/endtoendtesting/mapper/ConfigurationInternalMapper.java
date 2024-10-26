@@ -187,13 +187,27 @@ public final class ConfigurationInternalMapper {
     var testCase = new ConfigurationTestInternal();
     testCase.setTitle(firstArg.getValue());
 
+    testCase.setPosition(node.getAbsolutePosition());
+
     extractTagsAndVariables(node, testCase);
 
     if (parentSuite == null && configurationInternal != null) {
-      configurationInternal.getTests().add(testCase);
+      insertTestInOrder(configurationInternal.getTests(), testCase);
     } else if (parentSuite != null) {
-      parentSuite.getTests().add(testCase);
+      insertTestInOrder(parentSuite.getTests(), testCase);
     }
+  }
+
+  private static void insertTestInOrder(
+      List<ConfigurationTestInternal> tests, ConfigurationTestInternal newTest) {
+    int insertIndex = 0;
+    for (ConfigurationTestInternal test : tests) {
+      if (test.getPosition() > newTest.getPosition()) {
+        break;
+      }
+      insertIndex++;
+    }
+    tests.add(insertIndex, newTest);
   }
 
   private static void extractTagsAndVariables(AstNode node, ConfigurationTestInternal testCase) {
