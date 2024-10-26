@@ -2,6 +2,7 @@ package fr.njj.galaxion.endtoendtesting.usecases.search;
 
 import static fr.njj.galaxion.endtoendtesting.model.search.ConfigurationSuiteSearch.buildConfigurationSuiteSearchQuery;
 
+import fr.njj.galaxion.endtoendtesting.domain.enumeration.ConfigurationStatus;
 import fr.njj.galaxion.endtoendtesting.domain.request.SearchConfigurationRequest;
 import fr.njj.galaxion.endtoendtesting.domain.response.SearchConfigurationSuiteResponse;
 import fr.njj.galaxion.endtoendtesting.mapper.ConfigurationSuiteResponseMapper;
@@ -43,6 +44,7 @@ public class SearchSuiteOrTestUseCase {
 
     addSuiteByTag(environmentId, request);
     addSuiteByTest(request);
+    addSuiteByNewTest(environmentId, request);
 
     // To retrieve all the configuration suites that are not successful but also the new tests
     // (Suite is not set to new if only just one new test).
@@ -78,6 +80,28 @@ public class SearchSuiteOrTestUseCase {
       var configurationTest =
           configurationTestRetrievalService.get(request.getConfigurationTestId());
       request.setConfigurationSuiteId(configurationTest.getConfigurationSuite().getId());
+    }
+  }
+
+  private void addSuiteByNewTest(Long environmentId, SearchConfigurationRequest request) {
+    if (ConfigurationStatus.NEW.equals(request.getStatus())) {
+      request.setStatus(null);
+      var newSuiteIds =
+          configurationTestRetrievalService.getAllNewTests(environmentId).stream()
+              .map(
+                  configurationTestEntity ->
+                      configurationTestEntity.getConfigurationSuite().getId())
+              .collect(Collectors.toSet());
+      var newConfigurationSuiteIds = request.getConfigurationSuiteIds();
+      if (newConfigurationSuiteIds == null) {
+        newConfigurationSuiteIds = newSuiteIds;
+      } else {
+        newConfigurationSuiteIds =
+            newConfigurationSuiteIds.stream()
+                .filter(newSuiteIds::contains)
+                .collect(Collectors.toSet());
+      }
+      request.setConfigurationSuiteIds(newConfigurationSuiteIds);
     }
   }
 

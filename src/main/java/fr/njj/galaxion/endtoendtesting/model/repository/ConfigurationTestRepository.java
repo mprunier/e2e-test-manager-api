@@ -36,7 +36,7 @@ public class ConfigurationTestRepository
 
   public void deleteByEnvAndFileAndNotInTestIds(
       long environmentId, String file, List<Long> testIds) {
-    delete("environment.id IN ?1 AND file = ?2 AND id NOT IN ?3", environmentId, file, testIds);
+    delete("environment.id = ?1 AND file = ?2 AND id NOT IN ?3", environmentId, file, testIds);
   }
 
   public List<ConfigurationTestEntity> findAllByIds(List<Long> configurationTestIds) {
@@ -45,5 +45,9 @@ public class ConfigurationTestRepository
 
   public List<ConfigurationTestEntity> findAllByFiles(List<String> files) {
     return list("file IN ?1", files);
+  }
+
+  public List<ConfigurationTestEntity> findAllNewTests(long environmentId) {
+    return list("environment.id = ?1 AND status = ?2", environmentId, ConfigurationStatus.NEW);
   }
 }
