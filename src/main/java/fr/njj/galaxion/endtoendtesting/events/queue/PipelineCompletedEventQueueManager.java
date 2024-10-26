@@ -4,4 +4,5 @@ import fr.njj.galaxion.endtoendtesting.domain.event.internal.PipelineCompletedEv
 import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
-public class PipelineEventQueueManager extends AbstractEventQueueManager<PipelineCompletedEvent> {}
+public class PipelineCompletedEventQueueManager
+    extends AbstractEventQueueManager<PipelineCompletedEvent> {}

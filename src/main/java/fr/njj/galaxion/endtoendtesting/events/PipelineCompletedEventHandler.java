@@ -8,7 +8,7 @@ import fr.njj.galaxion.endtoendtesting.domain.event.send.AllTestsPipelinesUpdate
 import fr.njj.galaxion.endtoendtesting.domain.event.send.RunCompletedEvent;
 import fr.njj.galaxion.endtoendtesting.domain.event.send.UpdateFinalMetricsEvent;
 import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationSuiteResponse;
-import fr.njj.galaxion.endtoendtesting.events.queue.PipelineEventQueueManager;
+import fr.njj.galaxion.endtoendtesting.events.queue.PipelineCompletedEventQueueManager;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationSuiteRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.PipelineRetrievalService;
 import fr.njj.galaxion.endtoendtesting.usecases.pipeline.RetrieveAllTestsPipelinesUseCase;
@@ -29,7 +29,7 @@ public class PipelineCompletedEventHandler {
   private final PipelineRetrievalService pipelineRetrievalService;
   private final ConfigurationSuiteRetrievalService configurationSuiteRetrievalService;
   private final Event<UpdateFinalMetricsEvent> updateFinalMetricsEvent;
-  private final PipelineEventQueueManager queueManager;
+  private final PipelineCompletedEventQueueManager queueManager;
 
   @PostConstruct
   public void init() {
