@@ -10,6 +10,7 @@ import fr.njj.galaxion.endtoendtesting.domain.event.send.UpdateFinalMetricsEvent
 import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationSuiteResponse;
 import fr.njj.galaxion.endtoendtesting.events.queue.PipelineCompletedEventQueueManager;
 import fr.njj.galaxion.endtoendtesting.model.entity.PipelineGroupEntity;
+import fr.njj.galaxion.endtoendtesting.service.CleanPipelineService;
 import fr.njj.galaxion.endtoendtesting.service.TestService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationSuiteRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.PipelineRetrievalService;
@@ -31,6 +32,7 @@ public class PipelineCompletedEventHandler {
   private final PipelineRetrievalService pipelineRetrievalService;
   private final ConfigurationSuiteRetrievalService configurationSuiteRetrievalService;
   private final TestService testService;
+  private final CleanPipelineService cleanPipelineService;
 
   private final PipelineCompletedEventQueueManager queueManager;
 
@@ -67,6 +69,8 @@ public class PipelineCompletedEventHandler {
                 .environmentId(event.getEnvironmentId())
                 .isAllTestsRun(isAllTests)
                 .build());
+
+        cleanPipelineService.getLastPipelineGroup(event.getPipelineId());
       }
 
     } catch (Exception e) {

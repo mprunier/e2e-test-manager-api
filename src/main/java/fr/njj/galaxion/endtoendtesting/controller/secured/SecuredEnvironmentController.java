@@ -56,6 +56,12 @@ public class SecuredEnvironmentController {
     var username = identity.getPrincipal().getName();
     log.info("[{}] updated environment ID [{}].", username, id);
     updateEnvironmentUseCase.execute(id, request);
+    cacheManager
+        .getCache("environments")
+        .ifPresent(cache -> cache.invalidateAll().await().indefinitely());
+    cacheManager
+        .getCache("schedulers")
+        .ifPresent(cache -> cache.invalidateAll().await().indefinitely());
   }
 
   @PATCH
