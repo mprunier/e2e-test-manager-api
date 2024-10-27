@@ -3,6 +3,7 @@ package fr.njj.galaxion.endtoendtesting.usecases.search;
 import static fr.njj.galaxion.endtoendtesting.model.search.ConfigurationSuiteSearch.buildConfigurationSuiteSearchQuery;
 
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.ConfigurationStatus;
+import fr.njj.galaxion.endtoendtesting.domain.internal.InProgressPipelinesInternal;
 import fr.njj.galaxion.endtoendtesting.domain.request.SearchConfigurationRequest;
 import fr.njj.galaxion.endtoendtesting.domain.response.SearchConfigurationSuiteResponse;
 import fr.njj.galaxion.endtoendtesting.mapper.ConfigurationSuiteResponseMapper;
@@ -15,7 +16,6 @@ import fr.njj.galaxion.endtoendtesting.service.retrieval.FileGroupRetrievalServi
 import fr.njj.galaxion.endtoendtesting.service.retrieval.PipelineRetrievalService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,11 +40,13 @@ public class SearchSuiteOrTestUseCase {
       Long environmentId, SearchConfigurationRequest request) {
 
     var params = new HashMap<String, Object>();
-    var conditions = new ArrayList<String>();
+
+    var inProgressPipelines = pipelineRetrievalService.getInProgressPipelines(environmentId);
 
     addSuiteByTag(environmentId, request);
     addSuiteByTest(request);
     addSuiteByNewTest(environmentId, request);
+    addSuiteInProgress(request, inProgressPipelines);
 
     // To retrieve all the configuration suites that are not successful but also the new tests
     // (Suite is not set to new if only just one new test).
@@ -59,9 +61,7 @@ public class SearchSuiteOrTestUseCase {
               .collect(Collectors.toSet()));
     }
 
-    var inProgressPipelines = pipelineRetrievalService.getInProgressPipelines(environmentId);
-
-    var baseQuery = buildConfigurationSuiteSearchQuery(environmentId, request, params, conditions);
+    var baseQuery = buildConfigurationSuiteSearchQuery(environmentId, request, params);
     var filteredQuery =
         ConfigurationSuiteEntity.find(baseQuery, params).page(request.getPage(), request.getSize());
     List<ConfigurationSuiteEntity> configurationSuites = filteredQuery.list();
@@ -115,6 +115,26 @@ public class SearchSuiteOrTestUseCase {
       configurationSuiteIds.addAll(
           configurationSuiteRetrievalService.getSuiteIds(environmentId, files));
       request.setConfigurationSuiteIds(configurationSuiteIds);
+    }
+  }
+
+  private void addSuiteInProgress(
+      SearchConfigurationRequest request, InProgressPipelinesInternal inProgressPipelines) {
+    if (ConfigurationStatus.IN_PROGRESS.equals(request.getStatus())) {
+      request.setStatus(null);
+      if (!inProgressPipelines.isAllTests()) {
+        var inProgressConfigurationTestIds =
+            inProgressPipelines.pipelinesByConfigurationTestId().keySet();
+        var inProgressConfigurationTests =
+            configurationTestRetrievalService.getAllByIds(inProgressConfigurationTestIds);
+        var configurationSuiteIds =
+            inProgressConfigurationTests.stream()
+                .map(
+                    configurationTestEntity ->
+                        configurationTestEntity.getConfigurationSuite().getId())
+                .collect(Collectors.toSet());
+        request.setConfigurationSuiteIds(configurationSuiteIds);
+      }
     }
   }
 }

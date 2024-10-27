@@ -14,6 +14,7 @@ import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -63,7 +64,9 @@ public class PipelineRetrievalService {
         isAllTests = true;
       } else {
         var configurationTestIds =
-            pipeline.getConfigurationTestIdsFilter().stream().map(Long::valueOf).toList();
+            pipeline.getConfigurationTestIdsFilter().stream()
+                .map(Long::valueOf)
+                .collect(Collectors.toSet());
         var configurationTests =
             configurationTestRetrievalService.getAllByIds(configurationTestIds);
         configurationTests.forEach(

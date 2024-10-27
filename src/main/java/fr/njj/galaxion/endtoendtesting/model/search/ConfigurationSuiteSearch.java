@@ -2,7 +2,7 @@ package fr.njj.galaxion.endtoendtesting.model.search;
 
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.ConfigurationStatus;
 import fr.njj.galaxion.endtoendtesting.domain.request.SearchConfigurationRequest;
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -14,8 +14,9 @@ public final class ConfigurationSuiteSearch {
   public static String buildConfigurationSuiteSearchQuery(
       Long environmentId,
       SearchConfigurationRequest request,
-      Map<String, Object> params,
-      List<String> conditions) {
+      Map<String, Object> params) {
+
+    var conditions = new ArrayList<String>();
 
     conditions.add("environment.id = :environmentId");
     params.put("environmentId", environmentId);

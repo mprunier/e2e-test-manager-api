@@ -11,6 +11,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -52,7 +53,7 @@ public class ConfigurationTestRetrievalService {
   }
 
   @Transactional
-  public List<ConfigurationTestEntity> getAllByIds(List<Long> configurationTestIds) {
+  public List<ConfigurationTestEntity> getAllByIds(Set<Long> configurationTestIds) {
     return configurationTestRepository.findAllByIds(configurationTestIds);
   }
 
