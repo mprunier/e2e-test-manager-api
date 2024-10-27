@@ -6,6 +6,7 @@ import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationSuiteOrTestP
 import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationSuiteResponse;
 import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationTestResponse;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
+import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteTagEntity;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AccessLevel;
@@ -27,6 +28,12 @@ public final class ConfigurationSuiteResponseMapper {
         .file(entity.getFile())
         .status(entity.getStatus())
         .variables(entity.getVariables())
+        .tags(
+            entity.getConfigurationTags() != null
+                ? entity.getConfigurationTags().stream()
+                    .map(ConfigurationSuiteTagEntity::getTag)
+                    .toList()
+                : null)
         .tests(tests)
         .pipelinesInProgress(pipelinesInProgress)
         .lastPlayedAt(entity.getLastPlayedAt())

@@ -27,6 +27,8 @@ public class ConfigurationSuiteResponse {
 
   @ToString.Exclude private List<String> variables;
 
+  private List<String> tags;
+
   @Builder.Default private List<ConfigurationTestResponse> tests = new ArrayList<>();
 
   private ZonedDateTime lastPlayedAt;
