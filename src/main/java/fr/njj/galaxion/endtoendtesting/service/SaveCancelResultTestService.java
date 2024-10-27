@@ -3,7 +3,6 @@ package fr.njj.galaxion.endtoendtesting.service;
 import fr.njj.galaxion.endtoendtesting.domain.enumeration.ConfigurationStatus;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.PipelineEntity;
-import fr.njj.galaxion.endtoendtesting.model.entity.TemporaryTestEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.TestEntity;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationTestRetrievalService;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -51,12 +50,12 @@ public class SaveCancelResultTestService {
       PipelineEntity pipeline,
       ConfigurationStatus status,
       String errorMessage,
-      boolean isSaveImmediatly) {
+      boolean isSaveImmediately) {
     var configurationTestsToCancel =
         configurationTestRetrievalService.getAllByFiles(pipeline.getFilesFilter());
     configurationTestsToCancel.forEach(
         configurationTest -> {
-          saveTest(pipeline, status, errorMessage, configurationTest, isSaveImmediatly);
+          saveTest(pipeline, status, errorMessage, configurationTest, isSaveImmediately);
         });
   }
 
@@ -65,28 +64,16 @@ public class SaveCancelResultTestService {
       ConfigurationStatus status,
       String errorMessage,
       ConfigurationTestEntity configurationTest,
-      boolean isSaveImmediatly) {
-    if (isSaveImmediatly) {
-      TestEntity.builder()
-          .configurationTest(configurationTest)
-          .status(status)
-          .variables(pipeline.getVariables())
-          .createdBy(pipeline.getCreatedBy())
-          .errorMessage(errorMessage)
-          .createdAt(ZonedDateTime.now())
-          .build()
-          .persist();
-    } else {
-      TemporaryTestEntity.builder()
-          .pipelineId(pipeline.getId())
-          .configurationTest(configurationTest)
-          .status(status)
-          .variables(pipeline.getVariables())
-          .createdBy(pipeline.getCreatedBy())
-          .errorMessage(errorMessage)
-          .createdAt(ZonedDateTime.now())
-          .build()
-          .persist();
-    }
+      boolean isSaveImmediately) {
+    TestEntity.builder()
+        .configurationTest(configurationTest)
+        .isWaiting(!isSaveImmediately)
+        .status(status)
+        .variables(pipeline.getVariables())
+        .createdBy(pipeline.getCreatedBy())
+        .errorMessage(errorMessage)
+        .createdAt(ZonedDateTime.now())
+        .build()
+        .persist();
   }
 }

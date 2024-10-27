@@ -13,7 +13,8 @@ import fr.njj.galaxion.endtoendtesting.domain.internal.MochaReportSuiteInternal;
 import fr.njj.galaxion.endtoendtesting.domain.internal.MochaReportTestInternal;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
-import fr.njj.galaxion.endtoendtesting.model.entity.TemporaryTestEntity;
+import fr.njj.galaxion.endtoendtesting.model.entity.PipelineEntity;
+import fr.njj.galaxion.endtoendtesting.model.entity.TestEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.TestScreenshotEntity;
 import fr.njj.galaxion.endtoendtesting.service.CompletePipelineService;
 import fr.njj.galaxion.endtoendtesting.service.SaveCancelResultTestService;
@@ -60,7 +61,7 @@ public class RecordResultPipelineUseCase {
             && artifactData.getReport().getResults() != null
             && !artifactData.getReport().getResults().isEmpty()) {
           saveTestResult(
-              artifactData, environmentId, pipelineId, pipeline.getConfigurationTestIdsFilter());
+              artifactData, environmentId, pipeline, pipeline.getConfigurationTestIdsFilter());
           completePipelineService.execute(pipeline.getId(), PipelineStatus.FINISH);
         } else {
           completePipelineService.execute(pipeline.getId(), PipelineStatus.NO_REPORT_ERROR);
@@ -84,7 +85,7 @@ public class RecordResultPipelineUseCase {
   public void saveTestResult(
       ArtifactDataInternal artifactData,
       long environmentId,
-      String pipelineId,
+      PipelineEntity pipeline,
       List<String> configurationTestIdsFilter) {
     var screenshots = artifactData.getScreenshots();
     var report = artifactData.getReport();
@@ -94,14 +95,14 @@ public class RecordResultPipelineUseCase {
           var file = result.getFile().replaceAll(START_PATH, "");
           processTestsWithoutSuite(
               environmentId,
-              pipelineId,
+              pipeline,
               file,
               configurationTestIdsFilter,
               result.getTests(),
               screenshots);
           processSuites(
               environmentId,
-              pipelineId,
+              pipeline,
               file,
               configurationTestIdsFilter,
               result.getSuites(),
@@ -112,7 +113,7 @@ public class RecordResultPipelineUseCase {
 
   private void processTestsWithoutSuite(
       long environmentId,
-      String pipelineId,
+      PipelineEntity pipeline,
       String file,
       List<String> configurationTestIdsFilter,
       List<MochaReportTestInternal> tests,
@@ -131,7 +132,7 @@ public class RecordResultPipelineUseCase {
                     if (configurationTestIdsFilter == null
                         || configurationTestIdsFilter.contains(
                             configurationTestEntity.getId().toString())) {
-                      saveTest(pipelineId, mochaTest, configurationTestEntity, screenshots);
+                      saveTest(pipeline, mochaTest, configurationTestEntity, screenshots);
                     }
                   });
             }
@@ -141,7 +142,7 @@ public class RecordResultPipelineUseCase {
 
   private void processSuites(
       long environmentId,
-      String pipelineId,
+      PipelineEntity pipeline,
       String file,
       List<String> configurationTestIdsFilter,
       List<MochaReportSuiteInternal> suites,
@@ -159,7 +160,7 @@ public class RecordResultPipelineUseCase {
             if (configurationSuiteOptional.isPresent()) {
               processTests(
                   environmentId,
-                  pipelineId,
+                  pipeline,
                   file,
                   configurationTestIdsFilter,
                   mochaSuite.getTests(),
@@ -167,7 +168,7 @@ public class RecordResultPipelineUseCase {
                   screenshots);
               processSuites(
                   environmentId,
-                  pipelineId,
+                  pipeline,
                   file,
                   configurationTestIdsFilter,
                   mochaSuite.getSuites(),
@@ -180,7 +181,7 @@ public class RecordResultPipelineUseCase {
 
   private void processTests(
       long environmentId,
-      String pipelineId,
+      PipelineEntity pipeline,
       String file,
       List<String> configurationTestIdsFilter,
       List<MochaReportTestInternal> tests,
@@ -197,7 +198,7 @@ public class RecordResultPipelineUseCase {
                   if (configurationTestIdsFilter == null
                       || configurationTestIdsFilter.contains(
                           configurationTestEntity.getId().toString())) {
-                    saveTest(pipelineId, mochaTest, configurationTestEntity, screenshots);
+                    saveTest(pipeline, mochaTest, configurationTestEntity, screenshots);
                   }
                 });
           });
@@ -205,22 +206,22 @@ public class RecordResultPipelineUseCase {
   }
 
   private void saveTest(
-      String pipelineId,
+      PipelineEntity pipeline,
       MochaReportTestInternal mochaTest,
       ConfigurationTestEntity configurationTest,
       Map<String, byte[]> screenshots) {
 
     var status = getConfigurationStatus(mochaTest);
     var test =
-        TemporaryTestEntity.builder()
-            .pipelineId(pipelineId)
+        TestEntity.builder()
+            .pipelineId(pipeline.getId())
             .configurationTest(configurationTest)
             .status(status)
             .errorMessage(mochaTest.getErr() != null ? mochaTest.getErr().getMessage() : null)
             .errorStacktrace(mochaTest.getErr() != null ? mochaTest.getErr().getEstack() : null)
             .code(mochaTest.getCode())
             .duration(mochaTest.getDuration())
-            .createdBy("Scheduler")
+            .createdBy(pipeline.getCreatedBy())
             .createdAt(ZonedDateTime.now())
             .build();
     try {
@@ -258,9 +259,7 @@ public class RecordResultPipelineUseCase {
   }
 
   private void createTestScreenshot(
-      MochaReportTestInternal mochaTest,
-      Map<String, byte[]> screenshots,
-      TemporaryTestEntity test) {
+      MochaReportTestInternal mochaTest, Map<String, byte[]> screenshots, TestEntity test) {
     try {
       var contextList = mochaTest.getContextParse();
       if (contextList != null) {
@@ -278,12 +277,12 @@ public class RecordResultPipelineUseCase {
   }
 
   private void handleScreenshot(
-      String screenshotFilename, Map<String, byte[]> screenshots, TemporaryTestEntity test) {
+      String screenshotFilename, Map<String, byte[]> screenshots, TestEntity test) {
     byte[] screenshot = screenshots.get(screenshotFilename);
 
     if (screenshot != null) {
       TestScreenshotEntity.builder()
-          .temporaryTest(test)
+          .test(test)
           .filename(screenshotFilename.replace(SCREENSHOT_PATH, ""))
           .screenshot(screenshot)
           .build()

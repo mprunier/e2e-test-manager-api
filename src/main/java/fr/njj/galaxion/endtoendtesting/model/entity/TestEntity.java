@@ -41,6 +41,14 @@ public class TestEntity extends PanacheEntityBase {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @Column(name = "pipeline_id")
+  private String pipelineId;
+
+  @Setter
+  @Builder.Default
+  @Column(name = "is_waiting", nullable = false)
+  private boolean isWaiting = true;
+
   @ManyToOne
   @JoinColumn(
       name = "configuration_test_id",

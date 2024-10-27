@@ -37,14 +37,6 @@ public class TestScreenshotEntity extends PanacheEntityBase {
       nullable = false)
   protected TestEntity test;
 
-  @Setter
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(
-      name = "temporary_test_id",
-      foreignKey = @ForeignKey(name = "fk__test_screenshot__temporary_test_id"),
-      nullable = false)
-  protected TemporaryTestEntity temporaryTest;
-
   @Column(name = "filename", nullable = false)
   private String filename;
 

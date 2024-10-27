@@ -10,7 +10,7 @@ import fr.njj.galaxion.endtoendtesting.domain.event.send.UpdateFinalMetricsEvent
 import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationSuiteResponse;
 import fr.njj.galaxion.endtoendtesting.events.queue.PipelineCompletedEventQueueManager;
 import fr.njj.galaxion.endtoendtesting.model.entity.PipelineGroupEntity;
-import fr.njj.galaxion.endtoendtesting.service.TestTransformationService;
+import fr.njj.galaxion.endtoendtesting.service.TestService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationSuiteRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.PipelineRetrievalService;
 import fr.njj.galaxion.endtoendtesting.usecases.pipeline.RetrieveAllTestsPipelinesUseCase;
@@ -30,7 +30,7 @@ public class PipelineCompletedEventHandler {
   private final RetrieveAllTestsPipelinesUseCase retrieveAllTestsPipelinesUseCase;
   private final PipelineRetrievalService pipelineRetrievalService;
   private final ConfigurationSuiteRetrievalService configurationSuiteRetrievalService;
-  private final TestTransformationService testTransformationService;
+  private final TestService testService;
 
   private final PipelineCompletedEventQueueManager queueManager;
 
@@ -59,7 +59,7 @@ public class PipelineCompletedEventHandler {
       if (pipelineGroup == null || pipelineGroup.isAllCompleted()) {
         var isAllTests = isAllTests(event);
 
-        transformTemporaryTests(event, pipelineGroup);
+        validTest(event, pipelineGroup);
 
         buildAndSendRunCompletedEvent(event, isAllTests);
         updateFinalMetricsEvent.fire(
@@ -79,14 +79,11 @@ public class PipelineCompletedEventHandler {
     }
   }
 
-  private void transformTemporaryTests(
-      PipelineCompletedEvent event, PipelineGroupEntity pipelineGroup) {
+  private void validTest(PipelineCompletedEvent event, PipelineGroupEntity pipelineGroup) {
     if (pipelineGroup != null) {
-      pipelineGroup
-          .getPipelines()
-          .forEach(p -> testTransformationService.transformAndPersistAll(p.getId()));
+      pipelineGroup.getPipelines().forEach(p -> testService.setNotWaiting(p.getId()));
     } else {
-      testTransformationService.transformAndPersistAll(event.getPipelineId());
+      testService.setNotWaiting(event.getPipelineId());
     }
   }
 
