@@ -1,7 +1,9 @@
 package fr.njj.galaxion.endtoendtesting.controller;
 
 import fr.njj.galaxion.endtoendtesting.domain.response.EnvironmentResponse;
+import fr.njj.galaxion.endtoendtesting.domain.response.SyncEnvironmentErrorResponse;
 import fr.njj.galaxion.endtoendtesting.usecases.environment.RetrieveEnvironmentDetailsUseCase;
+import fr.njj.galaxion.endtoendtesting.usecases.environment.RetrieveEnvironmentErrorUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.environment.RetrieveEnvironmentsUseCase;
 import io.quarkus.cache.CacheResult;
 import jakarta.ws.rs.GET;
@@ -18,6 +20,7 @@ public class EnvironmentController {
 
   private final RetrieveEnvironmentDetailsUseCase retrieveEnvironmentDetailsUseCase;
   private final RetrieveEnvironmentsUseCase retrieveEnvironmentsUseCase;
+  private final RetrieveEnvironmentErrorUseCase retrieveEnvironmentErrorUseCase;
 
   @GET
   @Path("{id}")
@@ -29,5 +32,11 @@ public class EnvironmentController {
   @CacheResult(cacheName = "environments")
   public List<EnvironmentResponse> getEnvironments() {
     return retrieveEnvironmentsUseCase.execute();
+  }
+
+  @GET
+  @Path("{id}/errors")
+  public List<SyncEnvironmentErrorResponse> retrieveErrors(@PathParam("id") Long id) {
+    return retrieveEnvironmentErrorUseCase.execute(id);
   }
 }

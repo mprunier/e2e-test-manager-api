@@ -5,8 +5,9 @@ import static fr.njj.galaxion.endtoendtesting.domain.constant.CommonConstant.STA
 import static fr.njj.galaxion.endtoendtesting.helper.FileHelper.cleanRepo;
 import static fr.njj.galaxion.endtoendtesting.helper.GitHelper.getChangedFilesAfterDate;
 
-import fr.njj.galaxion.endtoendtesting.domain.event.SyncEnvironmentCompletedEvent;
+import fr.njj.galaxion.endtoendtesting.domain.event.send.SyncEnvironmentCompletedEvent;
 import fr.njj.galaxion.endtoendtesting.domain.exception.ConfigurationSynchronizationException;
+import fr.njj.galaxion.endtoendtesting.lib.exception.CustomException;
 import fr.njj.galaxion.endtoendtesting.lib.logging.Monitored;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
@@ -54,36 +55,48 @@ public class GlobalEnvironmentSynchronizationUseCase {
   @Transactional
   public void execute(long environmentId) {
 
-    var environment = environmentRetrievalService.get(environmentId);
-    cleanEnvironmentSynchronizationErrorService.cleanErrors(environment.getId(), null);
-
     var errors = new HashMap<String, String>();
-    var projectFolder =
-        cloneGitlabRepositoryService.cloneRepo(
-            environment.getProjectId(),
-            environment.getId().toString(),
-            environment.getToken(),
-            environment.getBranch());
 
+    File projectFolder = null;
     try {
+      var environment = environmentRetrievalService.get(environmentId);
+      cleanEnvironmentSynchronizationErrorService.cleanErrors(environment.getId(), null);
+
+      projectFolder =
+          cloneGitlabRepositoryService.cloneRepo(
+              environment.getProjectId(),
+              environment.getId().toString(),
+              environment.getToken(),
+              environment.getBranch());
+
       var commitAfterDate =
           ZonedDateTime.of(LocalDateTime.now().minusYears(10), ZoneId.systemDefault());
       var changedFiles = getChangedFilesAfterDate(projectFolder, commitAfterDate);
       cleanFilesRemoved(projectFolder, environment);
       synchronizeEnvironmentService.synchronize(environment, changedFiles, projectFolder, errors);
+
+    } catch (CustomException exception) {
+      errors.put(GLOBAL_ENVIRONMENT_ERROR, exception.getDetail());
+      log.error(
+          "Error during synchronization for Environment id [{}] : {}.",
+          environmentId,
+          exception.getDetail());
     } catch (Exception exception) {
       errors.put(GLOBAL_ENVIRONMENT_ERROR, exception.getMessage());
       log.error(
           "Error during synchronization for Environment id [{}] : {}.",
-          environment.getId(),
+          environmentId,
           exception.getMessage());
+    } finally {
+      if (projectFolder != null) {
+        cleanRepo(environmentId, projectFolder, errors);
+      }
     }
 
-    cleanRepo(environment, projectFolder, errors);
     errors.forEach(
         (file, error) ->
             createOrUpdateEnvironmentSynchronizationErrorService.createOrUpdateSynchronizationError(
-                environment.getId(), file, error));
+                environmentId, file, error));
     syncEnvironmentEvent.fire(
         SyncEnvironmentCompletedEvent.builder().environmentId(environmentId).build());
   }

@@ -2,8 +2,10 @@ package fr.njj.galaxion.endtoendtesting.events;
 
 import static fr.njj.galaxion.endtoendtesting.websocket.WebSocketEventHandler.sendEventToEnvironmentSessions;
 
-import fr.njj.galaxion.endtoendtesting.domain.event.UpdateFinalMetricsEvent;
+import fr.njj.galaxion.endtoendtesting.domain.event.send.UpdateFinalMetricsEvent;
 import fr.njj.galaxion.endtoendtesting.domain.response.MetricsResponse;
+import fr.njj.galaxion.endtoendtesting.model.entity.MetricsEntity;
+import fr.njj.galaxion.endtoendtesting.service.retrieval.MetricRetrievalService;
 import fr.njj.galaxion.endtoendtesting.usecases.metrics.AddMetricsUseCase;
 import fr.njj.galaxion.endtoendtesting.usecases.metrics.CalculateFinalMetricsUseCase;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -20,13 +22,16 @@ public class UpdateFinalMetricsEventHandler {
 
   private final CalculateFinalMetricsUseCase calculateFinalMetricsUseCase;
   private final AddMetricsUseCase addMetricsUseCase;
+  private final MetricRetrievalService metricRetrievalService;
 
   @Transactional(Transactional.TxType.REQUIRES_NEW)
   public void send(
       @Observes(during = TransactionPhase.AFTER_SUCCESS) UpdateFinalMetricsEvent event) {
     try {
       var finalMetrics = calculateFinalMetricsUseCase.execute(event.getEnvironmentId());
-      addMetricsUseCase.execute(event.getEnvironmentId(), finalMetrics, event.isAllTestsRun());
+      addMetricsUseCase.execute(event.getEnvironmentId(), finalMetrics, event.getIsAllTestsRun());
+      var optionalLastMetricsWithAllTestsRun =
+          metricRetrievalService.getOptionalLastMetricsWithAllTestsRun(event.getEnvironmentId());
       var metricsResponse =
           MetricsResponse.builder()
               .at(finalMetrics.at())
@@ -36,7 +41,13 @@ public class UpdateFinalMetricsEventHandler {
               .passes(finalMetrics.passes())
               .failures(finalMetrics.failures())
               .skipped(finalMetrics.skipped())
-              .isAllTestsRun(event.isAllTestsRun())
+              .isAllTestsRun(event.getIsAllTestsRun())
+              .lastAllTestsRunAt(
+                  event.getIsAllTestsRun()
+                      ? finalMetrics.at()
+                      : optionalLastMetricsWithAllTestsRun
+                          .map(MetricsEntity::getCreatedAt)
+                          .orElse(null))
               .build();
       event.setMetrics(metricsResponse);
       sendEventToEnvironmentSessions(event);

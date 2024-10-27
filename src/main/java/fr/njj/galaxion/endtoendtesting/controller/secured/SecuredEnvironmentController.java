@@ -8,6 +8,7 @@ import fr.njj.galaxion.endtoendtesting.usecases.environment.UpdateEnvironmentUse
 import io.quarkus.cache.CacheKey;
 import io.quarkus.cache.CacheManager;
 import io.quarkus.security.Authenticated;
+import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.PATCH;
@@ -29,11 +30,15 @@ public class SecuredEnvironmentController {
   private final CreateEnvironmentUseCase createEnvironmentUseCase;
   private final UpdateEnvironmentUseCase updateEnvironmentUseCase;
   private final ToggleEnvironmentUseCase toggleEnvironmentUseCase;
+
+  private final SecurityIdentity identity;
   private final CacheManager cacheManager;
 
   @POST
   public EnvironmentResponse create(@Valid @RequestBody CreateUpdateEnvironmentRequest request) {
-    var response = createEnvironmentUseCase.execute(request);
+    var username = identity.getPrincipal().getName();
+    log.info("[{}] created a new environment.", username);
+    var response = createEnvironmentUseCase.execute(request, username);
     cacheManager
         .getCache("environments")
         .ifPresent(cache -> cache.invalidateAll().await().indefinitely());
@@ -48,7 +53,15 @@ public class SecuredEnvironmentController {
   public void update(
       @CacheKey @PathParam("id") Long id,
       @Valid @RequestBody CreateUpdateEnvironmentRequest request) {
+    var username = identity.getPrincipal().getName();
+    log.info("[{}] updated environment ID [{}].", username, id);
     updateEnvironmentUseCase.execute(id, request);
+    cacheManager
+        .getCache("environments")
+        .ifPresent(cache -> cache.invalidateAll().await().indefinitely());
+    cacheManager
+        .getCache("schedulers")
+        .ifPresent(cache -> cache.invalidateAll().await().indefinitely());
   }
 
   @PATCH

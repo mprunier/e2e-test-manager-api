@@ -1,6 +1,8 @@
 package fr.njj.galaxion.endtoendtesting.domain.request;
 
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -23,6 +25,10 @@ public class CreateUpdateEnvironmentRequest {
   @NotBlank private String token;
 
   @NotBlank private String branch;
+
+  @Max(value = 8, message = "maxParallelTestNumber must not exceed 8")
+  @NotNull
+  private Integer maxParallelTestNumber;
 
   @Builder.Default
   private List<CreateUpdateEnvironmentVariableRequest> variables = new ArrayList<>();

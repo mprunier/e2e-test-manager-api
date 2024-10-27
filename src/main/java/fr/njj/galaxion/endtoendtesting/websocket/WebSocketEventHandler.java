@@ -11,10 +11,9 @@ import jakarta.websocket.OnOpen;
 import jakarta.websocket.Session;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @ServerEndpoint("/events/environments/{environment_id}")
@@ -27,8 +26,7 @@ public class WebSocketEventHandler {
   public void onOpen(Session session, @PathParam("environment_id") Long environmentId) {
     sessionMap.computeIfAbsent(environmentId, k -> new CopyOnWriteArrayList<>()).add(session);
     log.trace(
-        "New session opened: [{}] on Environment ID [{}]. Current session(s) : [{}]",
-        session.getId(),
+        "Session opened on Environment ID [{}]. Current session(s) : {}",
         environmentId,
         getTotalNumberOfSessions());
   }
@@ -49,8 +47,7 @@ public class WebSocketEventHandler {
       }
     }
     log.trace(
-        "Session closed: {} on environment ID [{}]. Current session(s) : [{}]",
-        session.getId(),
+        "Session closed on environment ID [{}]. Current session(s) : {}",
         environmentId,
         getTotalNumberOfSessions());
   }

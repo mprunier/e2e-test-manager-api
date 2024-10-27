@@ -32,6 +32,10 @@ public class GitlabWebHookService {
   }
 
   private void jobHook(GitlabWebHookRequest request) {
+    log.trace(
+        "Gitlab WebHook - Job Hook received with pipeline [{}] and status [{}].",
+        request.getPipelineId(),
+        request.getStatus());
 
     var isFinish = request.getFinishedAt() != null;
     if (!isFinish) {
@@ -52,6 +56,11 @@ public class GitlabWebHookService {
   }
 
   private void pushHook(GitlabWebHookRequest request) {
+    log.trace(
+        "Gitlab WebHook - Push Hook received for Project id [{}] and Branch name [{}].",
+        request.getProjectId(),
+        request.getRef());
+
     var projectId = request.getProjectId();
     var branch = request.getRef();
 

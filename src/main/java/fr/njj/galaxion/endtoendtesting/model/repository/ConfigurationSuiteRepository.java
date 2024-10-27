@@ -5,6 +5,8 @@ import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class ConfigurationSuiteRepository
@@ -53,5 +55,11 @@ public class ConfigurationSuiteRepository
             environmentId)
         .project(String.class)
         .list();
+  }
+
+  public Set<Long> findAllByFiles(Long environmentId, Set<String> files) {
+    return find("environment.id = ?1 AND file IN ?2", environmentId, files).stream()
+        .map(ConfigurationSuiteEntity::getId)
+        .collect(Collectors.toSet());
   }
 }

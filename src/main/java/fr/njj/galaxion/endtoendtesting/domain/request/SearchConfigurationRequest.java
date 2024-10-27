@@ -36,6 +36,7 @@ public class SearchConfigurationRequest {
   @QueryParam("file")
   private String file;
 
+  @Setter
   @QueryParam("status")
   private ConfigurationStatus status;
 

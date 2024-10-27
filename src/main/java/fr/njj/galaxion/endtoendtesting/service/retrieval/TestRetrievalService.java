@@ -55,12 +55,6 @@ public class TestRetrievalService {
   }
 
   @Transactional
-  public List<TestResponse> getErrorResponses(String pipelineId) {
-    var tests = testRepository.findAllErrorByPipelineId(pipelineId);
-    return buildTestResponses(tests);
-  }
-
-  @Transactional
   public List<TestEntity> getAll(List<Long> ids) {
     return testRepository.findAllBy(ids);
   }

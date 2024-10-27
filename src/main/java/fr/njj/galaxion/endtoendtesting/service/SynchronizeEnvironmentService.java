@@ -9,7 +9,6 @@ import static fr.njj.galaxion.endtoendtesting.mapper.ConfigurationInternalMapper
 import fr.njj.galaxion.endtoendtesting.client.converter.ConverterClient;
 import fr.njj.galaxion.endtoendtesting.domain.exception.CharactersForbiddenException;
 import fr.njj.galaxion.endtoendtesting.domain.exception.SuiteNoTitleException;
-import fr.njj.galaxion.endtoendtesting.domain.exception.SuiteShouldBeNotContainsSubSuiteException;
 import fr.njj.galaxion.endtoendtesting.domain.exception.TitleDuplicationException;
 import fr.njj.galaxion.endtoendtesting.domain.exception.TitleEmptyException;
 import fr.njj.galaxion.endtoendtesting.domain.internal.ConfigurationInternal;
@@ -17,6 +16,7 @@ import fr.njj.galaxion.endtoendtesting.domain.internal.ConfigurationSuiteInterna
 import fr.njj.galaxion.endtoendtesting.domain.internal.ConfigurationTestInternal;
 import fr.njj.galaxion.endtoendtesting.lib.exception.CustomException;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
+import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteTagEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestTagEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
@@ -25,6 +25,8 @@ import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationTestRetrie
 import fr.njj.galaxion.endtoendtesting.service.retrieval.EnvironmentRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.FileGroupRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.SearchSuiteRetrievalService;
+import io.quarkus.cache.CacheManager;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.io.File;
 import java.io.IOException;
@@ -54,6 +56,8 @@ public class SynchronizeEnvironmentService {
   private final FileGroupRetrievalService fileGroupRetrievalService;
 
   @RestClient private ConverterClient converterClient;
+
+  private final CacheManager cacheManager;
 
   public void synchronize(
       EnvironmentEntity environment,
@@ -101,6 +105,13 @@ public class SynchronizeEnvironmentService {
           if (!hasConverterError) {
             assertAndBuild(environment.getId(), content, relativePathString, errors, filePath);
           }
+
+          cacheManager
+              .getCache("allFilesByGroupMap")
+              .ifPresent(cache -> cache.invalidate(environment.getId()).await().indefinitely());
+          cacheManager
+              .getCache("fileByGroupMap")
+              .ifPresent(cache -> cache.invalidate(environment.getId()).await().indefinitely());
         }
       }
     }
@@ -125,14 +136,7 @@ public class SynchronizeEnvironmentService {
   // Always managed by the api but not by the front so we block here for the moment. To see if clean
   // to not manage it on the api side, is not cleaner. (TODO)
   private static void assertNoSubSuiteInTestSuite(ConfigurationInternal configurationInternal) {
-    configurationInternal
-        .getSuites()
-        .forEach(
-            suite -> {
-              if (suite.isExistSubSuite()) {
-                throw new SuiteShouldBeNotContainsSubSuiteException();
-              }
-            });
+    configurationInternal.getSuites().forEach(ConfigurationSuiteInternal::assertNotExistSubSuite);
   }
 
   private static void assertUniqueTitles(ConfigurationInternal config) {
@@ -212,7 +216,7 @@ public class SynchronizeEnvironmentService {
     if (suiteIds.isEmpty() && testIds.isEmpty()) {
       deleteFileGroupService.deleteByEnvAndFile(environmentId, file);
     } else {
-      var fileGroup = fileGroupRetrievalService.getByFileAndEnv(environmentId, file);
+      var fileGroup = fileGroupRetrievalService.getOptionalFileGroup(environmentId, file);
       if (fileGroup.isEmpty() && StringUtils.isNotBlank(configurationInternal.getGroup())) {
         FileGroupEntity.builder()
             .environment(environment)
@@ -220,8 +224,15 @@ public class SynchronizeEnvironmentService {
             .group(configurationInternal.getGroup())
             .build()
             .persist();
-      } else if (fileGroup.isPresent() && StringUtils.isBlank(configurationInternal.getGroup()))
+      } else if (fileGroup.isPresent() && StringUtils.isBlank(configurationInternal.getGroup())) {
         deleteFileGroupService.deleteByEnvAndFile(environmentId, file);
+      } else {
+        fileGroup.ifPresent(
+            fileGroupEntity -> {
+              fileGroupEntity.setGroup(configurationInternal.getGroup());
+              fileGroupEntity.persist();
+            });
+      }
     }
   }
 
@@ -283,19 +294,67 @@ public class SynchronizeEnvironmentService {
               ? null
               : suiteInternal.getVariables());
     }
+    createSuiteTags(environment, suiteInternal, configurationSuite);
     suiteIds.add(configurationSuite.getId());
 
-    suiteInternal
-        .getTests()
-        .forEach(
-            testInternal ->
-                updateOrCreateTest(environment, file, testInternal, configurationSuite, testIds));
+    for (int i = 0; i < suiteInternal.getTests().size(); i++) {
+      var testInternal = suiteInternal.getTests().get(i);
+      testInternal.setPosition(i);
+      updateOrCreateTest(environment, file, testInternal, configurationSuite, testIds);
+    }
+
     suiteInternal
         .getSuites()
         .forEach(
             suiteInternalChild ->
                 updateOrCreateSuite(
                     environment, file, suiteInternalChild, configurationSuite, suiteIds, testIds));
+  }
+
+  private static void createSuiteTags(
+      EnvironmentEntity environment,
+      ConfigurationSuiteInternal suiteInternal,
+      ConfigurationSuiteEntity configurationSuite) {
+    if (configurationSuite.getConfigurationTags() != null
+        && !configurationSuite.getConfigurationTags().isEmpty()) {
+      configurationSuite.getConfigurationTags().forEach(PanacheEntityBase::delete);
+      configurationSuite.getConfigurationTags().clear();
+    }
+    suiteInternal
+        .getTags()
+        .forEach(
+            tag -> {
+              var configurationSuiteTagEntity =
+                  ConfigurationSuiteTagEntity.builder()
+                      .configurationSuite(configurationSuite)
+                      .tag(tag)
+                      .environmentId(environment.getId())
+                      .build();
+              configurationSuiteTagEntity.persist();
+            });
+  }
+
+  private static void createTestTags(
+      EnvironmentEntity environment,
+      ConfigurationTestInternal testInternal,
+      ConfigurationTestEntity configurationTest) {
+    if (configurationTest.getConfigurationTags() != null
+        && !configurationTest.getConfigurationTags().isEmpty()) {
+      configurationTest.getConfigurationTags().forEach(PanacheEntityBase::delete);
+      configurationTest.getConfigurationTags().clear();
+    }
+    testInternal
+        .getTags()
+        .forEach(
+            tag -> {
+              var configurationTestTagEntity =
+                  ConfigurationTestTagEntity.builder()
+                      .configurationTest(configurationTest)
+                      .tag(tag)
+                      .environmentId(environment.getId())
+                      .build();
+              configurationTestTagEntity.persist();
+            });
   }
 
   private void updateOrCreateTest(
@@ -310,6 +369,7 @@ public class SynchronizeEnvironmentService {
             environment.getId(), file, testInternal.getTitle(), configurationSuite);
 
     var configurationTestTagEntities = new ArrayList<ConfigurationTestTagEntity>();
+
     if (configurationTestOptional.isEmpty()) {
       configurationTest =
           ConfigurationTestEntity.builder()
@@ -317,48 +377,25 @@ public class SynchronizeEnvironmentService {
               .configurationSuite(configurationSuite)
               .title(testInternal.getTitle())
               .file(file)
+              .position(testInternal.getPosition())
               .variables(
                   CollectionUtils.isEmpty(testInternal.getVariables())
                       ? null
                       : testInternal.getVariables())
               .build();
       configurationTest.persist();
-      testInternal
-          .getTags()
-          .forEach(
-              tag -> {
-                var configurationTestTagEntity =
-                    ConfigurationTestTagEntity.builder()
-                        .configurationTest(configurationTest)
-                        .tag(tag)
-                        .environmentId(configurationTest.getEnvironment().getId())
-                        .build();
-                configurationTestTagEntities.add(configurationTestTagEntity);
-                configurationTestTagEntity.persist();
-              });
       configurationTest.setConfigurationTags(configurationTestTagEntities);
     } else {
       configurationTest = configurationTestOptional.get();
       configurationTest.getConfigurationTags().clear();
-      testInternal
-          .getTags()
-          .forEach(
-              tag -> {
-                var configurationTestTagEntity =
-                    ConfigurationTestTagEntity.builder()
-                        .configurationTest(configurationTest)
-                        .tag(tag)
-                        .environmentId(configurationTest.getEnvironment().getId())
-                        .build();
-                configurationTestTagEntities.add(configurationTestTagEntity);
-                configurationTestTagEntity.persist();
-              });
       configurationTest.setVariables(
           CollectionUtils.isEmpty(testInternal.getVariables())
               ? null
               : testInternal.getVariables());
+      configurationTest.setPosition(testInternal.getPosition());
       configurationTest.setUpdatedAt(ZonedDateTime.now());
     }
+    createTestTags(environment, testInternal, configurationTest);
     testIds.add(configurationTest.getId());
   }
 }

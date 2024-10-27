@@ -19,7 +19,6 @@ public class CleanEnvironmentOnStartupUseCase {
     environments.forEach(
         environment -> {
           environment.setIsLocked(false);
-          environment.setIsRunningAllTests(false);
         });
   }
 }

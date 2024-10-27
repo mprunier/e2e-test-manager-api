@@ -34,4 +34,6 @@ public class ConfigurationTestResponse {
   private List<String> tags;
 
   private ZonedDateTime lastPlayedAt;
+
+  private List<ConfigurationSuiteOrTestPipelineResponse> pipelinesInProgress;
 }

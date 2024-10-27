@@ -11,6 +11,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,6 +21,11 @@ import lombok.extern.slf4j.Slf4j;
 public class ConfigurationTestRetrievalService {
 
   private final ConfigurationTestRepository configurationTestRepository;
+
+  @Transactional
+  public Optional<ConfigurationTestEntity> getOptional(Long id) {
+    return configurationTestRepository.findByIdOptional(id);
+  }
 
   @Transactional
   public ConfigurationTestEntity get(Long id) {
@@ -44,5 +50,20 @@ public class ConfigurationTestRetrievalService {
   public List<ConfigurationTestResponse> getResponses(Long environmentId) {
     var configurationTests = configurationTestRepository.findAllBy(environmentId);
     return buildTitles(configurationTests);
+  }
+
+  @Transactional
+  public List<ConfigurationTestEntity> getAllByIds(Set<Long> configurationTestIds) {
+    return configurationTestRepository.findAllByIds(configurationTestIds);
+  }
+
+  @Transactional
+  public List<ConfigurationTestEntity> getAllByFiles(List<String> files) {
+    return configurationTestRepository.findAllByFiles(files);
+  }
+
+  @Transactional
+  public List<ConfigurationTestEntity> getAllNewTests(long environmentId) {
+    return configurationTestRepository.findAllNewTests(environmentId);
   }
 }
