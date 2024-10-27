@@ -16,6 +16,7 @@ import fr.njj.galaxion.endtoendtesting.domain.internal.ConfigurationSuiteInterna
 import fr.njj.galaxion.endtoendtesting.domain.internal.ConfigurationTestInternal;
 import fr.njj.galaxion.endtoendtesting.lib.exception.CustomException;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
+import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteTagEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestTagEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.EnvironmentEntity;
@@ -274,7 +275,10 @@ public class SynchronizeEnvironmentService {
           CollectionUtils.isEmpty(suiteInternal.getVariables())
               ? null
               : suiteInternal.getVariables());
+
+      configurationSuite.getConfigurationTags().clear();
     }
+    createSuiteTags(environment, suiteInternal, configurationSuite);
     suiteIds.add(configurationSuite.getId());
 
     for (int i = 0; i < suiteInternal.getTests().size(); i++) {
@@ -289,6 +293,48 @@ public class SynchronizeEnvironmentService {
             suiteInternalChild ->
                 updateOrCreateSuite(
                     environment, file, suiteInternalChild, configurationSuite, suiteIds, testIds));
+  }
+
+  private static void createSuiteTags(
+      EnvironmentEntity environment,
+      ConfigurationSuiteInternal suiteInternal,
+      ConfigurationSuiteEntity configurationSuite) {
+    var configurationTags = new ArrayList<ConfigurationSuiteTagEntity>();
+    suiteInternal
+        .getTags()
+        .forEach(
+            tag -> {
+              var configurationSuiteTagEntity =
+                  ConfigurationSuiteTagEntity.builder()
+                      .configurationSuite(configurationSuite)
+                      .tag(tag)
+                      .environmentId(environment.getId())
+                      .build();
+              configurationTags.add(configurationSuiteTagEntity);
+              configurationSuiteTagEntity.persist();
+            });
+    configurationSuite.setConfigurationTags(configurationTags);
+  }
+
+  private static void createTestTags(
+      EnvironmentEntity environment,
+      ConfigurationTestInternal testInternal,
+      ConfigurationTestEntity configurationTest) {
+    var configurationTags = new ArrayList<ConfigurationTestTagEntity>();
+    testInternal
+        .getTags()
+        .forEach(
+            tag -> {
+              var configurationTestTagEntity =
+                  ConfigurationTestTagEntity.builder()
+                      .configurationTest(configurationTest)
+                      .tag(tag)
+                      .environmentId(environment.getId())
+                      .build();
+              configurationTags.add(configurationTestTagEntity);
+              configurationTestTagEntity.persist();
+            });
+    configurationTest.setConfigurationTags(configurationTags);
   }
 
   private void updateOrCreateTest(
@@ -318,37 +364,10 @@ public class SynchronizeEnvironmentService {
                       : testInternal.getVariables())
               .build();
       configurationTest.persist();
-
-      testInternal
-          .getTags()
-          .forEach(
-              tag -> {
-                var configurationTestTagEntity =
-                    ConfigurationTestTagEntity.builder()
-                        .configurationTest(configurationTest)
-                        .tag(tag)
-                        .environmentId(configurationTest.getEnvironment().getId())
-                        .build();
-                configurationTestTagEntities.add(configurationTestTagEntity);
-                configurationTestTagEntity.persist();
-              });
       configurationTest.setConfigurationTags(configurationTestTagEntities);
     } else {
       configurationTest = configurationTestOptional.get();
       configurationTest.getConfigurationTags().clear();
-      testInternal
-          .getTags()
-          .forEach(
-              tag -> {
-                var configurationTestTagEntity =
-                    ConfigurationTestTagEntity.builder()
-                        .configurationTest(configurationTest)
-                        .tag(tag)
-                        .environmentId(configurationTest.getEnvironment().getId())
-                        .build();
-                configurationTestTagEntities.add(configurationTestTagEntity);
-                configurationTestTagEntity.persist();
-              });
       configurationTest.setVariables(
           CollectionUtils.isEmpty(testInternal.getVariables())
               ? null
@@ -356,6 +375,7 @@ public class SynchronizeEnvironmentService {
       configurationTest.setPosition(testInternal.getPosition());
       configurationTest.setUpdatedAt(ZonedDateTime.now());
     }
+    createTestTags(environment, testInternal, configurationTest);
     testIds.add(configurationTest.getId());
   }
 }
