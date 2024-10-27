@@ -7,7 +7,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum PipelineStatus {
   IN_PROGRESS(null),
-  FINISH(null),
+  SUCCESS(null),
+  FAILED(null),
   CANCELED("This pipeline was cancelled."),
   SYSTEM_ERROR(
       "This pipeline has failed due to an internal error in the tool. Contact an administrator."),

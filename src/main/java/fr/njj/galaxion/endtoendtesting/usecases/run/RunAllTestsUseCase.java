@@ -161,6 +161,7 @@ public class RunAllTestsUseCase {
             pipelineFiles -> {
               var filesStr =
                   pipelineFiles.stream()
+                      .sorted()
                       .map(file -> START_PATH + file)
                       .collect(Collectors.joining(","));
               var variablesBuilder = new StringBuilder();

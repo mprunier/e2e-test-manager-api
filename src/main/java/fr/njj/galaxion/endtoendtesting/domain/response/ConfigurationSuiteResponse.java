@@ -36,4 +36,6 @@ public class ConfigurationSuiteResponse {
   private boolean hasNewTest;
 
   private List<ConfigurationSuiteOrTestPipelineResponse> pipelinesInProgress;
+
+  private String group;
 }

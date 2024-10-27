@@ -62,7 +62,11 @@ public class RecordResultPipelineUseCase {
             && !artifactData.getReport().getResults().isEmpty()) {
           saveTestResult(
               artifactData, environmentId, pipeline, pipeline.getConfigurationTestIdsFilter());
-          completePipelineService.execute(pipeline.getId(), PipelineStatus.FINISH);
+          completePipelineService.execute(
+              pipeline.getId(),
+              GitlabJobStatus.success.equals(status)
+                  ? PipelineStatus.SUCCESS
+                  : PipelineStatus.FAILED);
         } else {
           completePipelineService.execute(pipeline.getId(), PipelineStatus.NO_REPORT_ERROR);
         }

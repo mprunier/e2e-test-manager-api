@@ -25,6 +25,8 @@ import fr.njj.galaxion.endtoendtesting.service.retrieval.ConfigurationTestRetrie
 import fr.njj.galaxion.endtoendtesting.service.retrieval.EnvironmentRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.FileGroupRetrievalService;
 import fr.njj.galaxion.endtoendtesting.service.retrieval.SearchSuiteRetrievalService;
+import io.quarkus.cache.CacheManager;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.io.File;
 import java.io.IOException;
@@ -54,6 +56,8 @@ public class SynchronizeEnvironmentService {
   private final FileGroupRetrievalService fileGroupRetrievalService;
 
   @RestClient private ConverterClient converterClient;
+
+  private final CacheManager cacheManager;
 
   public void synchronize(
       EnvironmentEntity environment,
@@ -101,6 +105,13 @@ public class SynchronizeEnvironmentService {
           if (!hasConverterError) {
             assertAndBuild(environment.getId(), content, relativePathString, errors, filePath);
           }
+
+          cacheManager
+              .getCache("allFilesByGroupMap")
+              .ifPresent(cache -> cache.invalidate(environment.getId()).await().indefinitely());
+          cacheManager
+              .getCache("fileByGroupMap")
+              .ifPresent(cache -> cache.invalidate(environment.getId()).await().indefinitely());
         }
       }
     }
@@ -213,8 +224,15 @@ public class SynchronizeEnvironmentService {
             .group(configurationInternal.getGroup())
             .build()
             .persist();
-      } else if (fileGroup.isPresent() && StringUtils.isBlank(configurationInternal.getGroup()))
+      } else if (fileGroup.isPresent() && StringUtils.isBlank(configurationInternal.getGroup())) {
         deleteFileGroupService.deleteByEnvAndFile(environmentId, file);
+      } else {
+        fileGroup.ifPresent(
+            fileGroupEntity -> {
+              fileGroupEntity.setGroup(configurationInternal.getGroup());
+              fileGroupEntity.persist();
+            });
+      }
     }
   }
 
@@ -275,8 +293,6 @@ public class SynchronizeEnvironmentService {
           CollectionUtils.isEmpty(suiteInternal.getVariables())
               ? null
               : suiteInternal.getVariables());
-
-      configurationSuite.getConfigurationTags().clear();
     }
     createSuiteTags(environment, suiteInternal, configurationSuite);
     suiteIds.add(configurationSuite.getId());
@@ -299,7 +315,11 @@ public class SynchronizeEnvironmentService {
       EnvironmentEntity environment,
       ConfigurationSuiteInternal suiteInternal,
       ConfigurationSuiteEntity configurationSuite) {
-    var configurationTags = new ArrayList<ConfigurationSuiteTagEntity>();
+    if (configurationSuite.getConfigurationTags() != null
+        && !configurationSuite.getConfigurationTags().isEmpty()) {
+      configurationSuite.getConfigurationTags().forEach(PanacheEntityBase::delete);
+      configurationSuite.getConfigurationTags().clear();
+    }
     suiteInternal
         .getTags()
         .forEach(
@@ -310,17 +330,19 @@ public class SynchronizeEnvironmentService {
                       .tag(tag)
                       .environmentId(environment.getId())
                       .build();
-              configurationTags.add(configurationSuiteTagEntity);
               configurationSuiteTagEntity.persist();
             });
-    configurationSuite.setConfigurationTags(configurationTags);
   }
 
   private static void createTestTags(
       EnvironmentEntity environment,
       ConfigurationTestInternal testInternal,
       ConfigurationTestEntity configurationTest) {
-    var configurationTags = new ArrayList<ConfigurationTestTagEntity>();
+    if (configurationTest.getConfigurationTags() != null
+        && !configurationTest.getConfigurationTags().isEmpty()) {
+      configurationTest.getConfigurationTags().forEach(PanacheEntityBase::delete);
+      configurationTest.getConfigurationTags().clear();
+    }
     testInternal
         .getTags()
         .forEach(
@@ -331,10 +353,8 @@ public class SynchronizeEnvironmentService {
                       .tag(tag)
                       .environmentId(environment.getId())
                       .build();
-              configurationTags.add(configurationTestTagEntity);
               configurationTestTagEntity.persist();
             });
-    configurationTest.setConfigurationTags(configurationTags);
   }
 
   private void updateOrCreateTest(

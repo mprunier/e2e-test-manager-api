@@ -19,6 +19,7 @@ public class ConfigurationSuiteRetrievalService {
   private final ConfigurationSuiteRepository configurationSuiteRepository;
   private final PipelineRetrievalService pipelineRetrievalService;
   private final ConfigurationTestRetrievalService configurationTestRetrievalService;
+  private final FileGroupRetrievalService fileGroupRetrievalService;
 
   @Transactional
   public List<ConfigurationSuiteEntity> getAllByEnvironment(long environmentId) {
@@ -39,7 +40,8 @@ public class ConfigurationSuiteRetrievalService {
   public ConfigurationSuiteResponse getConfigurationSuiteResponse(Long environmentId, Long testId) {
     var configurationTest = configurationTestRetrievalService.get(testId);
     var inProgressPipelines = pipelineRetrievalService.getInProgressPipelines(environmentId);
+    var fileByGroupMap = fileGroupRetrievalService.getFileByGroupMap(environmentId);
     return ConfigurationSuiteResponseMapper.build(
-        configurationTest.getConfigurationSuite(), inProgressPipelines);
+        configurationTest.getConfigurationSuite(), inProgressPipelines, fileByGroupMap);
   }
 }

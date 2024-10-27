@@ -48,6 +48,8 @@ public class SearchSuiteOrTestUseCase {
     addSuiteByNewTest(environmentId, request);
     addSuiteInProgress(request, inProgressPipelines);
 
+    var fileByGroupMap = fileGroupRetrievalService.getFileByGroupMap(environmentId);
+
     // To retrieve all the configuration suites that are not successful but also the new tests
     // (Suite is not set to new if only just one new test).
     if (Boolean.TRUE.equals(request.getAllNotSuccess())) {
@@ -68,7 +70,8 @@ public class SearchSuiteOrTestUseCase {
     long total = filteredQuery.count();
 
     return new SearchConfigurationSuiteResponse(
-        ConfigurationSuiteResponseMapper.builds(configurationSuites, inProgressPipelines),
+        ConfigurationSuiteResponseMapper.builds(
+            configurationSuites, inProgressPipelines, fileByGroupMap),
         request.getPage(),
         (int) Math.ceil((double) total / request.getSize()),
         request.getSize(),

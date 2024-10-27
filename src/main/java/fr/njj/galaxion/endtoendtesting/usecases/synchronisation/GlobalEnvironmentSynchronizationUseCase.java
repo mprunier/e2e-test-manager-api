@@ -57,11 +57,12 @@ public class GlobalEnvironmentSynchronizationUseCase {
 
     var errors = new HashMap<String, String>();
 
+    File projectFolder = null;
     try {
       var environment = environmentRetrievalService.get(environmentId);
       cleanEnvironmentSynchronizationErrorService.cleanErrors(environment.getId(), null);
 
-      var projectFolder =
+      projectFolder =
           cloneGitlabRepositoryService.cloneRepo(
               environment.getProjectId(),
               environment.getId().toString(),
@@ -74,7 +75,6 @@ public class GlobalEnvironmentSynchronizationUseCase {
       cleanFilesRemoved(projectFolder, environment);
       synchronizeEnvironmentService.synchronize(environment, changedFiles, projectFolder, errors);
 
-      cleanRepo(environmentId, projectFolder, errors);
     } catch (CustomException exception) {
       errors.put(GLOBAL_ENVIRONMENT_ERROR, exception.getDetail());
       log.error(
@@ -87,6 +87,10 @@ public class GlobalEnvironmentSynchronizationUseCase {
           "Error during synchronization for Environment id [{}] : {}.",
           environmentId,
           exception.getMessage());
+    } finally {
+      if (projectFolder != null) {
+        cleanRepo(environmentId, projectFolder, errors);
+      }
     }
 
     errors.forEach(

@@ -8,6 +8,7 @@ import fr.njj.galaxion.endtoendtesting.domain.response.ConfigurationTestResponse
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationSuiteTagEntity;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -16,7 +17,9 @@ import lombok.NoArgsConstructor;
 public final class ConfigurationSuiteResponseMapper {
 
   public static ConfigurationSuiteResponse build(
-      ConfigurationSuiteEntity entity, InProgressPipelinesInternal inProgressPipelines) {
+      ConfigurationSuiteEntity entity,
+      InProgressPipelinesInternal inProgressPipelines,
+      Map<String, String> fileByGroupMap) {
     var tests =
         ConfigurationTestResponseMapper.builds(entity.getConfigurationTests(), inProgressPipelines);
     var hasNewTest =
@@ -38,6 +41,7 @@ public final class ConfigurationSuiteResponseMapper {
         .pipelinesInProgress(pipelinesInProgress)
         .lastPlayedAt(entity.getLastPlayedAt())
         .hasNewTest(hasNewTest)
+        .group(fileByGroupMap.get(entity.getFile()))
         .build();
   }
 
@@ -50,8 +54,12 @@ public final class ConfigurationSuiteResponseMapper {
   }
 
   public static List<ConfigurationSuiteResponse> builds(
-      List<ConfigurationSuiteEntity> entities, InProgressPipelinesInternal inProgressPipelines) {
-    return entities.stream().map(entity -> build(entity, inProgressPipelines)).toList();
+      List<ConfigurationSuiteEntity> entities,
+      InProgressPipelinesInternal inProgressPipelines,
+      Map<String, String> fileByGroupMap) {
+    return entities.stream()
+        .map(entity -> build(entity, inProgressPipelines, fileByGroupMap))
+        .toList();
   }
 
   public static ConfigurationSuiteResponse buildTitle(ConfigurationSuiteEntity entity) {

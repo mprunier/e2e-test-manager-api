@@ -2,6 +2,7 @@ package fr.njj.galaxion.endtoendtesting.service.retrieval;
 
 import fr.njj.galaxion.endtoendtesting.model.entity.FileGroupEntity;
 import fr.njj.galaxion.endtoendtesting.model.repository.FileGroupRepository;
+import io.quarkus.cache.CacheResult;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import java.util.List;
@@ -24,13 +25,20 @@ public class FileGroupRetrievalService {
     return fileGroupRepository.findByFileAndEnv(file, environmentId);
   }
 
-  @Transactional
+  @CacheResult(cacheName = "allFilesByGroupMap")
   public Map<String, List<String>> getAllFilesByGroup(long environmentId) {
     return fileGroupRepository.findAllByEnv(environmentId).stream()
         .collect(
             Collectors.groupingBy(
                 FileGroupEntity::getGroup,
                 Collectors.mapping(FileGroupEntity::getFile, Collectors.toList())));
+  }
+
+  @CacheResult(cacheName = "fileByGroupMap")
+  public Map<String, String> getFileByGroupMap(long environmentId) {
+    return fileGroupRepository.findAllByEnv(environmentId).stream()
+        .collect(
+            Collectors.toMap(FileGroupEntity::getFile, FileGroupEntity::getGroup, (a, b) -> a));
   }
 
   public Set<String> getAllGroups(long environmentId) {

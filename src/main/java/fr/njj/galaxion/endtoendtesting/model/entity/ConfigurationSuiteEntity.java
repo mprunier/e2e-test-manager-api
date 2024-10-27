@@ -109,9 +109,4 @@ public class ConfigurationSuiteEntity extends PanacheEntityBase {
   @Setter
   @Column(name = "last_played_at")
   private ZonedDateTime lastPlayedAt;
-
-  //    public void setStatus(ConfigurationStatus status) {
-  //        this.lastPlayedAt = ZonedDateTime.now();
-  //        this.status = status;
-  //    }
 }
