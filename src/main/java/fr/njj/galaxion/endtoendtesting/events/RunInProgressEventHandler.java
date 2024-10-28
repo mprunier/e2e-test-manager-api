@@ -21,7 +21,9 @@ public class RunInProgressEventHandler {
   public void send(@Observes(during = TransactionPhase.AFTER_SUCCESS) RunInProgressEvent event) {
     try {
       sendEventToEnvironmentSessions(event);
-      buildAndSendUpdateAllTestsPipelinesEvent(event.getEnvironmentId());
+      if (event.getIsAllTests() != null && event.getIsAllTests()) {
+        buildAndSendUpdateAllTestsPipelinesEvent(event.getEnvironmentId());
+      }
     } catch (Exception e) {
       log.error("Error while sending event", e);
     }

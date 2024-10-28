@@ -17,6 +17,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -90,8 +91,9 @@ public class TestEntity extends PanacheEntityBase {
   private Integer duration;
 
   @Setter
-  @Column(name = "video")
-  private byte[] video;
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "video_id")
+  private TestVideoEntity video;
 
   @Setter
   @Fetch(FetchMode.SUBSELECT)

@@ -16,6 +16,7 @@ import fr.njj.galaxion.endtoendtesting.model.entity.ConfigurationTestEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.PipelineEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.TestEntity;
 import fr.njj.galaxion.endtoendtesting.model.entity.TestScreenshotEntity;
+import fr.njj.galaxion.endtoendtesting.model.entity.TestVideoEntity;
 import fr.njj.galaxion.endtoendtesting.service.CompletePipelineService;
 import fr.njj.galaxion.endtoendtesting.service.SaveCancelResultTestService;
 import fr.njj.galaxion.endtoendtesting.service.gitlab.RetrieveGitlabJobArtifactsService;
@@ -92,6 +93,7 @@ public class RecordResultPipelineUseCase {
       PipelineEntity pipeline,
       List<String> configurationTestIdsFilter) {
     var screenshots = artifactData.getScreenshots();
+    var videos = artifactData.getVideos();
     var report = artifactData.getReport();
     var results = report.getResults();
     results.forEach(
@@ -103,7 +105,8 @@ public class RecordResultPipelineUseCase {
               file,
               configurationTestIdsFilter,
               result.getTests(),
-              screenshots);
+              screenshots,
+              videos);
           processSuites(
               environmentId,
               pipeline,
@@ -111,7 +114,8 @@ public class RecordResultPipelineUseCase {
               configurationTestIdsFilter,
               result.getSuites(),
               null,
-              screenshots);
+              screenshots,
+              videos);
         });
   }
 
@@ -121,7 +125,8 @@ public class RecordResultPipelineUseCase {
       String file,
       List<String> configurationTestIdsFilter,
       List<MochaReportTestInternal> tests,
-      Map<String, byte[]> screenshots) {
+      Map<String, byte[]> screenshots,
+      Map<String, byte[]> videos) {
     if (tests != null) {
       tests.forEach(
           mochaTest -> {
@@ -136,7 +141,7 @@ public class RecordResultPipelineUseCase {
                     if (configurationTestIdsFilter == null
                         || configurationTestIdsFilter.contains(
                             configurationTestEntity.getId().toString())) {
-                      saveTest(pipeline, mochaTest, configurationTestEntity, screenshots);
+                      saveTest(pipeline, mochaTest, configurationTestEntity, screenshots, videos);
                     }
                   });
             }
@@ -151,7 +156,8 @@ public class RecordResultPipelineUseCase {
       List<String> configurationTestIdsFilter,
       List<MochaReportSuiteInternal> suites,
       ConfigurationSuiteEntity parentSuite,
-      Map<String, byte[]> screenshots) {
+      Map<String, byte[]> screenshots,
+      Map<String, byte[]> videos) {
     if (suites != null) {
       suites.forEach(
           mochaSuite -> {
@@ -169,7 +175,8 @@ public class RecordResultPipelineUseCase {
                   configurationTestIdsFilter,
                   mochaSuite.getTests(),
                   configurationSuiteOptional.get(),
-                  screenshots);
+                  screenshots,
+                  videos);
               processSuites(
                   environmentId,
                   pipeline,
@@ -177,7 +184,8 @@ public class RecordResultPipelineUseCase {
                   configurationTestIdsFilter,
                   mochaSuite.getSuites(),
                   configurationSuiteOptional.get(),
-                  screenshots);
+                  screenshots,
+                  videos);
             }
           });
     }
@@ -190,7 +198,8 @@ public class RecordResultPipelineUseCase {
       List<String> configurationTestIdsFilter,
       List<MochaReportTestInternal> tests,
       ConfigurationSuiteEntity suite,
-      Map<String, byte[]> screenshots) {
+      Map<String, byte[]> screenshots,
+      Map<String, byte[]> videos) {
     if (tests != null) {
       tests.forEach(
           mochaTest -> {
@@ -202,7 +211,7 @@ public class RecordResultPipelineUseCase {
                   if (configurationTestIdsFilter == null
                       || configurationTestIdsFilter.contains(
                           configurationTestEntity.getId().toString())) {
-                    saveTest(pipeline, mochaTest, configurationTestEntity, screenshots);
+                    saveTest(pipeline, mochaTest, configurationTestEntity, screenshots, videos);
                   }
                 });
           });
@@ -213,7 +222,8 @@ public class RecordResultPipelineUseCase {
       PipelineEntity pipeline,
       MochaReportTestInternal mochaTest,
       ConfigurationTestEntity configurationTest,
-      Map<String, byte[]> screenshots) {
+      Map<String, byte[]> screenshots,
+      Map<String, byte[]> videos) {
 
     var status = getConfigurationStatus(mochaTest);
     var test =
@@ -228,6 +238,12 @@ public class RecordResultPipelineUseCase {
             .createdBy(pipeline.getCreatedBy())
             .createdAt(ZonedDateTime.now())
             .build();
+    if (!videos.isEmpty() && videos.get(configurationTest.getFile()) != null) {
+      var videoEntity =
+          TestVideoEntity.builder().video(videos.get(configurationTest.getFile())).build();
+      videoEntity.persist();
+      test.setVideo(videoEntity);
+    }
     try {
       var contextList = mochaTest.getContextParse();
       if (contextList != null) {

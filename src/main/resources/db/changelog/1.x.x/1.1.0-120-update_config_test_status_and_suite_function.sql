@@ -35,6 +35,7 @@ BEGIN
                                                                 WHERE configuration_suite_id = config_suite_id)
                                   AND id IN (SELECT MAX(id)
                                              FROM test
+                                             WHERE is_waiting = false
                                              GROUP BY configuration_test_id))
 
     SELECT succeeded, failed, newer, skipped, canceled

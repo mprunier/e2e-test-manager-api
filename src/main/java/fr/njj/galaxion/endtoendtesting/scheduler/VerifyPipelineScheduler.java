@@ -19,10 +19,8 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @RequiredArgsConstructor
 public class VerifyPipelineScheduler {
 
-  //  private final CancelTestUseCase cancelTestUseCase;
   private final CancelPipelineUseCase cancelPipelineUseCase;
   private final PipelineRetrievalService pipelineRetrievalService;
-  //  private final CancelPipelineUseCase cancelPipelineUseCase;
   private final RecordResultPipelineUseCase recordResultPipelineUseCase;
   private final RetrieveGitlabJobService retrieveGitlabJobService;
 
@@ -36,7 +34,7 @@ public class VerifyPipelineScheduler {
 
   private final AtomicBoolean inVerifyProgress = new AtomicBoolean(false);
 
-  @Scheduled(every = "5m")
+  @Scheduled(cron = "0 0/5 * * * ?")
   @ActivateRequestContext
   public void schedule() {
     if (inVerifyProgress.compareAndSet(false, true)) {

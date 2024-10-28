@@ -56,7 +56,10 @@ public class PipelineCompletedEventHandler {
           event.getPipelineId());
       var pipelineGroup = pipelineRetrievalService.getGroup(event.getPipelineId());
 
-      buildAndSendUpdateAllTestsPipelinesEvent(event);
+      if (PipelineType.ALL.equals(event.getType())
+          || PipelineType.ALL_IN_PARALLEL.equals(event.getType())) {
+        buildAndSendUpdateAllTestsPipelinesEvent(event);
+      }
 
       if (pipelineGroup == null || pipelineGroup.isAllCompleted()) {
         var isAllTests = isAllTests(event);

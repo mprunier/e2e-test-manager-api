@@ -60,7 +60,7 @@ public final class GitHelper {
           if (filename.contains("screenshots")) {
             screenshots.put(filename, byteArray);
           } else if (filename.contains("videos")) {
-            videos.put(filename, byteArray);
+            videos.put(filename.replace("cypress/videos/", "").replace(".mp4", ""), byteArray);
           } else if (filename.contains("cypress/results/results.json")) {
             var resultsJson = new String(byteArray, StandardCharsets.UTF_8);
             var objectMapper = new ObjectMapper();

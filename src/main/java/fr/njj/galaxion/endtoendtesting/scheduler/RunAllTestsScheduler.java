@@ -21,7 +21,7 @@ public class RunAllTestsScheduler {
 
   private final AtomicBoolean inProgress = new AtomicBoolean(false);
 
-  @Scheduled(every = "1m")
+  @Scheduled(cron = "30 * * * * ?")
   @ActivateRequestContext
   public void execute() {
     if (inProgress.compareAndSet(false, true)) {

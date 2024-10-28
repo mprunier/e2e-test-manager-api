@@ -34,7 +34,7 @@ public class TestRetrievalService {
     if (video == null) {
       throw new TestVideoNotFoundException();
     }
-    return video;
+    return video.getVideo();
   }
 
   @Transactional

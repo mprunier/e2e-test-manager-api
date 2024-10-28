@@ -8,7 +8,7 @@ package:
 install_skip_test:
 	mvn clean install -DskipTests
 
-run_quarkus:
+run_quarkus: install_skip_test
 	java -Xmx512m -Xms512m -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=60005 -jar target/quarkus-app/quarkus-run.jar -Dprocess.name=Test_Quarkus
 
 build:
