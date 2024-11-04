@@ -4,4 +4,4 @@
 ALTER TABLE pipeline
     DROP COLUMN type;
 
--- rollback ALTER TABLE pipeline ADD COLUMN type VARCHAR(255)             NOT NULL;
+-- rollback ALTER TABLE executor ADD COLUMN type VARCHAR(255)             NOT NULL;

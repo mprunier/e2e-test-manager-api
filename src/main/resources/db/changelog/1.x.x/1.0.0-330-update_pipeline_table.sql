@@ -7,6 +7,6 @@ ALTER TABLE pipeline
     ADD COLUMN environment_id BIGINT NOT NULL DEFAULT 1,
     ADD CONSTRAINT fk__scheduler__environment_id FOREIGN KEY (environment_id) REFERENCES environment (id) ON DELETE CASCADE;
 
--- rollback ALTER TABLE pipeline ALTER COLUMN id TYPE BIGINT USING id::BIGINT;
--- rollback ALTER TABLE pipeline ADD COLUMN pipeline_id VARCHAR(255)             NOT NULL;
--- rollback ALTER TABLE pipeline DROP COLUMN environment_id;
+-- rollback ALTER TABLE executor ALTER COLUMN id TYPE BIGINT USING id::BIGINT;
+-- rollback ALTER TABLE executor ADD COLUMN pipeline_id VARCHAR(255)             NOT NULL;
+-- rollback ALTER TABLE executor DROP COLUMN environment_id;

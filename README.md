@@ -36,7 +36,7 @@ quarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5432/e2e_manager
 
 ```properties
 gitlab.baseUrl=https://your-gitlab-instance/api/v4
-gitlab.job.max-in-parallel=5
+workerUnit.max.in.parallel=5
 gitlab.old-pipeline-to-verify-in-minutes=5
 gitlab.old-pipeline-to-cancel-in-minutes=60
 ```
@@ -85,7 +85,7 @@ cypress:
   before_script:
     - npm config set strict-ssl false
     - npm config set registry $NPM_REGISTRY_PUBLIC -L project
-    - npm config set //jfrog-artifactory.steelhome.internal/artifactory/api/npm/galaxion-npm/:_auth $NPM_AUTH -L project
+    - npm config set //jfrog-artifactory.steelhome.publisher/artifactory/api/npm/galaxion-npm/:_auth $NPM_AUTH -L project
     - npm ci
   script:
     - |

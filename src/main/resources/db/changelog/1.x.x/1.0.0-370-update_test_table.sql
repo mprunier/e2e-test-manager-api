@@ -4,4 +4,4 @@
 ALTER TABLE test
     DROP COLUMN pipeline_id;
 
--- rollback ALTER TABLE pipeline ADD COLUMN pipeline_id VARCHAR(255) NOT NULL;
+-- rollback ALTER TABLE executor ADD COLUMN pipeline_id VARCHAR(255) NOT NULL;

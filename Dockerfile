@@ -7,18 +7,18 @@
 #
 # Then, build the image with:
 #
-# docker build -f src/main/docker/Dockerfile.jvm -t quarkus/security-questions-service-jvm .
+# docker build -f src/main/docker/Dockerfile.jvm -t quarkus/security-questions-orchestration-jvm .
 #
 # Then run the container using:
 #
-# docker run -i --rm -p 8080:8080 quarkus/security-questions-service-jvm
+# docker run -i --rm -p 8080:8080 quarkus/security-questions-orchestration-jvm
 #
 # If you want to include the debug port into your docker image
 # you will have to expose the debug port (default 5005) like this :  EXPOSE 8080 5005
 #
 # Then run the container using :
 #
-# docker run -i --rm -p 8080:8080 quarkus/security-questions-service-jvm
+# docker run -i --rm -p 8080:8080 quarkus/security-questions-orchestration-jvm
 #
 # This image uses the `run-java.sh` script to run the application.
 # This scripts computes the command line to execute your Java application, and
@@ -53,7 +53,7 @@
 # - JAVA_DEBUG: If set remote debugging will be switched on. Disabled by default (example:
 #    true").
 # - JAVA_DEBUG_PORT: Port used for remote debugging. Defaults to 5005 (example: "8787").
-# - CONTAINER_CORE_LIMIT: A calculated core limit as described in
+# - CONTAINER_CORE_LIMIT: A calculated shared limit as described in
 #   https://www.kernel.org/doc/Documentation/scheduler/sched-bwc.txt. (example: "2")
 # - CONTAINER_MAX_MEMORY: Memory limit given to the container (example: "1024").
 # - GC_MIN_HEAP_FREE_RATIO: Minimum percentage of heap free after GC to avoid expansion.

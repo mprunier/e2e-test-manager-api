@@ -7,8 +7,8 @@ ALTER TABLE pipeline
     ADD COLUMN variables  VARCHAR(1000),
     ADD COLUMN created_by VARCHAR(500) NOT NULL DEFAULT 'System';
 
--- rollback ALTER TABLE pipeline
+-- rollback ALTER TABLE executor
 -- rollback RENAME COLUMN configuration_test_ids_filter TO test_ids;
--- rollback ALTER TABLE pipeline
+-- rollback ALTER TABLE executor
 -- rollback DROP COLUMN variables TO test_ids,
 -- rollback DROP COLUMN created_by TO test_ids;

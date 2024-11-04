@@ -4,4 +4,4 @@
 ALTER TABLE environment
     ADD COLUMN is_locked BOOLEAN NOT NULL DEFAULT FALSE;
 
--- rollback ALTER TABLE pipeline DROP COLUMN is_locked;
+-- rollback ALTER TABLE executor DROP COLUMN is_locked;
