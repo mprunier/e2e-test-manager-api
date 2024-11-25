@@ -2,7 +2,7 @@ package fr.plum.e2e.OLD.domain.event.send;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import fr.plum.e2e.OLD.domain.event.AbstractEvent;
-import fr.plum.e2e.OLD.domain.response.MetricsResponse;
+import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response.MetricsResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;

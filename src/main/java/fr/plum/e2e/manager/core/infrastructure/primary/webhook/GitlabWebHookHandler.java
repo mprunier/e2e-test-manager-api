@@ -56,12 +56,10 @@ public class GitlabWebHookHandler {
     }
 
     var pipelineId = request.pipelineId();
-    //    var jobId = request.jobId();
 
     var reportWorkerCommand =
         ReportWorkerCommand.builder().workerUnitId(new WorkerUnitId(pipelineId)).build();
     workerFacade.report(reportWorkerCommand);
-    //    workerFacade.report(pipelineId, jobId, status);
   }
 
   private void pushHook(GitlabWebHookRequest request) {

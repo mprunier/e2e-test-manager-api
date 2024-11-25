@@ -13,11 +13,11 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerIsRecordV
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerUnitFilter;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerVariable;
 import fr.plum.e2e.manager.core.domain.model.command.RunWorkerCommand;
-import fr.plum.e2e.manager.core.domain.model.event.WorkerGroupInProgressEvent;
+import fr.plum.e2e.manager.core.domain.model.event.WorkerInProgressEvent;
 import fr.plum.e2e.manager.core.domain.model.exception.WorkerInTypeAllAlreadyInProgressException;
 import fr.plum.e2e.manager.core.domain.port.out.ConfigurationPort;
 import fr.plum.e2e.manager.core.domain.port.out.EventPublisherPort;
-import fr.plum.e2e.manager.core.domain.port.out.WorkerPort;
+import fr.plum.e2e.manager.core.domain.port.out.WorkerUnitPort;
 import fr.plum.e2e.manager.core.domain.port.out.repository.EnvironmentRepositoryPort;
 import fr.plum.e2e.manager.core.domain.port.out.repository.FileConfigurationRepositoryPort;
 import fr.plum.e2e.manager.core.domain.port.out.repository.WorkerRepositoryPort;
@@ -37,7 +37,7 @@ public class RunWorkerUseCase implements CommandUseCase<RunWorkerCommand> {
 
   private final ClockPort clockPort;
   private final EventPublisherPort eventPublisherPort;
-  private final WorkerPort workerPort;
+  private final WorkerUnitPort workerUnitPort;
   private final FileConfigurationRepositoryPort fileConfigurationRepositoryPort;
   private final WorkerRepositoryPort workerRepositoryPort;
 
@@ -48,14 +48,14 @@ public class RunWorkerUseCase implements CommandUseCase<RunWorkerCommand> {
   public RunWorkerUseCase(
       ClockPort clockPort,
       EventPublisherPort eventPublisherPort,
-      WorkerPort workerPort,
+      WorkerUnitPort workerUnitPort,
       EnvironmentRepositoryPort environmentRepositoryPort,
       FileConfigurationRepositoryPort fileConfigurationRepositoryPort,
       WorkerRepositoryPort workerRepositoryPort,
       ConfigurationPort configurationPort) {
     this.clockPort = clockPort;
     this.eventPublisherPort = eventPublisherPort;
-    this.workerPort = workerPort;
+    this.workerUnitPort = workerUnitPort;
     this.fileConfigurationRepositoryPort = fileConfigurationRepositoryPort;
     this.workerRepositoryPort = workerRepositoryPort;
     this.workerService = new WorkerService(workerRepositoryPort, configurationPort);
@@ -70,27 +70,27 @@ public class RunWorkerUseCase implements CommandUseCase<RunWorkerCommand> {
 
     var environment = environmentService.getEnvironment(command.environmentId());
 
-    var workerGroup = Worker.initialize(command.environmentId(), command.getWorkerType());
-    workerGroup.updateAuditInfo(command.username(), clockPort.now());
-    workerGroup.addVariables(command.variables());
+    var worker = Worker.initialize(command.environmentId(), command.getWorkerType());
+    worker.updateAuditInfo(command.username(), clockPort.now());
+    worker.addVariables(command.variables());
 
     if (command.getWorkerType() == WorkerType.ALL
         && environment.getMaxParallelWorkers().value() > 1) {
-      executeParallelWorkers(command, environment, workerGroup);
+      executeParallelWorkers(command, environment, worker);
     } else {
-      executeSingleWorker(command, environment, workerGroup);
+      executeSingleWorker(command, environment, worker);
     }
 
-    workerRepositoryPort.save(workerGroup);
+    workerRepositoryPort.save(worker);
 
     eventPublisherPort.publishAsync(
-        new WorkerGroupInProgressEvent(command.environmentId(), command.username(), workerGroup));
+        new WorkerInProgressEvent(command.environmentId(), command.username(), worker));
   }
 
   private void assertWorkerInTypeAll(RunWorkerCommand command) {
     if (command.getWorkerType() == WorkerType.ALL
         && workerRepositoryPort
-            .assertNotWorkerGroupInProgressByType(command.environmentId(), command.getWorkerType())
+            .assertNotWorkerInProgressByType(command.environmentId(), command.getWorkerType())
             .isPresent()) {
       throw new WorkerInTypeAllAlreadyInProgressException();
     }
@@ -123,12 +123,12 @@ public class RunWorkerUseCase implements CommandUseCase<RunWorkerCommand> {
       WorkerUnitFilter workerUnitFilter,
       List<WorkerVariable> variables,
       WorkerIsRecordVideo workerIsRecordVideo,
-      Worker workerGroup) {
+      Worker worker) {
     var workerId =
-        workerPort.runWorker(
+        workerUnitPort.runWorker(
             sourceCodeInformation, workerUnitFilter, variables, workerIsRecordVideo);
-    var worker = WorkerUnit.builder().id(workerId).filter(workerUnitFilter).build();
-    workerGroup.addWorkerUnit(worker);
+    var workerUnit = WorkerUnit.builder().id(workerId).filter(workerUnitFilter).build();
+    worker.addWorkerUnit(workerUnit);
   }
 
   private void distributeGroupedFiles(
@@ -152,6 +152,7 @@ public class RunWorkerUseCase implements CommandUseCase<RunWorkerCommand> {
     TestConfiguration testFilter = null;
 
     switch (command.getWorkerType()) {
+      case ALL -> filterByAll(environment, fileNamesFilter);
       case GROUP -> filterByGroup(command, environment, fileNamesFilter);
       case FILE -> fileNamesFilter.add(command.fileName());
       case SUITE -> suiteFiler = filterBySuite(command, environment, fileNamesFilter);
@@ -166,6 +167,10 @@ public class RunWorkerUseCase implements CommandUseCase<RunWorkerCommand> {
         command.variables(),
         workerIsRecordVideo,
         worker);
+  }
+
+  private void filterByAll(Environment environment, ArrayList<FileName> fileNamesFilter) {
+    fileNamesFilter.addAll(fileConfigurationRepositoryPort.findAllFileNames(environment.getId()));
   }
 
   private void filterByGroup(

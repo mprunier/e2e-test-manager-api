@@ -1,0 +1,73 @@
+package fr.plum.e2e.manager.core.domain.model.view;
+
+import fr.plum.e2e.manager.core.domain.model.aggregate.worker.Worker;
+import fr.plum.e2e.manager.core.domain.model.aggregate.worker.WorkerType;
+import fr.plum.e2e.manager.core.domain.model.aggregate.worker.WorkerUnit;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.UUID;
+import lombok.Builder;
+
+@Builder
+public record WorkerView(UUID id, String createdBy, ZonedDateTime createdAt, WorkerType type) {
+
+  public static WorkerView from(Worker group) {
+    return builder()
+        .id(group.getId().value())
+        .createdBy(group.getAuditInfo().getCreatedBy().value())
+        .createdAt(group.getAuditInfo().getCreatedAt())
+        .type(group.getType())
+        .build();
+  }
+
+  public static List<WorkerView> findForSuite(String fileName, UUID suiteId, List<Worker> workers) {
+    return workers.stream()
+        .filter(group -> hasWorkerForSuite(group, fileName, suiteId))
+        .map(WorkerView::from)
+        .toList();
+  }
+
+  public static List<WorkerView> findForTest(UUID testId, List<Worker> workers) {
+    return workers.stream()
+        .filter(group -> hasWorkerForTest(group, testId))
+        .map(WorkerView::from)
+        .toList();
+  }
+
+  private static boolean hasWorkerForSuite(Worker group, String fileName, UUID suiteId) {
+    return group.getType() == WorkerType.ALL
+        || group.getWorkerUnits().stream()
+            .anyMatch(workerUnit -> isWorkerMatchingSuite(workerUnit, fileName, suiteId));
+  }
+
+  private static boolean hasWorkerForTest(Worker group, UUID testId) {
+    return group.getType() == WorkerType.ALL
+        || group.getWorkerUnits().stream()
+            .anyMatch(workerUnit -> isWorkerMatchingTest(workerUnit, testId));
+  }
+
+  private static boolean isWorkerMatchingSuite(
+      WorkerUnit workerUnit, String fileName, UUID suiteId) {
+    if (workerUnit.getFilter() == null) {
+      return true;
+    }
+
+    boolean matchesFile =
+        workerUnit.getFilter().fileNames().stream().anyMatch(name -> name.value().equals(fileName));
+
+    boolean matchesSuite =
+        workerUnit.getFilter().suiteConfiguration() != null
+            && workerUnit.getFilter().suiteConfiguration().getId().value().equals(suiteId);
+
+    return matchesFile && matchesSuite;
+  }
+
+  private static boolean isWorkerMatchingTest(WorkerUnit workerUnit, UUID testId) {
+    if (workerUnit.getFilter() == null) {
+      return true;
+    }
+
+    return workerUnit.getFilter().testConfiguration() != null
+        && workerUnit.getFilter().testConfiguration().getId().value().equals(testId);
+  }
+}

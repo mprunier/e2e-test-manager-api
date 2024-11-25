@@ -19,7 +19,7 @@ public record ConfigurationSuiteWithWorkerView(
     ZonedDateTime lastPlayedAt,
     boolean hasNewTest,
     String group,
-    List<WorkerGroupView> workerGroups) {
+    List<WorkerView> workers) {
 
   public static ConfigurationSuiteWithWorkerView from(
       ConfigurationSuiteView suite, List<Worker> workers) {
@@ -34,7 +34,7 @@ public record ConfigurationSuiteWithWorkerView(
         .lastPlayedAt(suite.lastPlayedAt())
         .hasNewTest(suite.hasNewTest())
         .group(suite.group())
-        .workerGroups(WorkerGroupView.findForSuite(suite.file(), suite.id(), workers))
+        .workers(WorkerView.findForSuite(suite.file(), suite.id(), workers))
         .build();
   }
 }

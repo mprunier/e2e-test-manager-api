@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.TestResultStatus;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -42,5 +43,18 @@ public class MochaReportTestInternal {
     }
 
     return resultList;
+  }
+
+  public TestResultStatus status() {
+    if (Boolean.TRUE.equals(pass)) {
+      return TestResultStatus.SUCCESS;
+    }
+    if (Boolean.TRUE.equals(fail)) {
+      return TestResultStatus.FAILED;
+    }
+    if (Boolean.TRUE.equals(pending) || Boolean.TRUE.equals(skipped)) {
+      return TestResultStatus.SKIPPED;
+    }
+    return TestResultStatus.UNKNOWN;
   }
 }

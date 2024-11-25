@@ -1,8 +1,9 @@
 package fr.plum.e2e.manager.core.domain.port.out;
 
-import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.report.Report;
+import fr.plum.e2e.manager.core.domain.model.aggregate.report.Report;
+import java.util.List;
 
 public interface WorkerExtractorPort {
 
-  Report extractWorkerReportArtifacts(Object artefact);
+  List<Report> extractWorkerReportArtifacts(Object artefact);
 }

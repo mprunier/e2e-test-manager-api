@@ -1,8 +1,8 @@
 package fr.plum.e2e.OLD.controller;
 
-import fr.plum.e2e.OLD.domain.response.MetricsResponse;
 import fr.plum.e2e.OLD.usecases.metrics.RetrieveFinalMetricsUseCase;
 import fr.plum.e2e.OLD.usecases.metrics.RetrieveMetricsHistoryUseCase;
+import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response.MetricsResponse;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;

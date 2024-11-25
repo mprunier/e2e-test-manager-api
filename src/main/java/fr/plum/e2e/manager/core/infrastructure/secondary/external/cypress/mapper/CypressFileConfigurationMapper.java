@@ -17,6 +17,9 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.Suit
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.Tag;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.TestTitle;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.Variable;
+import fr.plum.e2e.manager.core.domain.model.exception.CharactersForbiddenException;
+import fr.plum.e2e.manager.core.domain.model.exception.SuiteNoTitleException;
+import fr.plum.e2e.manager.core.domain.model.exception.TitleEmptyException;
 import fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.exception.BuildFileConfigurationException;
 import fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.exception.SuiteShouldBeNotContainsSubSuiteException;
 import java.util.ArrayList;
@@ -27,6 +30,7 @@ import java.util.regex.Pattern;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.mozilla.javascript.CompilerEnvirons;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.EvaluatorException;
@@ -146,6 +150,7 @@ public final class CypressFileConfigurationMapper {
     processSuiteBody(call, tests, subSuites, fileName);
 
     validateNoSubSuite(subSuites);
+    validateSuiteTitle(titleNode);
 
     var suite =
         SuiteConfiguration.builder()
@@ -156,6 +161,18 @@ public final class CypressFileConfigurationMapper {
             .build();
 
     parentSuites.add(suite);
+  }
+
+  private static void validateSuiteTitle(StringLiteral titleNode) {
+    if (StringUtils.isBlank(titleNode.getValue())) {
+      throw new TitleEmptyException();
+    }
+    if (titleNode.getValue().contains("|") || titleNode.getValue().contains(";")) {
+      throw new CharactersForbiddenException();
+    }
+    if (NO_SUITE.equals(titleNode.getValue())) {
+      throw new SuiteNoTitleException();
+    }
   }
 
   private static void validateNoSubSuite(ArrayList<SuiteConfiguration> subSuites) {

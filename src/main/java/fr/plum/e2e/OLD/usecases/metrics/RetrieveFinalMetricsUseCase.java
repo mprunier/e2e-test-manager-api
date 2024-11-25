@@ -1,7 +1,7 @@
 package fr.plum.e2e.OLD.usecases.metrics;
 
-import fr.plum.e2e.OLD.domain.response.MetricsResponse;
 import fr.plum.e2e.OLD.service.retrieval.MetricRetrievalService;
+import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response.MetricsResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -33,9 +33,9 @@ public class RetrieveFinalMetricsUseCase {
                 .build());
     var lastMetricsWithAllTests =
         metricRetrievalService.getOptionalLastMetricsWithAllTestsRun(environmentId);
-    lastMetricsWithAllTests.ifPresent(
-        metricsEntity ->
-            metricsResponseBuilder.lastAllTestsRunAt(metricsEntity.getCreatedAt()).build());
+    //    lastMetricsWithAllTests.ifPresent(
+    //        metricsEntity ->
+    //            metricsResponseBuilder.lastAllTestsRunAt(metricsEntity.getCreatedAt()).build());
 
     return metricsResponseBuilder.build();
   }

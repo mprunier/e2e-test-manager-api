@@ -14,7 +14,7 @@ public interface WorkerRepositoryPort {
 
   void delete(WorkerId workerId);
 
-  Optional<Worker> assertNotWorkerGroupInProgressByType(
+  Optional<Worker> assertNotWorkerInProgressByType(
       EnvironmentId environmentId, WorkerType workerType);
 
   int countWorkerInProgress();
@@ -23,5 +23,5 @@ public interface WorkerRepositoryPort {
 
   Optional<Worker> findTypeAllByEnvironmentId(EnvironmentId environmentId);
 
-  Optional<Worker> findByWorkerId(WorkerUnitId workerUnitId);
+  Optional<Worker> findByWorkerUnitId(WorkerUnitId workerUnitId);
 }

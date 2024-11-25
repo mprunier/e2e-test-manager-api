@@ -3,9 +3,10 @@ package fr.plum.e2e.manager.core.domain.usecase.metrics;
 import fr.plum.e2e.manager.core.domain.model.aggregate.metric.Metrics;
 import fr.plum.e2e.manager.core.domain.model.command.AddMetricsCommand;
 import fr.plum.e2e.manager.core.domain.port.out.repository.MetricsRepositoryPort;
+import fr.plum.e2e.manager.sharedkernel.domain.port.in.CommandUseCase;
 import fr.plum.e2e.manager.sharedkernel.domain.port.out.ClockPort;
 
-public class AddMetricsUseCase {
+public class AddMetricsUseCase implements CommandUseCase<AddMetricsCommand> {
 
   private final ClockPort clockPort;
   private final MetricsRepositoryPort metricsRepositoryPort;
@@ -15,6 +16,7 @@ public class AddMetricsUseCase {
     this.clockPort = clockPort;
   }
 
+  @Override
   public void execute(AddMetricsCommand command) {
 
     var testCount = metricsRepositoryPort.testCount(command.environmentId());

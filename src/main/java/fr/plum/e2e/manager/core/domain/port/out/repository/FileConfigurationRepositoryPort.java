@@ -18,6 +18,8 @@ public interface FileConfigurationRepositoryPort {
 
   List<FileName> findAllFileNames(EnvironmentId environmentId, GroupName groupName);
 
+  List<FileName> findAllFileNames(EnvironmentId environmentId);
+
   void save(List<FileConfiguration> fileConfigurations);
 
   void update(List<FileConfiguration> fileConfigurations);
@@ -29,6 +31,4 @@ public interface FileConfigurationRepositoryPort {
 
   Optional<FileConfiguration> findByTestId(
       EnvironmentId environmentId, TestConfigurationId testConfigurationId);
-
-  //  List<FileConfiguration> findAllByTag(EnvironmentId environmentId, Tag tag);
 }

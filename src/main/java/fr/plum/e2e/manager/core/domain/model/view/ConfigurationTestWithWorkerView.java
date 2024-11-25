@@ -15,7 +15,7 @@ public record ConfigurationTestWithWorkerView(
     List<String> variables,
     List<String> tags,
     ZonedDateTime lastPlayedAt,
-    List<WorkerGroupView> workerGroups) {
+    List<WorkerView> workers) {
 
   public static ConfigurationTestWithWorkerView from(
       ConfigurationTestView test, List<Worker> workers) {
@@ -26,7 +26,7 @@ public record ConfigurationTestWithWorkerView(
         .variables(test.variables())
         .tags(test.tags())
         .lastPlayedAt(test.lastPlayedAt())
-        .workerGroups(WorkerGroupView.findForTest(test.id(), workers))
+        .workers(WorkerView.findForTest(test.id(), workers))
         .build();
   }
 

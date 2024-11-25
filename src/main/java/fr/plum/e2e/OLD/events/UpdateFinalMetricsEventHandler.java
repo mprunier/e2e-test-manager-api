@@ -1,12 +1,10 @@
 package fr.plum.e2e.OLD.events;
 
-
 import fr.plum.e2e.OLD.domain.event.send.UpdateFinalMetricsEvent;
-import fr.plum.e2e.OLD.domain.response.MetricsResponse;
-import fr.plum.e2e.OLD.model.entity.MetricsEntity;
 import fr.plum.e2e.OLD.service.retrieval.MetricRetrievalService;
 import fr.plum.e2e.OLD.usecases.metrics.AddMetricsUseCase;
 import fr.plum.e2e.OLD.usecases.metrics.CalculateFinalMetricsUseCase;
+import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response.MetricsResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.event.TransactionPhase;
@@ -41,12 +39,12 @@ public class UpdateFinalMetricsEventHandler {
               .failures(finalMetrics.failures())
               .skipped(finalMetrics.skipped())
               .isAllTestsRun(event.getIsAllTestsRun())
-              .lastAllTestsRunAt(
-                  event.getIsAllTestsRun()
-                      ? finalMetrics.at()
-                      : optionalLastMetricsWithAllTestsRun
-                          .map(MetricsEntity::getCreatedAt)
-                          .orElse(null))
+              //              .lastAllTestsRunAt(
+              //                  event.getIsAllTestsRun()
+              //                      ? finalMetrics.at()
+              //                      : optionalLastMetricsWithAllTestsRun
+              //                          .map(MetricsEntity::getCreatedAt)
+              //                          .orElse(null))
               .build();
       event.setMetrics(metricsResponse);
       //      sendEventToEnvironmentSessions(event);

@@ -30,7 +30,7 @@ import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 @RequiredArgsConstructor
 public class WorkerController {
 
-  private final WorkerFacade executeFacade;
+  private final WorkerFacade workerFacade;
 
   private final SecurityIdentity identity;
 
@@ -39,7 +39,7 @@ public class WorkerController {
       @NotNull @QueryParam("environmentId") UUID environmentId, @RequestBody RunRequest request) {
     var username = extractUsername(identity);
     log.info("[{}] ran test(s) on Environment id [{}].", username, environmentId);
-    executeFacade.run(request.toCommand(environmentId, username));
+    workerFacade.run(request.toCommand(environmentId, username));
   }
 
   @DELETE
@@ -49,14 +49,14 @@ public class WorkerController {
       @PathParam("worker_id") String workerId) {
     var username = extractUsername(identity);
     log.info("[{}] cancel test(s) on Environment id [{}].", username, environmentId);
-    executeFacade.cancel(
+    workerFacade.cancel(
         new CancelWorkerCommand(new EnvironmentId(environmentId), new WorkerUnitId(workerId)));
   }
 
   @GET
   @Path("/type-all")
   public List<WorkerUnitResponse> get(@NotNull @QueryParam("environmentId") UUID environmentId) {
-    var optionalWorker = executeFacade.get(new CommonQuery(new EnvironmentId(environmentId)));
+    var optionalWorker = workerFacade.get(new CommonQuery(new EnvironmentId(environmentId)));
     if (optionalWorker.isPresent()) {
       return WorkerUnitResponse.fromWorkers(optionalWorker.get().getWorkerUnits());
     }

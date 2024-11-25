@@ -1,102 +1,242 @@
 package fr.plum.e2e.manager.core.domain.usecase.worker;
 
+import fr.plum.e2e.manager.core.domain.model.aggregate.environment.Environment;
+import fr.plum.e2e.manager.core.domain.model.aggregate.report.Report;
+import fr.plum.e2e.manager.core.domain.model.aggregate.report.ReportTest;
+import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.SuiteTitle;
+import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.TestConfigurationId;
+import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.TestResult;
+import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.TestResultStatus;
+import fr.plum.e2e.manager.core.domain.model.aggregate.worker.Worker;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.WorkerUnitStatus;
+import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerUnitId;
 import fr.plum.e2e.manager.core.domain.model.command.ReportWorkerCommand;
 import fr.plum.e2e.manager.core.domain.model.event.WorkerCompletedEvent;
-import fr.plum.e2e.manager.core.domain.model.event.WorkerGroupCompletedEvent;
-import fr.plum.e2e.manager.core.domain.port.out.ConfigurationPort;
+import fr.plum.e2e.manager.core.domain.model.event.WorkerUnitCompletedEvent;
+import fr.plum.e2e.manager.core.domain.model.exception.ArtifactReportException;
 import fr.plum.e2e.manager.core.domain.port.out.EventPublisherPort;
 import fr.plum.e2e.manager.core.domain.port.out.WorkerExtractorPort;
-import fr.plum.e2e.manager.core.domain.port.out.WorkerPort;
+import fr.plum.e2e.manager.core.domain.port.out.WorkerUnitPort;
 import fr.plum.e2e.manager.core.domain.port.out.repository.EnvironmentRepositoryPort;
-import fr.plum.e2e.manager.core.domain.port.out.repository.FileConfigurationRepositoryPort;
+import fr.plum.e2e.manager.core.domain.port.out.repository.TestConfigurationRepositoryPort;
+import fr.plum.e2e.manager.core.domain.port.out.repository.TestResultRepositoryPort;
 import fr.plum.e2e.manager.core.domain.port.out.repository.WorkerRepositoryPort;
 import fr.plum.e2e.manager.core.domain.service.EnvironmentService;
-import fr.plum.e2e.manager.core.domain.service.FileConfigurationService;
-import fr.plum.e2e.manager.core.domain.service.WorkerService;
 import fr.plum.e2e.manager.sharedkernel.domain.port.in.CommandUseCase;
 import fr.plum.e2e.manager.sharedkernel.domain.port.out.ClockPort;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class ReportWorkerUseCase implements CommandUseCase<ReportWorkerCommand> {
 
   private final ClockPort clockPort;
   private final EventPublisherPort eventPublisherPort;
-  private final WorkerPort workerPort;
-  private final FileConfigurationRepositoryPort fileConfigurationRepositoryPort;
+  private final WorkerUnitPort workerUnitPort;
+  private final TestConfigurationRepositoryPort testConfigurationRepositoryPort;
   private final WorkerRepositoryPort workerRepositoryPort;
   private final WorkerExtractorPort workerExtractorPort;
+  private final TestResultRepositoryPort testResultRepositoryPort;
 
-  private final WorkerService workerService;
   private final EnvironmentService environmentService;
-  private final FileConfigurationService fileConfigurationService;
 
   public ReportWorkerUseCase(
       ClockPort clockPort,
       EventPublisherPort eventPublisherPort,
-      WorkerPort workerPort,
-      WorkerExtractorPort workerExtractorPort,
-      EnvironmentRepositoryPort environmentRepositoryPort,
-      FileConfigurationRepositoryPort fileConfigurationRepositoryPort,
+      WorkerUnitPort workerUnitPort,
+      TestConfigurationRepositoryPort testConfigurationRepositoryPort,
       WorkerRepositoryPort workerRepositoryPort,
-      ConfigurationPort configurationPort) {
+      WorkerExtractorPort workerExtractorPort,
+      TestResultRepositoryPort testResultRepositoryPort,
+      EnvironmentRepositoryPort environmentRepositoryPort) {
     this.clockPort = clockPort;
     this.eventPublisherPort = eventPublisherPort;
-    this.workerPort = workerPort;
-    this.workerExtractorPort = workerExtractorPort;
-    this.fileConfigurationRepositoryPort = fileConfigurationRepositoryPort;
+    this.workerUnitPort = workerUnitPort;
+    this.testConfigurationRepositoryPort = testConfigurationRepositoryPort;
     this.workerRepositoryPort = workerRepositoryPort;
-    this.workerService = new WorkerService(workerRepositoryPort, configurationPort);
+    this.workerExtractorPort = workerExtractorPort;
+    this.testResultRepositoryPort = testResultRepositoryPort;
     this.environmentService = new EnvironmentService(environmentRepositoryPort);
-    this.fileConfigurationService = new FileConfigurationService(fileConfigurationRepositoryPort);
   }
 
   @Override
   public void execute(ReportWorkerCommand command) {
+    var worker = workerRepositoryPort.findByWorkerUnitId(command.workerUnitId()).orElse(null);
 
-    var optionalWorkerGroup = workerRepositoryPort.findByWorkerId(command.workerUnitId());
-    if (optionalWorkerGroup.isEmpty()) {
-      return;
-    }
-    var workerGroup = optionalWorkerGroup.get();
-
-    var environment = environmentService.getEnvironment(workerGroup.getEnvironmentId());
-
-    var workerStatus =
-        workerPort.getWorkerStatus(environment.getSourceCodeInformation(), command.workerUnitId());
-    if (WorkerUnitStatus.IN_PROGRESS.equals(workerStatus)) {
+    if (worker == null) {
       return;
     }
 
-    if (WorkerUnitStatus.FAILED.equals(workerStatus)
-        || WorkerUnitStatus.SUCCESS.equals(workerStatus)) {
-      {
-        var reportArtifacts =
-            workerPort.getWorkerReportArtifacts(
-                environment.getSourceCodeInformation(), command.workerUnitId());
-        var workerReport = workerExtractorPort.extractWorkerReportArtifacts(reportArtifacts);
-        // TODO
-      }
+    var environment = environmentService.getEnvironment(worker.getEnvironmentId());
+    var workerUnitStatus =
+        workerUnitPort.getWorkerStatus(
+            environment.getSourceCodeInformation(), command.workerUnitId());
 
-      if (WorkerUnitStatus.CANCELED.equals(workerStatus)) {
-        // TODO
-      }
-
-      eventPublisherPort.publishAsync(
-          new WorkerCompletedEvent(
-              workerGroup.getEnvironmentId(), workerGroup.getAuditInfo().getCreatedBy()));
-
-      if (workerGroup.isCompleted()) {
-        // TODO Passer les tests en mode isWaiting à false (renommer en isHidden)
-        //  ou plutot ajouté une colonne workerId, tant que c'est pas null ça veut dire que c'est
-        // hidden
-        workerRepositoryPort.delete(workerGroup.getId());
-        // TODO create metrics --> in async : peut être dans le consumer de
-        // WorkerGroupCompletedEvent
-        // pour que ça se fasse avant
-        eventPublisherPort.publishAsync(
-            new WorkerGroupCompletedEvent(
-                workerGroup.getEnvironmentId(), workerGroup.getAuditInfo().getCreatedBy()));
-      }
+    if (WorkerUnitStatus.IN_PROGRESS.equals(workerUnitStatus)) {
+      return;
     }
+
+    var testConfigurationsToRun = getTestConfigurationsToRun(worker, command.workerUnitId());
+    var testResults =
+        processWorkerResults(
+            worker, environment, command, workerUnitStatus, testConfigurationsToRun);
+
+    handleMissingTests(testConfigurationsToRun, testResults, worker);
+
+    testResultRepositoryPort.saveAll(testResults);
+    publishWorkerUnitCompletedEvent(worker);
+
+    if (worker.isCompleted()) {
+      finalizeWorker(worker);
+    }
+  }
+
+  private List<TestConfigurationId> getTestConfigurationsToRun(
+      Worker worker, WorkerUnitId workerUnitId) {
+    var workerUnit = worker.findById(workerUnitId);
+
+    return switch (worker.getType()) {
+      case ALL, GROUP, FILE ->
+          testConfigurationRepositoryPort.findAllIds(
+              worker.getEnvironmentId(), workerUnit.getFilter().fileNames());
+      case SUITE ->
+          testConfigurationRepositoryPort.findAllIds(
+              worker.getEnvironmentId(), workerUnit.getFilter().suiteConfiguration().getId());
+      case TEST -> List.of(workerUnit.getFilter().testConfiguration().getId());
+    };
+  }
+
+  private List<TestResult> processWorkerResults(
+      Worker worker,
+      Environment environment,
+      ReportWorkerCommand command,
+      WorkerUnitStatus workerUnitStatus,
+      List<TestConfigurationId> testConfigurationsToRun) {
+
+    try {
+      if (WorkerUnitStatus.FAILED.equals(workerUnitStatus)
+          || WorkerUnitStatus.SUCCESS.equals(workerUnitStatus)) {
+        return processSuccessOrFailedStatus(worker, environment, command);
+      }
+
+      if (WorkerUnitStatus.CANCELED.equals(workerUnitStatus)) {
+        return createCanceledResults(worker, testConfigurationsToRun);
+      }
+
+      return new ArrayList<>();
+    } catch (ArtifactReportException e) {
+      return createErrorResults(worker, testConfigurationsToRun, TestResultStatus.NO_REPORT_ERROR);
+    } catch (Exception e) {
+      log.error("Error while recording worker result", e);
+      return createErrorResults(worker, testConfigurationsToRun, TestResultStatus.SYSTEM_ERROR);
+    }
+  }
+
+  private List<TestResult> processSuccessOrFailedStatus(
+      Worker worker, Environment environment, ReportWorkerCommand command) {
+
+    var reportArtifacts =
+        workerUnitPort.getWorkerReportArtifacts(
+            environment.getSourceCodeInformation(), command.workerUnitId());
+
+    var reports = workerExtractorPort.extractWorkerReportArtifacts(reportArtifacts);
+    var results = new ArrayList<TestResult>();
+
+    reports.forEach(
+        report -> {
+          processTestsWithoutSuite(report, worker, results);
+          processSuiteTests(report, worker, results);
+        });
+
+    return results;
+  }
+
+  private void processTestsWithoutSuite(Report report, Worker worker, List<TestResult> results) {
+    report
+        .tests()
+        .forEach(
+            reportTest -> {
+              testConfigurationRepositoryPort
+                  .findId(report.fileName(), SuiteTitle.noSuite(), reportTest.title())
+                  .ifPresent(
+                      configId -> results.add(createTestResult(worker, configId, reportTest)));
+            });
+  }
+
+  private void processSuiteTests(Report report, Worker worker, List<TestResult> results) {
+    report
+        .suites()
+        .forEach(
+            suite ->
+                suite
+                    .tests()
+                    .forEach(
+                        test -> {
+                          testConfigurationRepositoryPort
+                              .findId(report.fileName(), suite.title(), test.title())
+                              .ifPresent(
+                                  configId ->
+                                      results.add(createTestResult(worker, configId, test)));
+                        }));
+  }
+
+  private List<TestResult> createCanceledResults(
+      Worker worker, List<TestConfigurationId> testConfigurationIds) {
+
+    return testConfigurationIds.stream()
+        .map(id -> createTestResult(worker, id, TestResultStatus.CANCELED))
+        .toList();
+  }
+
+  private List<TestResult> createErrorResults(
+      Worker worker, List<TestConfigurationId> testConfigurationIds, TestResultStatus status) {
+
+    return testConfigurationIds.stream().map(id -> createTestResult(worker, id, status)).toList();
+  }
+
+  private TestResult createTestResult(
+      Worker worker, TestConfigurationId id, ReportTest reportTest) {
+    var result = TestResult.create(worker, id, reportTest);
+    result.createAuditInfo(worker.getAuditInfo().getCreatedBy(), clockPort.now());
+    return result;
+  }
+
+  private TestResult createTestResult(
+      Worker worker, TestConfigurationId id, TestResultStatus status) {
+    var result = TestResult.create(worker, id, status);
+    result.createAuditInfo(worker.getAuditInfo().getCreatedBy(), clockPort.now());
+    return result;
+  }
+
+  private void handleMissingTests(
+      List<TestConfigurationId> expectedTests, List<TestResult> actualResults, Worker worker) {
+
+    expectedTests.stream()
+        .filter(
+            expected ->
+                actualResults.stream()
+                    .noneMatch(actual -> actual.getTestConfigurationId().equals(expected)))
+        .map(id -> createTestResult(worker, id, TestResultStatus.NO_CORRESPONDING_TEST))
+        .forEach(actualResults::add);
+  }
+
+  private void publishWorkerUnitCompletedEvent(Worker worker) {
+    eventPublisherPort.publishAsync(
+        new WorkerUnitCompletedEvent(
+            worker.getEnvironmentId(), worker.getAuditInfo().getCreatedBy(), worker));
+  }
+
+  private void finalizeWorker(Worker worker) {
+    // TODO Passer les tests en mode isWaiting à false (renommer en isHidden)
+    //  ou plutot ajouté une colonne workerId, tant que c'est pas null ça veut dire que c'est
+    // hidden
+    workerRepositoryPort.delete(worker.getId());
+    // TODO create metrics --> in async : peut être dans le consumer de
+    // WorkerGroupCompletedEvent
+    // pour que ça se fasse avant
+    eventPublisherPort.publishAsync(
+        new WorkerCompletedEvent(
+            worker.getEnvironmentId(), worker.getAuditInfo().getCreatedBy(), worker));
   }
 }
