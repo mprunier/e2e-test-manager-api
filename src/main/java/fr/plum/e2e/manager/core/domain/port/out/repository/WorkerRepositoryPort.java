@@ -24,4 +24,6 @@ public interface WorkerRepositoryPort {
   Optional<Worker> findTypeAllByEnvironmentId(EnvironmentId environmentId);
 
   Optional<Worker> findByWorkerUnitId(WorkerUnitId workerUnitId);
+
+  Optional<Worker> find(WorkerId workerId);
 }

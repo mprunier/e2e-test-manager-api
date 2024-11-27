@@ -4,7 +4,8 @@ import static fr.plum.e2e.manager.core.infrastructure.primary.rest.utils.RestUti
 
 import fr.plum.e2e.manager.core.application.WorkerFacade;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
-import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerUnitId;
+import fr.plum.e2e.manager.core.domain.model.aggregate.shared.ActionUsername;
+import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerId;
 import fr.plum.e2e.manager.core.domain.model.command.CancelWorkerCommand;
 import fr.plum.e2e.manager.core.domain.model.query.CommonQuery;
 import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.request.RunRequest;
@@ -46,11 +47,14 @@ public class WorkerController {
   @Path("/{worker_id}/cancel")
   public void cancel(
       @NotNull @QueryParam("environmentId") UUID environmentId,
-      @PathParam("worker_id") String workerId) {
+      @PathParam("worker_id") UUID workerId) {
     var username = extractUsername(identity);
     log.info("[{}] cancel test(s) on Environment id [{}].", username, environmentId);
     workerFacade.cancel(
-        new CancelWorkerCommand(new EnvironmentId(environmentId), new WorkerUnitId(workerId)));
+        new CancelWorkerCommand(
+            new EnvironmentId(environmentId),
+            new ActionUsername(username),
+            new WorkerId(workerId)));
   }
 
   @GET

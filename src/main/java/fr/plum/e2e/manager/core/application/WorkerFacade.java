@@ -50,7 +50,8 @@ public class WorkerFacade {
             fileConfigurationRepositoryPort,
             workerRepositoryPort,
             configurationPort);
-    this.cancelWorkerUseCase = new CancelWorkerUseCase();
+    this.cancelWorkerUseCase =
+        new CancelWorkerUseCase(eventPublisherPort, workerUnitPort, workerRepositoryPort);
     this.getTypeAllWorkerUseCase = new GetTypeAllWorkerUseCase(workerRepositoryPort);
     this.reportWorkerUseCase =
         new ReportWorkerUseCase(

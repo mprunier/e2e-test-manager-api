@@ -232,9 +232,6 @@ public class ReportWorkerUseCase implements CommandUseCase<ReportWorkerCommand> 
     //  ou plutot ajouté une colonne workerId, tant que c'est pas null ça veut dire que c'est
     // hidden
     workerRepositoryPort.delete(worker.getId());
-    // TODO create metrics --> in async : peut être dans le consumer de
-    // WorkerGroupCompletedEvent
-    // pour que ça se fasse avant
     eventPublisherPort.publishAsync(
         new WorkerCompletedEvent(
             worker.getEnvironmentId(), worker.getAuditInfo().getCreatedBy(), worker));

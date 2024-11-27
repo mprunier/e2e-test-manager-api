@@ -11,38 +11,38 @@ import lombok.Builder;
 @Builder
 public record WorkerView(UUID id, String createdBy, ZonedDateTime createdAt, WorkerType type) {
 
-  public static WorkerView from(Worker group) {
+  public static WorkerView from(Worker worker) {
     return builder()
-        .id(group.getId().value())
-        .createdBy(group.getAuditInfo().getCreatedBy().value())
-        .createdAt(group.getAuditInfo().getCreatedAt())
-        .type(group.getType())
+        .id(worker.getId().value())
+        .createdBy(worker.getAuditInfo().getCreatedBy().value())
+        .createdAt(worker.getAuditInfo().getCreatedAt())
+        .type(worker.getType())
         .build();
   }
 
   public static List<WorkerView> findForSuite(String fileName, UUID suiteId, List<Worker> workers) {
     return workers.stream()
-        .filter(group -> hasWorkerForSuite(group, fileName, suiteId))
+        .filter(worker -> hasWorkerForSuite(worker, fileName, suiteId))
         .map(WorkerView::from)
         .toList();
   }
 
   public static List<WorkerView> findForTest(UUID testId, List<Worker> workers) {
     return workers.stream()
-        .filter(group -> hasWorkerForTest(group, testId))
+        .filter(worker -> hasWorkerForTest(worker, testId))
         .map(WorkerView::from)
         .toList();
   }
 
-  private static boolean hasWorkerForSuite(Worker group, String fileName, UUID suiteId) {
-    return group.getType() == WorkerType.ALL
-        || group.getWorkerUnits().stream()
+  private static boolean hasWorkerForSuite(Worker worker, String fileName, UUID suiteId) {
+    return worker.getType() == WorkerType.ALL
+        || worker.getWorkerUnits().stream()
             .anyMatch(workerUnit -> isWorkerMatchingSuite(workerUnit, fileName, suiteId));
   }
 
-  private static boolean hasWorkerForTest(Worker group, UUID testId) {
-    return group.getType() == WorkerType.ALL
-        || group.getWorkerUnits().stream()
+  private static boolean hasWorkerForTest(Worker worker, UUID testId) {
+    return worker.getType() == WorkerType.ALL
+        || worker.getWorkerUnits().stream()
             .anyMatch(workerUnit -> isWorkerMatchingTest(workerUnit, testId));
   }
 

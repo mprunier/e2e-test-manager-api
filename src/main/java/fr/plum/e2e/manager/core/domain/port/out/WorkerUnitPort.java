@@ -21,4 +21,6 @@ public interface WorkerUnitPort {
 
   Object getWorkerReportArtifacts(
       SourceCodeInformation sourceCodeInformation, WorkerUnitId workerUnitId);
+
+  void cancel(WorkerUnitId id);
 }
