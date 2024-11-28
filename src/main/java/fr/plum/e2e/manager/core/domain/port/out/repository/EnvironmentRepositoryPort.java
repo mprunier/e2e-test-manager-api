@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface EnvironmentRepositoryPort {
-  Optional<Environment> findById(EnvironmentId environmentId);
+  Optional<Environment> find(EnvironmentId environmentId);
 
-  List<Environment> findAllByProjectIdAndBranch(String projectId, String branch);
+  List<Environment> findAll(String projectId, String branch);
 
   void save(Environment environment);
 
   void update(Environment environment);
 
-  boolean existsByDescription(EnvironmentDescription description);
+  boolean exist(EnvironmentDescription description);
 }

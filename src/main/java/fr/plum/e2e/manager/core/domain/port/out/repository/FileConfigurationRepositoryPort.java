@@ -26,9 +26,9 @@ public interface FileConfigurationRepositoryPort {
 
   void delete(List<FileConfiguration> fileConfigurations);
 
-  Optional<FileConfiguration> findBySuiteId(
+  Optional<FileConfiguration> find(
       EnvironmentId environmentId, SuiteConfigurationId suiteConfigurationId);
 
-  Optional<FileConfiguration> findByTestId(
+  Optional<FileConfiguration> find(
       EnvironmentId environmentId, TestConfigurationId testConfigurationId);
 }

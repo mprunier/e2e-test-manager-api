@@ -1,6 +1,7 @@
 package fr.plum.e2e.manager.core.domain.usecase.worker;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.Worker;
+import fr.plum.e2e.manager.core.domain.model.aggregate.worker.WorkerType;
 import fr.plum.e2e.manager.core.domain.model.query.CommonQuery;
 import fr.plum.e2e.manager.core.domain.port.out.repository.WorkerRepositoryPort;
 import fr.plum.e2e.manager.sharedkernel.domain.port.in.QueryUseCase;
@@ -16,6 +17,6 @@ public class GetTypeAllWorkerUseCase implements QueryUseCase<CommonQuery, Option
 
   @Override
   public Optional<Worker> execute(CommonQuery query) {
-    return workerRepositoryPort.findTypeAllByEnvironmentId(query.environmentId());
+    return workerRepositoryPort.find(query.environmentId(), WorkerType.ALL);
   }
 }

@@ -1,6 +1,6 @@
 package fr.plum.e2e.manager.core.application;
 
-import fr.plum.e2e.manager.core.domain.model.aggregate.metric.Metrics;
+import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.Metrics;
 import fr.plum.e2e.manager.core.domain.model.command.AddMetricsCommand;
 import fr.plum.e2e.manager.core.domain.model.query.GetAllMetricsQuery;
 import fr.plum.e2e.manager.core.domain.model.query.GetMetricsQuery;

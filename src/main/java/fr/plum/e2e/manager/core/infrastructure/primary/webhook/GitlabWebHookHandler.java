@@ -81,8 +81,7 @@ public class GitlabWebHookHandler {
     }
     try {
       String finalBranch = extractRefName(branch);
-      var environments =
-          environmentRepositoryPort.findAllByProjectIdAndBranch(projectId, finalBranch);
+      var environments = environmentRepositoryPort.findAll(projectId, finalBranch);
 
       environments.forEach(
           environment -> {

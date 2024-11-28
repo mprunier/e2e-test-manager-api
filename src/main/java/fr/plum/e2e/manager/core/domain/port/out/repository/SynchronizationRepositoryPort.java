@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface SynchronizationRepositoryPort {
-  Optional<Synchronization> findById(EnvironmentId environmentId);
+  Optional<Synchronization> find(EnvironmentId environmentId);
 
   List<Synchronization> findAll();
 

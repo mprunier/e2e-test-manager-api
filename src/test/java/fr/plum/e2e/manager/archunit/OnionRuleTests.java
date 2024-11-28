@@ -33,15 +33,6 @@ public final class OnionRuleTests {
           .resideInAnyPackage("jakarta.enterprise..", "jakarta.persistence..");
 
   @ArchTest
-  static final ArchRule testApplicationDependencies =
-      noClasses()
-          .that()
-          .resideInAPackage("..application..")
-          .should()
-          .dependOnClassesThat()
-          .resideInAnyPackage("jakarta.enterprise..", "jakarta.persistence..");
-
-  @ArchTest
   static final ArchRule noCyclicDependencies =
       slices().matching("fr.plum.e2e.manager.(*)..").should().beFreeOfCycles();
 

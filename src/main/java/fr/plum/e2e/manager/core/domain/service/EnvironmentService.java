@@ -15,12 +15,12 @@ public class EnvironmentService {
 
   public Environment getEnvironment(EnvironmentId id) {
     return environmentRepositoryPort
-        .findById(id)
+        .find(id)
         .orElseThrow(() -> new EnvironmentNotFoundException(id));
   }
 
   public void assertEnvironmentDescriptionNotExist(EnvironmentDescription description) {
-    if (environmentRepositoryPort.existsByDescription(description)) {
+    if (environmentRepositoryPort.exist(description)) {
       throw new DuplicateEnvironmentException(description);
     }
   }

@@ -25,7 +25,7 @@ public class SearchSuiteUseCase
   public PaginatedView<ConfigurationSuiteWithWorkerView> execute(
       SearchSuiteConfigurationQuery query) {
     var paginatedSuites = searchSuiteConfigurationPort.search(query);
-    var workers = workerRepositoryPort.findAllByEnvironmentId(query.environmentId());
+    var workers = workerRepositoryPort.findAll(query.environmentId());
 
     var suiteWithWorkers =
         paginatedSuites.getContent().stream()

@@ -12,5 +12,5 @@ public enum TestResultStatus {
   NO_REPORT_ERROR,
   UNKNOWN,
 
-  CANCELED;
+  CANCELED
 }

@@ -3,8 +3,8 @@ package fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter.mapper;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.ConfigurationStatus;
 import fr.plum.e2e.manager.core.domain.model.view.ConfigurationSuiteView;
 import fr.plum.e2e.manager.core.domain.model.view.ConfigurationTestView;
-import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.fileconfiguration.JpaSuiteConfigurationEntity;
-import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.fileconfiguration.JpaTestConfigurationEntity;
+import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.testconfiguration.JpaSuiteConfigurationEntity;
+import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.testconfiguration.JpaTestConfigurationEntity;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 

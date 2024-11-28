@@ -4,8 +4,8 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.Environmen
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.GroupName;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.SuiteConfigurationId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.TestConfigurationId;
-import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.fileconfiguration.JpaFileConfigurationEntity;
-import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.fileconfiguration.JpaFileConfigurationId;
+import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.testconfiguration.JpaFileConfigurationEntity;
+import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.testconfiguration.JpaFileConfigurationId;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.List;
@@ -15,7 +15,7 @@ import java.util.Optional;
 public class JpaFileConfigurationRepository
     implements PanacheRepositoryBase<JpaFileConfigurationEntity, JpaFileConfigurationId> {
 
-  public List<JpaFileConfigurationEntity> findAllByEnvironmentId(EnvironmentId environmentId) {
+  public List<JpaFileConfigurationEntity> findAll(EnvironmentId environmentId) {
     return list("environmentId = ?1", environmentId.value());
   }
 
@@ -27,12 +27,12 @@ public class JpaFileConfigurationRepository
             .toList());
   }
 
-  public List<JpaFileConfigurationEntity> findAllByEnvironmentIdAndGroupName(
+  public List<JpaFileConfigurationEntity> findAll(
       EnvironmentId environmentId, GroupName groupName) {
     return list("environmentId = ?1 AND groupName = ?2", environmentId.value(), groupName.value());
   }
 
-  public Optional<JpaFileConfigurationEntity> findBySuiteId(
+  public Optional<JpaFileConfigurationEntity> find(
       EnvironmentId environmentId, SuiteConfigurationId suiteConfigurationId) {
     return find(
             "FROM JpaFileConfigurationEntity fc JOIN fc.suiteConfigurations sc "
@@ -42,7 +42,7 @@ public class JpaFileConfigurationRepository
         .firstResultOptional();
   }
 
-  public Optional<JpaFileConfigurationEntity> findByTestId(
+  public Optional<JpaFileConfigurationEntity> find(
       EnvironmentId environmentId, TestConfigurationId testConfigurationId) {
     return find(
             "FROM JpaFileConfigurationEntity fc JOIN fc.suiteConfigurations sc "
@@ -52,16 +52,4 @@ public class JpaFileConfigurationRepository
             testConfigurationId.value())
         .firstResultOptional();
   }
-
-  //  public List<JpaFileConfigurationEntity> findAllByTag(EnvironmentId environmentId, Tag tag) {
-  //    return find(
-  //            "FROM JpaFileConfigurationEntity fc "
-  //                + "JOIN fc.suiteConfigurations sc "
-  //                + "LEFT JOIN sc.testConfigurations tc "
-  //                + "WHERE fc.environmentId = ?1 "
-  //                + "AND (?2 = ANY(sc.tags) OR ?2 = ANY(tc.tags))",
-  //            environmentId.value(),
-  //            tag.value())
-  //        .list();
-  //  }
 }

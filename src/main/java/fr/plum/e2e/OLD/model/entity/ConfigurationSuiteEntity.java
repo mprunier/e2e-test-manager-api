@@ -1,12 +1,9 @@
 package fr.plum.e2e.OLD.model.entity;
 
-import fr.plum.e2e.OLD.domain.enumeration.ConfigurationStatus;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
@@ -46,10 +43,10 @@ public class ConfigurationSuiteEntity extends PanacheEntityBase {
       nullable = false)
   private EnvironmentEntity environment;
 
-  @Builder.Default
-  @Enumerated(EnumType.STRING)
-  @Column(name = "status", nullable = false)
-  private ConfigurationStatus status = ConfigurationStatus.NEW;
+  //  @Builder.Default
+  //  @Enumerated(EnumType.STRING)
+  //  @Column(name = "status", nullable = false)
+  //  private ConfigurationStatus status = ConfigurationStatus.NEW;
 
   @Setter
   @Column(name = "file", nullable = false)

@@ -13,7 +13,7 @@ public class SynchronizationService {
 
   public Synchronization getSynchronization(EnvironmentId id) {
     return synchronizationRepositoryPort
-        .findById(id)
+        .find(id)
         .orElseThrow(() -> new SynchronizationNotFoundException(id));
   }
 }

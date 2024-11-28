@@ -12,7 +12,7 @@ public class WorkerService {
   private final ConfigurationPort configurationPort;
 
   public void assertWorkerNotReached() {
-    var inProgressWorker = workerRepositoryPort.countWorkerInProgress();
+    var inProgressWorker = workerRepositoryPort.countAll();
     if (inProgressWorker >= configurationPort.getMaxJobInParallel()) {
       throw new ConcurrentWorkersReachedException();
     }

@@ -14,8 +14,6 @@ public interface TestConfigurationRepositoryPort {
   Optional<TestConfigurationId> findId(
       FileName fileName, SuiteTitle suiteTitle, TestTitle testTitle);
 
-  //  List<TestConfigurationId> findAllIds(EnvironmentId environmentId);
-
   List<TestConfigurationId> findAllIds(EnvironmentId environmentId, List<FileName> fileNames);
 
   List<TestConfigurationId> findAllIds(

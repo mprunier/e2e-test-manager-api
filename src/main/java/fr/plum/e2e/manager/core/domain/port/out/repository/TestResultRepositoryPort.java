@@ -8,5 +8,5 @@ public interface TestResultRepositoryPort {
 
   void saveAll(List<TestResult> testResults);
 
-  void removeAllWorkerId(WorkerId id);
+  void clearAllWorkerId(WorkerId id);
 }

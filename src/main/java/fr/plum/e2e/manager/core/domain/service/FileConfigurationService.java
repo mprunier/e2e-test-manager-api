@@ -16,14 +16,14 @@ public class FileConfigurationService {
   public FileConfiguration getFileConfigurationBySuiteId(
       EnvironmentId environmentId, SuiteConfigurationId suiteConfigurationId) {
     return fileConfigurationRepositoryPort
-        .findBySuiteId(environmentId, suiteConfigurationId)
+        .find(environmentId, suiteConfigurationId)
         .orElseThrow(() -> new FileNotFoundException(suiteConfigurationId));
   }
 
   public FileConfiguration getFileConfigurationByTestId(
       EnvironmentId environmentId, TestConfigurationId testConfigurationId) {
     return fileConfigurationRepositoryPort
-        .findByTestId(environmentId, testConfigurationId)
+        .find(environmentId, testConfigurationId)
         .orElseThrow(() -> new FileNotFoundException(testConfigurationId));
   }
 }

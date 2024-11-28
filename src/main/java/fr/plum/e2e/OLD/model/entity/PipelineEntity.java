@@ -1,6 +1,5 @@
 package fr.plum.e2e.OLD.model.entity;
 
-import fr.plum.e2e.OLD.domain.enumeration.PipelineType;
 import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.enumeration.WorkerStatus;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.converter.StringMapConverter;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
@@ -32,9 +31,9 @@ public class PipelineEntity extends PanacheEntityBase {
 
   @Id private String id;
 
-  @Enumerated(EnumType.STRING)
-  @Column(name = "type", nullable = false)
-  private PipelineType type;
+  //  @Enumerated(EnumType.STRING)
+  //  @Column(name = "type", nullable = false)
+  //  private PipelineType type;
 
   @ManyToOne
   @JoinColumn(

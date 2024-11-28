@@ -2,7 +2,7 @@ package fr.plum.e2e.manager.core.infrastructure.primary.shared;
 
 import fr.plum.e2e.manager.core.application.MetricsFacade;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
-import fr.plum.e2e.manager.core.domain.model.aggregate.metric.MetricsType;
+import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.MetricsType;
 import fr.plum.e2e.manager.core.domain.model.query.GetMetricsQuery;
 import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response.MetricsResponse;
 import java.util.UUID;

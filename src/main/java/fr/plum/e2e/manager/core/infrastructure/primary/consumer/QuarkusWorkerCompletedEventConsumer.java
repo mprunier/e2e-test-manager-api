@@ -1,7 +1,7 @@
 package fr.plum.e2e.manager.core.infrastructure.primary.consumer;
 
 import fr.plum.e2e.manager.core.application.MetricsFacade;
-import fr.plum.e2e.manager.core.domain.model.aggregate.metric.MetricsType;
+import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.MetricsType;
 import fr.plum.e2e.manager.core.domain.model.command.AddMetricsCommand;
 import fr.plum.e2e.manager.core.domain.model.event.WorkerCompletedEvent;
 import fr.plum.e2e.manager.core.infrastructure.primary.consumer.shared.WorkerNotificationHelper;

@@ -5,7 +5,7 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.scheduler.Scheduler;
 import java.util.Optional;
 
 public interface SchedulerRepositoryPort {
-  Optional<Scheduler> findById(EnvironmentId environmentId);
+  Optional<Scheduler> find(EnvironmentId environmentId);
 
   void save(Scheduler scheduler);
 

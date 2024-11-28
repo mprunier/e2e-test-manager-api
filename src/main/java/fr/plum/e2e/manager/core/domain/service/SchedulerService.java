@@ -12,8 +12,6 @@ public class SchedulerService {
   private final SchedulerRepositoryPort schedulerRepositoryPort;
 
   public Scheduler getScheduler(EnvironmentId id) {
-    return schedulerRepositoryPort
-        .findById(id)
-        .orElseThrow(() -> new SchedulerNotFoundException(id));
+    return schedulerRepositoryPort.find(id).orElseThrow(() -> new SchedulerNotFoundException(id));
   }
 }

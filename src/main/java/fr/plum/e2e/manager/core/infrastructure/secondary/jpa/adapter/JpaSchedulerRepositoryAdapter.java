@@ -8,13 +8,14 @@ import jakarta.transaction.Transactional;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 
+// TODO
 @RequiredArgsConstructor
 @ApplicationScoped
 @Transactional
 public class JpaSchedulerRepositoryAdapter implements SchedulerRepositoryPort {
 
   @Override
-  public Optional<Scheduler> findById(EnvironmentId environmentId) {
+  public Optional<Scheduler> find(EnvironmentId environmentId) {
     return Optional.empty();
   }
 

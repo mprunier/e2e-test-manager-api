@@ -57,7 +57,7 @@ public class Worker extends AggregateRoot<WorkerId> {
     return workerUnits.stream().allMatch(WorkerUnit::isCompleted);
   }
 
-  public WorkerUnit findById(WorkerUnitId workerUnitId) {
+  public WorkerUnit findWorkerUnit(WorkerUnitId workerUnitId) {
     return workerUnits.stream()
         .filter(workerUnit -> workerUnit.getId().equals(workerUnitId))
         .findFirst()

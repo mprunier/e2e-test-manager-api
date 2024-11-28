@@ -25,19 +25,26 @@ public class JpaFileConfigurationRepositoryAdapter implements FileConfigurationR
 
   @Override
   public List<FileConfiguration> findAll(EnvironmentId environmentId) {
-    return FileConfigurationMapper.toDomainList(repository.findAllByEnvironmentId(environmentId));
+    return FileConfigurationMapper.toDomainList(repository.findAll(environmentId));
   }
 
   @Override
   public Map<GroupName, List<FileName>> findAllFileNamesMapByGroupName(
       EnvironmentId environmentId) {
-    var fileConfigurationEntities = repository.findAllByEnvironmentId(environmentId);
+    var fileConfigurationEntities = repository.findAll(environmentId);
     return FileConfigurationMapper.toDomainFileNamesMapByGroupName(fileConfigurationEntities);
   }
 
   @Override
   public List<FileName> findAllFileNames(EnvironmentId environmentId, GroupName groupName) {
-    return repository.findAllByEnvironmentIdAndGroupName(environmentId, groupName).stream()
+    return repository.findAll(environmentId, groupName).stream()
+        .map(FileConfigurationMapper::toDomainFileName)
+        .toList();
+  }
+
+  @Override
+  public List<FileName> findAllFileNames(EnvironmentId environmentId) {
+    return repository.findAll(environmentId).stream()
         .map(FileConfigurationMapper::toDomainFileName)
         .toList();
   }
@@ -62,18 +69,18 @@ public class JpaFileConfigurationRepositoryAdapter implements FileConfigurationR
   }
 
   @Override
-  public Optional<FileConfiguration> findBySuiteId(
+  public Optional<FileConfiguration> find(
       EnvironmentId environmentId, SuiteConfigurationId suiteConfigurationId) {
     return repository
-        .findBySuiteId(environmentId, suiteConfigurationId)
+        .find(environmentId, suiteConfigurationId)
         .map(FileConfigurationMapper::toDomain);
   }
 
   @Override
-  public Optional<FileConfiguration> findByTestId(
+  public Optional<FileConfiguration> find(
       EnvironmentId environmentId, TestConfigurationId testConfigurationId) {
     return repository
-        .findByTestId(environmentId, testConfigurationId)
+        .find(environmentId, testConfigurationId)
         .map(FileConfigurationMapper::toDomain);
   }
 

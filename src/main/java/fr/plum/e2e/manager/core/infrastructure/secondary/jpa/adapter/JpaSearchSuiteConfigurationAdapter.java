@@ -9,12 +9,11 @@ import fr.plum.e2e.manager.core.domain.model.view.PaginatedView;
 import fr.plum.e2e.manager.core.domain.model.view.SearchCriteriaView;
 import fr.plum.e2e.manager.core.domain.port.out.query.SearchSuiteConfigurationPort;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter.mapper.SuiteMapper;
-import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.fileconfiguration.JpaSuiteConfigurationEntity;
+import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.testconfiguration.JpaSuiteConfigurationEntity;
 import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.quarkus.panache.common.Page;
 import io.quarkus.panache.common.Parameters;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import java.util.List;
@@ -26,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class JpaSearchSuiteConfigurationAdapter implements SearchSuiteConfigurationPort {
 
-  @Inject EntityManager entityManager;
+  private final EntityManager entityManager;
 
   @Override
   public PaginatedView<ConfigurationSuiteView> search(SearchSuiteConfigurationQuery query) {
@@ -96,10 +95,13 @@ public class JpaSearchSuiteConfigurationAdapter implements SearchSuiteConfigurat
     if (!results.isEmpty()) {
       entityManager
           .createQuery(
-              "SELECT DISTINCT s FROM JpaSuiteConfigurationEntity s "
-                  + "LEFT JOIN FETCH s.testConfigurations "
-                  + "LEFT JOIN FETCH s.fileConfiguration "
-                  + "WHERE s IN :suites",
+              """
+                SELECT DISTINCT s
+                FROM JpaSuiteConfigurationEntity s
+                LEFT JOIN FETCH s.testConfigurations
+                LEFT JOIN FETCH s.fileConfiguration
+                WHERE s IN :suites
+                """,
               JpaSuiteConfigurationEntity.class)
           .setParameter("suites", results)
           .getResultList();
@@ -157,10 +159,13 @@ public class JpaSearchSuiteConfigurationAdapter implements SearchSuiteConfigurat
     List<String> suiteTags =
         entityManager
             .createNativeQuery(
-                "SELECT DISTINCT unnest(s.tags) FROM suite_configuration s "
-                    + "JOIN file_configuration f ON s.file_configuration_name = f.file_name "
-                    + "AND s.file_configuration_environment_id = f.environment_id "
-                    + "WHERE f.environment_id = :envId")
+                """
+                SELECT DISTINCT unnest(s.tags)
+                FROM suite_configuration s
+                JOIN file_configuration f ON s.file_configuration_name = f.file_name
+                AND s.file_configuration_environment_id = f.environment_id
+                WHERE f.environment_id = :envId
+                """)
             .setParameter("envId", environmentId.value())
             .getResultList();
 
@@ -168,19 +173,26 @@ public class JpaSearchSuiteConfigurationAdapter implements SearchSuiteConfigurat
     List<String> testTags =
         entityManager
             .createNativeQuery(
-                "SELECT DISTINCT unnest(t.tags) FROM test_configuration t "
-                    + "JOIN suite_configuration s ON t.suite_id = s.id "
-                    + "JOIN file_configuration f ON s.file_configuration_name = f.file_name "
-                    + "AND s.file_configuration_environment_id = f.environment_id "
-                    + "WHERE f.environment_id = :envId")
+                """
+            SELECT DISTINCT unnest(t.tags)
+            FROM test_configuration t
+            JOIN suite_configuration s ON t.suite_id = s.id
+            JOIN file_configuration f ON s.file_configuration_name = f.file_name
+            AND s.file_configuration_environment_id = f.environment_id
+            WHERE f.environment_id = :envId
+            """)
             .setParameter("envId", environmentId.value())
             .getResultList();
 
     List<String> groupNames =
         entityManager
             .createQuery(
-                "SELECT DISTINCT e.groupName FROM JpaFileConfigurationEntity e "
-                    + "WHERE e.environmentId = :envId AND e.groupName IS NOT NULL",
+                """
+            SELECT DISTINCT e.groupName
+            FROM JpaFileConfigurationEntity e
+            WHERE e.environmentId = :envId
+            AND e.groupName IS NOT NULL
+            """,
                 String.class)
             .setParameter("envId", environmentId.value())
             .getResultList();

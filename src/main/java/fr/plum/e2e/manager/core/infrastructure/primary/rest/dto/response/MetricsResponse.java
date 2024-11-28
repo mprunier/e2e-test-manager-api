@@ -1,7 +1,7 @@
 package fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response;
 
-import fr.plum.e2e.manager.core.domain.model.aggregate.metric.Metrics;
-import fr.plum.e2e.manager.core.domain.model.aggregate.metric.MetricsType;
+import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.Metrics;
+import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.MetricsType;
 import java.time.ZonedDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;

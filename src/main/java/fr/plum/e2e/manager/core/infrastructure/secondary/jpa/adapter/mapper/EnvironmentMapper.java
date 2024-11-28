@@ -14,8 +14,6 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.VariableVa
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.sourcecode.SourceCodeBranch;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.sourcecode.SourceCodeProjectId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.sourcecode.SourceCodeToken;
-import fr.plum.e2e.manager.core.domain.model.aggregate.shared.ActionUsername;
-import fr.plum.e2e.manager.core.domain.model.aggregate.shared.AuditInfo;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.environment.JpaEnvironmentEntity;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.environment.JpaEnvironmentVariableEntity;
 import java.util.ArrayList;
@@ -38,16 +36,7 @@ public final class EnvironmentMapper {
             .sourceCodeInformation(sourceCodeInformation)
             .isEnabled(new EnvironmentIsEnabled(entity.isEnabled()))
             .maxParallelWorkers(new MaxParallelWorkers(entity.getMaxParallelTestNumber()))
-            .auditInfo(
-                AuditInfo.builder()
-                    .createdBy(new ActionUsername(entity.getCreatedBy()))
-                    .createdAt(entity.getCreatedAt())
-                    .updatedBy(
-                        entity.getUpdatedBy() != null
-                            ? new ActionUsername(entity.getUpdatedBy())
-                            : null)
-                    .updatedAt(entity.getUpdatedAt())
-                    .build())
+            .auditInfo(AuditInfoMapper.toDomain(entity))
             .build();
 
     var variables = toVariableDomain(entity);

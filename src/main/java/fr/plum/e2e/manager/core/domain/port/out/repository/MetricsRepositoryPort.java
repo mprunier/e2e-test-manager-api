@@ -1,13 +1,13 @@
 package fr.plum.e2e.manager.core.domain.port.out.repository;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
-import fr.plum.e2e.manager.core.domain.model.aggregate.metric.Metrics;
-import fr.plum.e2e.manager.core.domain.model.aggregate.metric.MetricsType;
-import fr.plum.e2e.manager.core.domain.model.aggregate.metric.vo.FailureCount;
-import fr.plum.e2e.manager.core.domain.model.aggregate.metric.vo.PassCount;
-import fr.plum.e2e.manager.core.domain.model.aggregate.metric.vo.SkippedCount;
-import fr.plum.e2e.manager.core.domain.model.aggregate.metric.vo.SuiteCount;
-import fr.plum.e2e.manager.core.domain.model.aggregate.metric.vo.TestCount;
+import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.Metrics;
+import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.MetricsType;
+import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.vo.FailureCount;
+import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.vo.PassCount;
+import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.vo.SkippedCount;
+import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.vo.SuiteCount;
+import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.vo.TestCount;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;

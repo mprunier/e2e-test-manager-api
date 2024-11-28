@@ -70,4 +70,12 @@ public class GitlabWorkerUnitAdapter implements WorkerUnitPort {
         sourceCodeInformation.sourceCodeProjectId().value(),
         jobId);
   }
+
+  @Override
+  public void cancel(SourceCodeInformation sourceCodeInformation, WorkerUnitId id) {
+    gitlabClient.cancelPipeline(
+        sourceCodeInformation.sourceCodeToken().value(),
+        sourceCodeInformation.sourceCodeProjectId().value(),
+        id.value());
+  }
 }

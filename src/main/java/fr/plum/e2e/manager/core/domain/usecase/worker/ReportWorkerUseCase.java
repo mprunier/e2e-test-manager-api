@@ -62,7 +62,7 @@ public class ReportWorkerUseCase implements CommandUseCase<ReportWorkerCommand> 
 
   @Override
   public void execute(ReportWorkerCommand command) {
-    var worker = workerRepositoryPort.findByWorkerUnitId(command.workerUnitId()).orElse(null);
+    var worker = workerRepositoryPort.find(command.workerUnitId()).orElse(null);
 
     if (worker == null) {
       return;
@@ -94,7 +94,7 @@ public class ReportWorkerUseCase implements CommandUseCase<ReportWorkerCommand> 
 
   private List<TestConfigurationId> getTestConfigurationsToRun(
       Worker worker, WorkerUnitId workerUnitId) {
-    var workerUnit = worker.findById(workerUnitId);
+    var workerUnit = worker.findWorkerUnit(workerUnitId);
 
     return switch (worker.getType()) {
       case ALL, GROUP, FILE ->
@@ -233,7 +233,7 @@ public class ReportWorkerUseCase implements CommandUseCase<ReportWorkerCommand> 
   }
 
   private void finalizeWorker(Worker worker) {
-    testResultRepositoryPort.removeAllWorkerId(worker.getId());
+    testResultRepositoryPort.clearAllWorkerId(worker.getId());
     workerRepositoryPort.delete(worker.getId());
     eventPublisherPort.publishAsync(
         new WorkerCompletedEvent(

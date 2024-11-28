@@ -17,13 +17,13 @@ public interface WorkerRepositoryPort {
   Optional<Worker> assertNotWorkerInProgressByType(
       EnvironmentId environmentId, WorkerType workerType);
 
-  int countWorkerInProgress();
+  int countAll();
 
-  List<Worker> findAllByEnvironmentId(EnvironmentId environmentId);
+  List<Worker> findAll(EnvironmentId environmentId);
 
-  Optional<Worker> findTypeAllByEnvironmentId(EnvironmentId environmentId);
+  Optional<Worker> find(EnvironmentId environmentId, WorkerType workerType);
 
-  Optional<Worker> findByWorkerUnitId(WorkerUnitId workerUnitId);
+  Optional<Worker> find(WorkerUnitId workerUnitId);
 
   Optional<Worker> find(WorkerId workerId);
 }

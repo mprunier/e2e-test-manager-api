@@ -1,6 +1,6 @@
 package fr.plum.e2e.OLD.model.repository;
 
-import fr.plum.e2e.OLD.model.entity.MetricsEntity;
+import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.metrics.JpaMetricsEntity;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.time.LocalDate;
@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.Optional;
 
 @ApplicationScoped
-public class MetricRepository implements PanacheRepositoryBase<MetricsEntity, Long> {
+public class MetricRepository implements PanacheRepositoryBase<JpaMetricsEntity, Long> {
 
-  public List<MetricsEntity> findAllByEnvironmentIdSince(long environmentId, LocalDate since) {
+  public List<JpaMetricsEntity> findAllByEnvironmentIdSince(long environmentId, LocalDate since) {
     var sinceStartOfDay = since.atStartOfDay(ZoneId.systemDefault());
     return list(
         "environment.id = ?1 AND createdAt >= ?2 ORDER BY createdAt ASC",
@@ -19,11 +19,11 @@ public class MetricRepository implements PanacheRepositoryBase<MetricsEntity, Lo
         sinceStartOfDay);
   }
 
-  public Optional<MetricsEntity> findLastMetrics(long environmentId) {
+  public Optional<JpaMetricsEntity> findLastMetrics(long environmentId) {
     return find("environment.id = ?1 ORDER BY createdAt DESC", environmentId).firstResultOptional();
   }
 
-  public Optional<MetricsEntity> findLastMetricsWithAllTests(long environmentId) {
+  public Optional<JpaMetricsEntity> findLastMetricsWithAllTests(long environmentId) {
     return find(
             "environment.id = ?1 AND isAllTestsRun IS TRUE ORDER BY createdAt DESC", environmentId)
         .firstResultOptional();

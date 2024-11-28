@@ -19,7 +19,7 @@ public class JpaSynchronizationRepositoryAdapter implements SynchronizationRepos
   private final JpaSynchronizationRepository repository;
 
   @Override
-  public Optional<Synchronization> findById(EnvironmentId environmentId) {
+  public Optional<Synchronization> find(EnvironmentId environmentId) {
     var optionalJpaEnvironment = repository.findByIdOptional(environmentId.value());
     return optionalJpaEnvironment.map(SynchronizationMapper::toDomain);
   }

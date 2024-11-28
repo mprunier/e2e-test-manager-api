@@ -28,15 +28,14 @@ public class JpaEnvironmentRepositoryAdapter implements EnvironmentRepositoryPor
 
   @CacheResult(cacheName = CACHE_JPA_ENVIRONMENT_BY_ID)
   @Override
-  public Optional<Environment> findById(@CacheKey EnvironmentId environmentId) {
+  public Optional<Environment> find(@CacheKey EnvironmentId environmentId) {
     var optionalJpaEnvironment = repository.findByIdOptional(environmentId.value());
     return optionalJpaEnvironment.map(EnvironmentMapper::toDomain);
   }
 
   @CacheResult(cacheName = CACHE_JPA_ENVIRONMENTS_BY_PROJECT_BRANCH)
   @Override
-  public List<Environment> findAllByProjectIdAndBranch(
-      @CacheKey String projectId, @CacheKey String branch) {
+  public List<Environment> findAll(@CacheKey String projectId, @CacheKey String branch) {
     return repository.findByProjectIdAndBranch(projectId, branch).stream()
         .map(EnvironmentMapper::toDomain)
         .toList();
@@ -56,7 +55,7 @@ public class JpaEnvironmentRepositoryAdapter implements EnvironmentRepositoryPor
   }
 
   @Override
-  public boolean existsByDescription(EnvironmentDescription description) {
+  public boolean exist(EnvironmentDescription description) {
     return repository.count("description", description.value()) > 0;
   }
 
