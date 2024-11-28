@@ -19,6 +19,7 @@ public final class MetricsMapper {
 
   public static JpaMetricsEntity toEntity(Metrics domain) {
     return JpaMetricsEntity.builder()
+        .id(domain.getId().value())
         .environmentId(domain.getEnvironmentId().value())
         .type(domain.getType())
         .suites(domain.getSuiteCount().value())

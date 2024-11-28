@@ -1,4 +1,4 @@
-package fr.plum.e2e.OLD.model.entity;
+package fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.testresult;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.Column;
@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "old_test_video")
-public class TestVideoEntity extends PanacheEntityBase {
+public class JpaTestVideoEntity extends PanacheEntityBase {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

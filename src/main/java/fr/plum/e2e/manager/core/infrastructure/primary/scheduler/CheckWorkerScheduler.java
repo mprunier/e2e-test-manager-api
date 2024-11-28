@@ -1,11 +1,19 @@
-package fr.plum.e2e.manager.core.infrastructure.primary.scheduler;
-
-public class CheckWorkerScheduler {}
-
+// package fr.plum.e2e.manager.core.infrastructure.primary.scheduler;
+//
+// import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.enumeration.WorkerStatus;
+// import io.quarkus.scheduler.Scheduled;
+// import jakarta.enterprise.context.ApplicationScoped;
+// import jakarta.enterprise.context.control.ActivateRequestContext;
+// import lombok.Getter;
+// import lombok.RequiredArgsConstructor;
+// import lombok.extern.slf4j.Slf4j;
+//
+// import java.util.concurrent.atomic.AtomicBoolean;
+//
 // @Slf4j
 // @ApplicationScoped
 // @RequiredArgsConstructor
-// public class VerifyPipelineScheduler {
+// public class CheckWorkerScheduler {
 //
 //  private final CancelPipelineUseCase cancelPipelineUseCase;
 //  private final PipelineRetrievalService pipelineRetrievalService;

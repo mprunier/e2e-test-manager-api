@@ -51,8 +51,9 @@ public class JpaFileConfigurationRepositoryAdapter implements FileConfigurationR
 
   @Override
   public void save(List<FileConfiguration> fileConfigurations) {
-    var entities = fileConfigurations.stream().map(FileConfigurationMapper::toEntity).toList();
-    repository.persist(entities);
+    fileConfigurations.stream()
+        .map(FileConfigurationMapper::toEntity)
+        .forEach(entity -> entity.persist());
   }
 
   @Override

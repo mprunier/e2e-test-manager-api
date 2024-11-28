@@ -1,5 +1,6 @@
 package fr.plum.e2e.OLD.model.entity;
 
+import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.testresult.JpaTestResultEntity;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -74,7 +75,7 @@ public class ConfigurationTestEntity extends PanacheEntityBase {
       fetch = FetchType.LAZY,
       cascade = CascadeType.ALL,
       orphanRemoval = true)
-  private List<TestEntity> tests;
+  private List<JpaTestResultEntity> tests;
 
   @Setter
   @Fetch(FetchMode.SUBSELECT)

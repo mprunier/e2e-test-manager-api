@@ -1,4 +1,4 @@
-package fr.plum.e2e.OLD.model.entity;
+package fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.testresult;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.Column;
@@ -23,7 +23,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "old_test_screenshot")
-public class TestScreenshotEntity extends PanacheEntityBase {
+public class JpaTestScreenshotEntity extends PanacheEntityBase {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,7 +35,7 @@ public class TestScreenshotEntity extends PanacheEntityBase {
       name = "test_id",
       foreignKey = @ForeignKey(name = "fk__test_screenshot__test_id"),
       nullable = false)
-  protected TestEntity test;
+  protected JpaTestResultEntity test;
 
   @Column(name = "filename", nullable = false)
   private String filename;
