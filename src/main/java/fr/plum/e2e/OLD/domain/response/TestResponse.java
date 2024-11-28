@@ -1,6 +1,7 @@
 package fr.plum.e2e.OLD.domain.response;
 
 import fr.plum.e2e.OLD.domain.enumeration.ConfigurationStatus;
+import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response.TestResultVariableResponse;
 import java.time.ZonedDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -17,7 +18,7 @@ import lombok.ToString;
 @Builder
 public class TestResponse {
 
-  private Long id;
+  private Long testResultId;
 
   private Long configurationId;
 
@@ -51,7 +52,7 @@ public class TestResponse {
 
   private String createdBy;
 
-  @Setter @ToString.Exclude private List<TestVariableResponse> variables;
+  @Setter @ToString.Exclude private List<TestResultVariableResponse> variables;
 
   @Setter @ToString.Exclude private List<String> configurationTestTags;
 }

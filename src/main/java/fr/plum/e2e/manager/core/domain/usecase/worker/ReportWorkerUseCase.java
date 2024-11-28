@@ -185,14 +185,18 @@ public class ReportWorkerUseCase implements CommandUseCase<ReportWorkerCommand> 
       Worker worker, List<TestConfigurationId> testConfigurationIds) {
 
     return testConfigurationIds.stream()
-        .map(id -> createTestResult(worker, id, TestResultStatus.CANCELED))
+        .map(id -> createTestResultWithoutReport(worker, id, TestResultStatus.CANCELED))
         .toList();
   }
 
   private List<TestResult> createErrorResults(
-      Worker worker, List<TestConfigurationId> testConfigurationIds, TestResultStatus status) {
+      Worker worker,
+      List<TestConfigurationId> testConfigurationIds,
+      TestResultStatus testResultStatus) {
 
-    return testConfigurationIds.stream().map(id -> createTestResult(worker, id, status)).toList();
+    return testConfigurationIds.stream()
+        .map(id -> createTestResultWithoutReport(worker, id, testResultStatus))
+        .toList();
   }
 
   private TestResult createTestResult(
@@ -202,9 +206,9 @@ public class ReportWorkerUseCase implements CommandUseCase<ReportWorkerCommand> 
     return result;
   }
 
-  private TestResult createTestResult(
+  private TestResult createTestResultWithoutReport(
       Worker worker, TestConfigurationId id, TestResultStatus status) {
-    var result = TestResult.create(worker, id, status);
+    var result = TestResult.createWithoutInformation(worker, id, status);
     result.createAuditInfo(worker.getAuditInfo().getCreatedBy(), clockPort.now());
     return result;
   }
@@ -217,7 +221,8 @@ public class ReportWorkerUseCase implements CommandUseCase<ReportWorkerCommand> 
             expected ->
                 actualResults.stream()
                     .noneMatch(actual -> actual.getTestConfigurationId().equals(expected)))
-        .map(id -> createTestResult(worker, id, TestResultStatus.NO_CORRESPONDING_TEST))
+        .map(
+            id -> createTestResultWithoutReport(worker, id, TestResultStatus.NO_CORRESPONDING_TEST))
         .forEach(actualResults::add);
   }
 
@@ -228,9 +233,7 @@ public class ReportWorkerUseCase implements CommandUseCase<ReportWorkerCommand> 
   }
 
   private void finalizeWorker(Worker worker) {
-    // TODO Passer les tests en mode isWaiting à false (renommer en isHidden)
-    //  ou plutot ajouté une colonne workerId, tant que c'est pas null ça veut dire que c'est
-    // hidden
+    testResultRepositoryPort.removeAllWorkerId(worker.getId());
     workerRepositoryPort.delete(worker.getId());
     eventPublisherPort.publishAsync(
         new WorkerCompletedEvent(

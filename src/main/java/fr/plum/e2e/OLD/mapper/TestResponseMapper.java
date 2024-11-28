@@ -2,10 +2,10 @@ package fr.plum.e2e.OLD.mapper;
 
 import fr.plum.e2e.OLD.domain.response.ScreenshotResponse;
 import fr.plum.e2e.OLD.domain.response.TestResponse;
-import fr.plum.e2e.OLD.domain.response.TestVariableResponse;
 import fr.plum.e2e.OLD.model.entity.ConfigurationTestTagEntity;
 import fr.plum.e2e.OLD.model.entity.TestEntity;
 import fr.plum.e2e.OLD.model.entity.TestScreenshotEntity;
+import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response.TestResultVariableResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -63,12 +63,13 @@ public final class TestResponseMapper {
         .build();
   }
 
-  public static List<TestVariableResponse> buildTestVariableResponses(
+  public static List<TestResultVariableResponse> buildTestVariableResponses(
       Map<String, String> entities) {
-    var testVariableResponses = new ArrayList<TestVariableResponse>();
+    var testVariableResponses = new ArrayList<TestResultVariableResponse>();
     entities.forEach(
         (a, b) ->
-            testVariableResponses.add(TestVariableResponse.builder().name(a).value(b).build()));
+            testVariableResponses.add(
+                TestResultVariableResponse.builder().name(a).value(b).build()));
     return testVariableResponses;
   }
 

@@ -21,7 +21,7 @@ import lombok.experimental.SuperBuilder;
 @Getter
 public class TestResult extends AggregateRoot<TestResultId> {
 
-  private WorkerId workerId;
+  private WorkerId workerId; // When not null, TestResult is hidden. Only during worker execution.
 
   private TestConfigurationId testConfigurationId;
 
@@ -56,7 +56,7 @@ public class TestResult extends AggregateRoot<TestResultId> {
         .build();
   }
 
-  public static TestResult create(
+  public static TestResult createWithoutInformation(
       Worker worker, TestConfigurationId testConfigurationId, TestResultStatus status) {
     return builder()
         .workerId(worker.getId())
