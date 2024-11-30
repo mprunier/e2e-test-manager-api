@@ -5,9 +5,11 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.Environmen
 import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.MetricsType;
 import fr.plum.e2e.manager.core.domain.model.query.GetMetricsQuery;
 import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response.MetricsResponse;
+import jakarta.enterprise.context.ApplicationScoped;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 
+@ApplicationScoped
 @RequiredArgsConstructor
 public class MetricsHelper {
 

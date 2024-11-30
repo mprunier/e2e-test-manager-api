@@ -5,17 +5,18 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerUnitFilte
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerUnitId;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
 @Getter
 public class WorkerUnit extends Entity<WorkerUnitId> {
 
-  @Builder.Default private WorkerUnitStatus status = WorkerUnitStatus.IN_PROGRESS;
+  @Setter @Builder.Default private WorkerUnitStatus status = WorkerUnitStatus.IN_PROGRESS;
 
   private WorkerUnitFilter filter;
 
-  public boolean isCompleted() {
+  public boolean isFinish() {
     return status != WorkerUnitStatus.IN_PROGRESS;
   }
 }

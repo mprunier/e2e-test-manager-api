@@ -9,6 +9,7 @@ import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.request.UpdateSc
 import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response.SchedulerResponse;
 import io.quarkus.cache.CacheKey;
 import io.quarkus.cache.CacheResult;
+import io.quarkus.security.Authenticated;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.PUT;
@@ -20,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 
 @Slf4j
+@Authenticated
 @Path("/auth/schedulers")
 @RequiredArgsConstructor
 public class SchedulerController {

@@ -10,7 +10,6 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.Test
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.WorkerType;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerVariable;
 import java.util.List;
-import java.util.stream.Stream;
 import lombok.Builder;
 
 @Builder
@@ -23,23 +22,6 @@ public record RunWorkerCommand(
     SuiteConfigurationId suiteConfigurationId,
     TestConfigurationId testConfigurationId,
     List<WorkerVariable> variables) {
-
-  public RunWorkerCommand {
-    int nonNullCount =
-        Stream.of(fileName, groupName, suiteConfigurationId, testConfigurationId)
-            .mapToInt(field -> field != null ? 1 : 0)
-            .sum();
-
-    if (nonNullCount == 0) {
-      throw new IllegalArgumentException(
-          "At least one identifier must be provided: fileName, groupName, suiteConfigurationId, or testConfigurationId");
-    }
-
-    if (nonNullCount > 1) {
-      throw new IllegalArgumentException(
-          "Only one identifier must be provided: fileName, groupName, suiteConfigurationId, or testConfigurationId");
-    }
-  }
 
   public WorkerType getWorkerType() {
     if (fileName() != null) return WorkerType.FILE;

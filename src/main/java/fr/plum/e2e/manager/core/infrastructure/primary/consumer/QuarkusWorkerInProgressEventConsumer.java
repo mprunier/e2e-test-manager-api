@@ -16,10 +16,14 @@ public class QuarkusWorkerInProgressEventConsumer {
   private final WorkerNotificationHelper workerNotificationHelper;
 
   public void workerInProgress(@ObservesAsync WorkerInProgressEvent event) {
-    workerNotificationHelper.sendWorkerUpdatedNotification(
-        event.environmentId(), event.worker(), WorkerNotificationStatus.IN_PROGRESS);
+    try {
+      workerNotificationHelper.sendWorkerUpdatedNotification(
+          event.environmentId(), event.worker(), WorkerNotificationStatus.IN_PROGRESS);
 
-    workerNotificationHelper.sendWorkerUnitUpdatedNotification(
-        event.environmentId(), event.worker());
+      workerNotificationHelper.sendWorkerUnitUpdatedNotification(
+          event.environmentId(), event.worker());
+    } catch (Exception e) {
+      log.error("Error while sending worker in progress notification", e);
+    }
   }
 }

@@ -3,7 +3,6 @@ package fr.plum.e2e.manager.core.infrastructure.secondary.transaction.adapter;
 import fr.plum.e2e.manager.core.domain.model.exception.TransactionException;
 import fr.plum.e2e.manager.sharedkernel.domain.model.transaction.TransactionalOperation;
 import fr.plum.e2e.manager.sharedkernel.domain.port.out.TransactionManagerPort;
-import jakarta.annotation.Resource;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Status;
@@ -16,8 +15,7 @@ public class TransactionManagerAdapter implements TransactionManagerPort {
 
   @Inject UserTransaction userTransaction;
 
-  @Resource(lookup = "java:comp/TransactionSynchronizationRegistry")
-  TransactionSynchronizationRegistry syncRegistry;
+  @Inject TransactionSynchronizationRegistry syncRegistry;
 
   @Override
   public void beginTransaction() {

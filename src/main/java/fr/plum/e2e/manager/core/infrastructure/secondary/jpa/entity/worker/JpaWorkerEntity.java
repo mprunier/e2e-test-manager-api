@@ -9,11 +9,10 @@ import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +21,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 @Entity
 @Getter
@@ -43,12 +45,16 @@ public class JpaWorkerEntity extends AbstractAuditableEntity {
   private WorkerType type;
 
   @Convert(converter = StringMapConverter.class)
-  @Column(name = "variables", columnDefinition = "jsonb")
+  @Column(name = "variables")
   @Builder.Default
   private Map<String, String> variables = new HashMap<>();
 
-  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-  @JoinColumn(name = "worker_id", nullable = false)
-  @Builder.Default
-  private List<JpaWorkerUnitEntity> units = new ArrayList<>();
+  @Setter
+  @Fetch(value = FetchMode.SUBSELECT)
+  @OneToMany(
+      mappedBy = "worker",
+      fetch = FetchType.LAZY,
+      cascade = CascadeType.ALL,
+      orphanRemoval = true)
+  private List<JpaWorkerUnitEntity> units;
 }

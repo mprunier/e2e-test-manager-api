@@ -22,12 +22,14 @@ public final class TestResultMapper {
             .workerId(domain.getWorkerId().value())
             .configurationTestId(domain.getTestConfigurationId().value())
             .status(domain.getStatus())
-            .reference(domain.getReference().value())
-            .errorUrl(domain.getErrorUrl().value())
-            .errorMessage(domain.getErrorMessage().value())
-            .errorStacktrace(domain.getErrorStacktrace().value())
-            .code(domain.getCode().value())
-            .duration(domain.getDuration().value())
+            .reference(domain.getReference() != null ? domain.getReference().value() : null)
+            .errorUrl(domain.getErrorUrl() != null ? domain.getErrorUrl().value() : null)
+            .errorMessage(
+                domain.getErrorMessage() != null ? domain.getErrorMessage().value() : null)
+            .errorStacktrace(
+                domain.getErrorStacktrace() != null ? domain.getErrorStacktrace().value() : null)
+            .code(domain.getCode() != null ? domain.getCode().value() : null)
+            .duration(domain.getDuration() != null ? domain.getDuration().value() : null)
             .variables(variables)
             .build();
     testResult.setAuditFields(domain.getAuditInfo());

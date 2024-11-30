@@ -73,7 +73,7 @@ public class JpaSearchSuiteConfigurationAdapter implements SearchSuiteConfigurat
 
     String orderByClause =
         switch (query.sortField()) {
-          case "file" -> "s.fileConfiguration.value";
+          case "file" -> "s.fileConfiguration.fileName";
           case "lastPlayedAt" -> "s.lastPlayedAt";
           case "title" -> "s.title";
           case "status" -> "s.status";

@@ -8,6 +8,7 @@ public enum GitlabJobStatus {
   running,
   success,
   failed,
+  canceling,
   canceled,
   skipped;
 

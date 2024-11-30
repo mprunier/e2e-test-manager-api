@@ -33,9 +33,8 @@ public final class WorkerMapper {
         .variables(
             entity.getVariables().entrySet().stream()
                 .map(entry -> new WorkerVariable(entry.getKey(), entry.getValue()))
-                .collect(Collectors.toList()))
-        .workerUnits(
-            entity.getUnits().stream().map(WorkerMapper::toWorkerUnit).collect(Collectors.toList()))
+                .toList())
+        .workerUnits(entity.getUnits().stream().map(WorkerMapper::toWorkerUnit).toList())
         .auditInfo(AuditInfoMapper.toDomain(entity))
         .build();
   }
@@ -51,13 +50,8 @@ public final class WorkerMapper {
                     .collect(Collectors.toMap(WorkerVariable::name, WorkerVariable::value)))
             .build();
 
-    entity
-        .getUnits()
-        .addAll(
-            domain.getWorkerUnits().stream()
-                .map(unit -> toWorkerUnitEntity(unit, entity))
-                .toList());
-
+    entity.setUnits(
+        domain.getWorkerUnits().stream().map(unit -> toWorkerUnitEntity(unit, entity)).toList());
     entity.setAuditFields(domain.getAuditInfo());
     return entity;
   }
@@ -83,7 +77,7 @@ public final class WorkerMapper {
     if (dto == null) return null;
 
     return WorkerUnitFilter.builder()
-        .fileNames(dto.getFileNames().stream().map(FileName::new).collect(Collectors.toList()))
+        .fileNames(dto.getFileNames().stream().map(FileName::new).toList())
         .tag(dto.getTag() != null ? new Tag(dto.getTag()) : null)
         .suiteFilter(
             dto.getSuiteFilter() != null
@@ -108,7 +102,7 @@ public final class WorkerMapper {
     if (domain == null) return null;
 
     return WorkerUnitFilterDto.builder()
-        .fileNames(domain.fileNames().stream().map(FileName::value).collect(Collectors.toList()))
+        .fileNames(domain.fileNames().stream().map(FileName::value).toList())
         .tag(domain.tag() != null ? domain.tag().value() : null)
         .suiteFilter(
             domain.suiteFilter() != null

@@ -37,4 +37,9 @@ public class JpaLockManagerAdapter implements LockManagerPort {
   public void releaseLock(String resourceType, String resourceId) {
     JpaLockManagerEntity.delete("resourceType = ?1 and resourceId = ?2", resourceType, resourceId);
   }
+
+  @Override
+  public void releaseAllLocks() {
+    JpaLockManagerEntity.deleteAll();
+  }
 }

@@ -41,6 +41,7 @@ public class TestResult extends AggregateRoot<TestResultId> {
   public static TestResult create(
       Worker worker, TestConfigurationId testConfigurationId, ReportTest testWithoutSuite) {
     return builder()
+        .id(TestResultId.generate())
         .workerId(worker.getId())
         .testConfigurationId(testConfigurationId)
         .status(testWithoutSuite.status())
@@ -59,6 +60,7 @@ public class TestResult extends AggregateRoot<TestResultId> {
   public static TestResult createWithoutInformation(
       Worker worker, TestConfigurationId testConfigurationId, TestResultStatus status) {
     return builder()
+        .id(TestResultId.generate())
         .workerId(worker.getId())
         .testConfigurationId(testConfigurationId)
         .status(status)

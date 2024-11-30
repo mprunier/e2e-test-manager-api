@@ -29,6 +29,7 @@ public class Metrics extends AggregateRoot<MetricsId> {
   public static Metrics initialize(
       EnvironmentId environmentId, ZonedDateTime now, MetricsType type) {
     return builder()
+        .id(MetricsId.generate())
         .environmentId(environmentId)
         .auditInfo(AuditInfo.create(now))
         .type(type)

@@ -40,7 +40,8 @@ public class JpaSuiteConfigurationEntity extends PanacheEntityBase {
   @Builder.Default
   @Enumerated(EnumType.STRING)
   @Column(name = "status", nullable = false)
-  private ConfigurationStatus status = ConfigurationStatus.NEW;
+  private ConfigurationStatus status =
+      ConfigurationStatus.NEW; // Status update in SQL view after test result creation
 
   @ManyToOne
   @JoinColumns({

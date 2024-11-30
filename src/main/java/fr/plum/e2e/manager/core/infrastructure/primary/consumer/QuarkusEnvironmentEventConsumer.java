@@ -22,8 +22,12 @@ public class QuarkusEnvironmentEventConsumer {
   private final RunWorkerScheduler runWorkerScheduler;
 
   public void environmentCreated(@ObservesAsync EnvironmentCreatedEvent event) {
-    runWorkerScheduler.updateSchedule();
-    cacheManager.invalidateCache(CACHE_HTTP_LIST_ALL_ENVIRONMENTS);
+    try {
+      runWorkerScheduler.updateSchedule();
+      cacheManager.invalidateCache(CACHE_HTTP_LIST_ALL_ENVIRONMENTS);
+    } catch (Exception e) {
+      log.error("Error while updating scheduler", e);
+    }
   }
 
   public void environmentUpdated(@ObservesAsync EnvironmentUpdatedEvent event) {

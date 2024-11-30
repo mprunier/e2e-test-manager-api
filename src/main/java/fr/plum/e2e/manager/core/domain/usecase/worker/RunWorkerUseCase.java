@@ -71,7 +71,7 @@ public class RunWorkerUseCase implements CommandUseCase<RunWorkerCommand> {
     var environment = environmentService.getEnvironment(command.environmentId());
 
     var worker = Worker.initialize(command.environmentId(), command.getWorkerType());
-    worker.updateAuditInfo(command.username(), clockPort.now());
+    worker.createAuditInfo(command.username(), clockPort.now());
     worker.addVariables(command.variables());
 
     if (command.getWorkerType() == WorkerType.ALL

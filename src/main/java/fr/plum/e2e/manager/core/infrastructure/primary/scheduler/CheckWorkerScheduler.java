@@ -32,7 +32,7 @@ public class CheckWorkerScheduler {
 
   private final AtomicBoolean inVerifyProgress = new AtomicBoolean(false);
 
-  @Scheduled(cron = "0 0/5 * * * ?")
+  @Scheduled(cron = "0 0/1 * * * ?")
   @ActivateRequestContext
   public void schedule() {
     if (inVerifyProgress.compareAndSet(false, true)) {
@@ -56,8 +56,7 @@ public class CheckWorkerScheduler {
           }
         }
       } catch (Exception e) {
-        log.error(
-            "Error during the verification of the in progress pipelines. : {}", e.getMessage());
+        log.error("Error during the verification of the in progress pipelines.", e);
       } finally {
         inVerifyProgress.set(false);
       }

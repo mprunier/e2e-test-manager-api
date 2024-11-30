@@ -25,7 +25,9 @@ import fr.plum.e2e.manager.sharedkernel.domain.port.out.TransactionManagerPort;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.List;
 import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @ApplicationScoped
 public class WorkerFacade {
 
@@ -80,6 +82,7 @@ public class WorkerFacade {
 
   @CommandLock
   public void cancel(CancelWorkerCommand command) {
+    log.trace("Cancel worker: {}", command);
     cancelWorkerUseCase.execute(command);
   }
 
@@ -89,6 +92,7 @@ public class WorkerFacade {
 
   @CommandLock
   public void report(ReportWorkerCommand command) {
+    log.trace("Report worker: {}", command);
     reportWorkerUseCase.execute(command);
   }
 

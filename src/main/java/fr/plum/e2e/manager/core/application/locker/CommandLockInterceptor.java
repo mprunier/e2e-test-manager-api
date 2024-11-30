@@ -2,7 +2,6 @@ package fr.plum.e2e.manager.core.application.locker;
 
 import fr.plum.e2e.manager.core.domain.port.out.LockManagerPort;
 import jakarta.annotation.Priority;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.interceptor.AroundInvoke;
 import jakarta.interceptor.Interceptor;
 import jakarta.interceptor.InvocationContext;
@@ -13,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 @Interceptor
 @CommandLock
 @Priority(Interceptor.Priority.APPLICATION)
-@ApplicationScoped
 @RequiredArgsConstructor
 public class CommandLockInterceptor {
 

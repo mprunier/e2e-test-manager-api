@@ -25,9 +25,13 @@ public class QuarkusWorkerCompletedEventConsumer {
   private final MetricsHelper metricsHelper;
 
   public void workerCompleted(@ObservesAsync WorkerCompletedEvent event) {
-    addMetrics(event);
-    workerNotificationHelper.sendWorkerUpdatedNotification(
-        event.environmentId(), event.worker(), WorkerNotificationStatus.COMPLETED);
+    try {
+      addMetrics(event);
+      workerNotificationHelper.sendWorkerUpdatedNotification(
+          event.environmentId(), event.worker(), WorkerNotificationStatus.COMPLETED);
+    } catch (Exception e) {
+      log.error("Error while sending worker completed notification", e);
+    }
   }
 
   private void addMetrics(WorkerCompletedEvent event) {

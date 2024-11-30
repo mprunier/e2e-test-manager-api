@@ -33,6 +33,7 @@ public class WorkerNotificationHelper {
       if (optionalWorker.isPresent()) {
         var workerUnitUpdatedNotificationEvent =
             WorkerUnitUpdatedNotificationEvent.builder()
+                .environmentId(environmentId)
                 .workers(WorkerUnitResponse.fromWorkers(optionalWorker.get().getWorkerUnits()))
                 .build();
         webSocketNotifier.notifySubscribers(workerUnitUpdatedNotificationEvent);

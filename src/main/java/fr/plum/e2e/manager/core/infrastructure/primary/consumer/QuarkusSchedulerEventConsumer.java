@@ -19,8 +19,12 @@ public class QuarkusSchedulerEventConsumer {
   private final RunWorkerScheduler runWorkerScheduler;
 
   public void schedulerUpdated(@ObservesAsync SchedulerUpdatedEvent event) {
-    runWorkerScheduler.updateSchedule();
-    cacheManager.invalidateCacheByKey(
-        CACHE_HTTP_GET_SCHEDULER_DETAILS, event.environmentId().value());
+    try {
+      runWorkerScheduler.updateSchedule();
+      cacheManager.invalidateCacheByKey(
+          CACHE_HTTP_GET_SCHEDULER_DETAILS, event.environmentId().value());
+    } catch (Exception e) {
+      log.error("Error while updating scheduler", e);
+    }
   }
 }

@@ -88,6 +88,9 @@ public class ReportWorkerUseCase implements CommandUseCase<ReportWorkerCommand> 
 
     handleMissingTests(testConfigurationsToRun, testResults, worker);
 
+    var workerUnit = worker.findWorkerUnit(command.workerUnitId());
+    workerUnit.setStatus(workerUnitStatus);
+
     transactionManagerPort.executeInTransaction(
         () -> {
           testResultRepositoryPort.saveAll(testResults);
@@ -96,6 +99,8 @@ public class ReportWorkerUseCase implements CommandUseCase<ReportWorkerCommand> 
 
           if (worker.isCompleted()) {
             finalizeWorker(worker);
+          } else {
+            workerRepositoryPort.save(worker);
           }
         });
   }
@@ -240,8 +245,8 @@ public class ReportWorkerUseCase implements CommandUseCase<ReportWorkerCommand> 
   }
 
   private void finalizeWorker(Worker worker) {
-    testResultRepositoryPort.clearAllWorkerId(worker.getId());
-    workerRepositoryPort.delete(worker.getId());
+    //    testResultRepositoryPort.clearAllWorkerId(worker.getId());
+    //    workerRepositoryPort.delete(worker.getId());
     transactionManagerPort.registerAfterCommit(
         () ->
             eventPublisherPort.publishAsync(

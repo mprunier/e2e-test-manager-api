@@ -54,7 +54,7 @@ public class Worker extends AggregateRoot<WorkerId> {
   }
 
   public boolean isCompleted() {
-    return workerUnits.stream().allMatch(WorkerUnit::isCompleted);
+    return workerUnits.stream().allMatch(WorkerUnit::isFinish);
   }
 
   public WorkerUnit findWorkerUnit(WorkerUnitId workerUnitId) {

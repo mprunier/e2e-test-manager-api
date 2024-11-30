@@ -14,8 +14,12 @@ public class QuarkusWorkerUnitCompletedEventConsumer {
 
   private final WorkerNotificationHelper workerNotificationHelper;
 
-  public void workerCompleted(@ObservesAsync WorkerUnitCompletedEvent event) {
-    workerNotificationHelper.sendWorkerUnitUpdatedNotification(
-        event.environmentId(), event.worker());
+  public void workerUnitCompleted(@ObservesAsync WorkerUnitCompletedEvent event) {
+    try {
+      workerNotificationHelper.sendWorkerUnitUpdatedNotification(
+          event.environmentId(), event.worker());
+    } catch (Exception e) {
+      log.error("Error while sending worker unit completed notification", e);
+    }
   }
 }

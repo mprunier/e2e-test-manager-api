@@ -8,6 +8,7 @@ public enum GitlabJobStatus {
   running,
   success,
   failed,
+  canceling,
   canceled,
   skipped;
 
@@ -16,7 +17,7 @@ public enum GitlabJobStatus {
       case created, pending, running -> WorkerUnitStatus.IN_PROGRESS;
       case success -> WorkerUnitStatus.SUCCESS;
       case failed -> WorkerUnitStatus.FAILED;
-      case canceled, skipped -> WorkerUnitStatus.CANCELED;
+      case canceled, skipped, canceling -> WorkerUnitStatus.CANCELED;
     };
   }
 }
