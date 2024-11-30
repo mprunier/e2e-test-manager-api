@@ -1,7 +1,7 @@
 package fr.plum.e2e.manager.core.infrastructure.primary.consumer;
 
 import fr.plum.e2e.manager.core.domain.model.event.WorkerUnitCompletedEvent;
-import fr.plum.e2e.manager.core.infrastructure.primary.consumer.shared.WorkerNotificationHelper;
+import fr.plum.e2e.manager.core.infrastructure.primary.shared.helper.WorkerNotificationHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.ObservesAsync;
 import lombok.RequiredArgsConstructor;

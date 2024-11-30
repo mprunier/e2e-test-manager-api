@@ -37,8 +37,8 @@ quarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5432/e2e_manager
 ```properties
 gitlab.baseUrl=https://your-gitlab-instance/api/v4
 workerUnit.max.in.parallel=5
-gitlab.old-pipeline-to-verify-in-minutes=5
-gitlab.old-pipeline-to-cancel-in-minutes=60
+business.scheduler.worker.report.verification.interval-minutes=5
+business.scheduler.worker.report.cancel-timeout.interval-minutes=60
 ```
 
 ## 🚀 Cypress Project Configuration
@@ -66,7 +66,7 @@ Add the following `.gitlab-ci.yml` to your Cypress project:
 
 ```yaml
 stages:
-  - test
+  - testFilter
 
 default:
   interruptible: true
@@ -78,7 +78,7 @@ default:
       - node_modules/
 
 cypress:
-  stage: test
+  stage: testFilter
   image:
     name: cypress/browsers:node-20.17.0-chrome-129.0.6668.70-1-ff-130.0.1-edge-129.0.2792.52-1
     entrypoint: [ "" ]

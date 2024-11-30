@@ -102,8 +102,9 @@ public class ReportWorkerUseCase implements CommandUseCase<ReportWorkerCommand> 
               worker.getEnvironmentId(), workerUnit.getFilter().fileNames());
       case SUITE ->
           testConfigurationRepositoryPort.findAllIds(
-              worker.getEnvironmentId(), workerUnit.getFilter().suiteConfiguration().getId());
-      case TEST -> List.of(workerUnit.getFilter().testConfiguration().getId());
+              worker.getEnvironmentId(),
+              workerUnit.getFilter().suiteFilter().suiteConfigurationId());
+      case TEST -> List.of(workerUnit.getFilter().testFilter().testConfigurationId());
     };
   }
 

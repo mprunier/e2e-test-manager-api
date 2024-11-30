@@ -13,7 +13,7 @@ public enum WorkerStatus {
   SYSTEM_ERROR(
       "This worker has failed due to an publisher error in the tool. Contact an administrator."),
   NO_REPORT_ERROR(
-      "The worker has failed because there was no test report. Check the worker with logs/artefacts on your gitlab project.");
+      "The worker has failed because there was no testFilter report. Check the worker with logs/artefacts on your gitlab project.");
 
   private final String errorMessage;
 }

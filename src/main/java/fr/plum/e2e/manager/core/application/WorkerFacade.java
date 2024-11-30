@@ -15,11 +15,13 @@ import fr.plum.e2e.manager.core.domain.port.out.repository.TestConfigurationRepo
 import fr.plum.e2e.manager.core.domain.port.out.repository.TestResultRepositoryPort;
 import fr.plum.e2e.manager.core.domain.port.out.repository.WorkerRepositoryPort;
 import fr.plum.e2e.manager.core.domain.usecase.worker.CancelWorkerUseCase;
+import fr.plum.e2e.manager.core.domain.usecase.worker.GetAllWorkerUseCase;
 import fr.plum.e2e.manager.core.domain.usecase.worker.GetTypeAllWorkerUseCase;
 import fr.plum.e2e.manager.core.domain.usecase.worker.ReportWorkerUseCase;
 import fr.plum.e2e.manager.core.domain.usecase.worker.RunWorkerUseCase;
 import fr.plum.e2e.manager.sharedkernel.domain.port.out.ClockPort;
 import jakarta.enterprise.context.ApplicationScoped;
+import java.util.List;
 import java.util.Optional;
 
 @ApplicationScoped
@@ -28,6 +30,7 @@ public class WorkerFacade {
   private final RunWorkerUseCase runWorkerUseCase;
   private final CancelWorkerUseCase cancelWorkerUseCase;
   private final GetTypeAllWorkerUseCase getTypeAllWorkerUseCase;
+  private final GetAllWorkerUseCase getAllWorkerUseCase;
   private final ReportWorkerUseCase reportWorkerUseCase;
 
   public WorkerFacade(
@@ -64,6 +67,7 @@ public class WorkerFacade {
             workerExtractorPort,
             testResultRepositoryPort,
             environmentRepositoryPort);
+    this.getAllWorkerUseCase = new GetAllWorkerUseCase(workerRepositoryPort);
   }
 
   public void run(RunWorkerCommand command) {
@@ -80,5 +84,9 @@ public class WorkerFacade {
 
   public void report(ReportWorkerCommand command) {
     reportWorkerUseCase.execute(command);
+  }
+
+  public List<Worker> getAll() {
+    return getAllWorkerUseCase.execute();
   }
 }

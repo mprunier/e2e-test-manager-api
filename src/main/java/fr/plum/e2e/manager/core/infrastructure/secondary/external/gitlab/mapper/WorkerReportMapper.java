@@ -174,7 +174,7 @@ public final class WorkerReportMapper {
         }
       }
     } catch (JsonProcessingException e) {
-      log.error("Error parsing test context", e);
+      log.error("Error parsing testFilter context", e);
     }
 
     return new TestContext(reference, urlError, screenshotError);

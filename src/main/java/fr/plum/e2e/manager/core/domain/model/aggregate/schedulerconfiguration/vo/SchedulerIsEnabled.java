@@ -1,4 +1,4 @@
-package fr.plum.e2e.manager.core.domain.model.aggregate.scheduler.vo;
+package fr.plum.e2e.manager.core.domain.model.aggregate.schedulerconfiguration.vo;
 
 public record SchedulerIsEnabled(boolean value) {
   public static SchedulerIsEnabled defaultStatus() {

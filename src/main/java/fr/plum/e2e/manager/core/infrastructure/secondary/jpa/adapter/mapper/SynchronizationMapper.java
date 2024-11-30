@@ -1,8 +1,6 @@
 package fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter.mapper;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
-import fr.plum.e2e.manager.core.domain.model.aggregate.shared.ActionUsername;
-import fr.plum.e2e.manager.core.domain.model.aggregate.shared.AuditInfo;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.Synchronization;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationError;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationErrorValue;
@@ -25,13 +23,7 @@ public final class SynchronizationMapper {
         .id(new EnvironmentId(entity.getEnvironmentId()))
         .synchronizationIsInProgress(new SynchronizationIsInProgress(entity.isInProgress()))
         .errors(errors)
-        .auditInfo(
-            AuditInfo.builder()
-                .createdBy(new ActionUsername(entity.getCreatedBy()))
-                .createdAt(entity.getCreatedAt())
-                .updatedBy(new ActionUsername(entity.getUpdatedBy()))
-                .updatedAt(entity.getUpdatedAt())
-                .build())
+        .auditInfo(AuditInfoMapper.toDomain(entity))
         .build();
   }
 
@@ -57,13 +49,7 @@ public final class SynchronizationMapper {
             .isInProgress(domain.isInProgress())
             .build();
 
-    synchronization.setAuditFields(
-        domain.getAuditInfo().getCreatedAt(),
-        domain.getAuditInfo().getUpdatedAt(),
-        domain.getAuditInfo().getCreatedBy().value(),
-        domain.getAuditInfo().getUpdatedBy() != null
-            ? domain.getAuditInfo().getUpdatedBy().value()
-            : null);
+    synchronization.setAuditFields(domain.getAuditInfo());
 
     var errors = toErrorEntity(domain, synchronization);
 

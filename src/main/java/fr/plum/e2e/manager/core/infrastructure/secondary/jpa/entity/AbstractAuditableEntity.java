@@ -1,5 +1,6 @@
 package fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity;
 
+import fr.plum.e2e.manager.core.domain.model.aggregate.shared.AuditInfo;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
@@ -26,11 +27,10 @@ public abstract class AbstractAuditableEntity extends PanacheEntityBase {
   @Column(name = "updated_by")
   private String updatedBy;
 
-  public void setAuditFields(
-      ZonedDateTime createdAt, ZonedDateTime updatedAt, String createdBy, String updatedBy) {
-    this.createdAt = createdAt;
-    this.updatedAt = updatedAt;
-    this.createdBy = createdBy;
-    this.updatedBy = updatedBy;
+  public void setAuditFields(AuditInfo auditInfo) {
+    this.createdAt = auditInfo.getCreatedAt();
+    this.updatedAt = auditInfo.getUpdatedAt();
+    this.createdBy = auditInfo.getCreatedBy().value();
+    this.updatedBy = auditInfo.getUpdatedBy() != null ? auditInfo.getUpdatedBy().value() : null;
   }
 }

@@ -7,7 +7,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @ApplicationScoped
 public class QuarkusConfigurationAdapter implements ConfigurationPort {
 
-  @ConfigProperty(name = "max.worker-unit.in.parallel")
+  @ConfigProperty(name = "business.worker.max-unit-in-parallel")
   Integer maxJobInParallel;
 
   @Override

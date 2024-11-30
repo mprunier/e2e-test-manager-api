@@ -5,6 +5,7 @@ import static fr.plum.e2e.manager.sharedkernel.infrastructure.cache.CacheNamesCo
 
 import fr.plum.e2e.manager.core.domain.model.event.EnvironmentCreatedEvent;
 import fr.plum.e2e.manager.core.domain.model.event.EnvironmentUpdatedEvent;
+import fr.plum.e2e.manager.core.infrastructure.primary.scheduler.RunWorkerScheduler;
 import fr.plum.e2e.manager.core.infrastructure.secondary.cache.QuarkusCacheManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.ObservesAsync;
@@ -18,7 +19,10 @@ public class QuarkusEnvironmentEventConsumer {
 
   private final QuarkusCacheManager cacheManager;
 
+  private final RunWorkerScheduler runWorkerScheduler;
+
   public void environmentCreated(@ObservesAsync EnvironmentCreatedEvent event) {
+    runWorkerScheduler.updateSchedule();
     cacheManager.invalidateCache(CACHE_HTTP_LIST_ALL_ENVIRONMENTS);
   }
 

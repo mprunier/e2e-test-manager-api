@@ -18,29 +18,29 @@
 //            + "describe('Suite1', {variables: ['variableSuite1'], tags: ['tagSuite1']}, function()
 // { "
 //            + "  it('Test1', {tags: ['tagTest1'], variables: ['variableTest1']}, function() { /*
-// test code */ });"
-//            + "  it('Test2', function() { /* test code */ });"
+// testFilter code */ });"
+//            + "  it('Test2', function() { /* testFilter code */ });"
 //            + "});";
 //
 //    var result = ConfigurationInternalMapper.build(content, "fullPath");
 //
 //    assertEquals(1, result.getSuites().size());
-//    var suite = result.getSuites().getFirst();
-//    assertEquals("Suite1", suite.getTitle());
-//    assertFalse(suite.getVariables().isEmpty());
-//    assertEquals("tagSuite1", suite.getTags().getFirst());
-//    assertEquals("variableSuite1", suite.getVariables().getFirst());
+//    var suiteFilter = result.getSuites().getFirst();
+//    assertEquals("Suite1", suiteFilter.getTitle());
+//    assertFalse(suiteFilter.getVariables().isEmpty());
+//    assertEquals("tagSuite1", suiteFilter.getTags().getFirst());
+//    assertEquals("variableSuite1", suiteFilter.getVariables().getFirst());
 //
-//    assertEquals(2, suite.getTests().size());
+//    assertEquals(2, suiteFilter.getTests().size());
 //
-//    var test1 = suite.getTests().getFirst();
+//    var test1 = suiteFilter.getTests().getFirst();
 //    assertEquals("Test1", test1.getTitle());
 //    assertFalse(test1.getVariables().isEmpty());
 //    assertFalse(test1.getTags().isEmpty());
 //    assertEquals("tagTest1", test1.getTags().getFirst());
 //    assertEquals("variableTest1", test1.getVariables().getFirst());
 //
-//    var test2 = suite.getTests().get(1);
+//    var test2 = suiteFilter.getTests().get(1);
 //    assertEquals("Test2", test2.getTitle());
 //    assertTrue(test2.getVariables().isEmpty());
 //    assertTrue(test2.getTags().isEmpty());
@@ -54,50 +54,51 @@
 //        "// use group-for-parallelization-0040"
 //            + System.lineSeparator()
 //            + "describe('Suite1', function() { "
-//            + "  it('Test1', {tags: ['tag1'], variables: ['variableTest1']}, function() { /* test
+//            + "  it('Test1', {tags: ['tag1'], variables: ['variableTest1']}, function() { /*
+// testFilter
 // code */ });"
-//            + "  it('Test2', function() { /* test code */ });"
-//            + "  it('Test3', function() { /* test code */ });"
-//            + "  it('Test4', function() { /* test code */ });"
-//            + "  it('Test5', function() { /* test code */ });"
-//            + "  it('Test6', function() { /* test code */ });"
-//            + "  it('Test7', function() { /* test code */ });"
+//            + "  it('Test2', function() { /* testFilter code */ });"
+//            + "  it('Test3', function() { /* testFilter code */ });"
+//            + "  it('Test4', function() { /* testFilter code */ });"
+//            + "  it('Test5', function() { /* testFilter code */ });"
+//            + "  it('Test6', function() { /* testFilter code */ });"
+//            + "  it('Test7', function() { /* testFilter code */ });"
 //            + "});";
 //
 //    var result = ConfigurationInternalMapper.build(content, "fullPath");
 //
 //    assertEquals(1, result.getSuites().size());
-//    var suite = result.getSuites().getFirst();
-//    assertEquals("Suite1", suite.getTitle());
-//    assertTrue(suite.getVariables().isEmpty());
+//    var suiteFilter = result.getSuites().getFirst();
+//    assertEquals("Suite1", suiteFilter.getTitle());
+//    assertTrue(suiteFilter.getVariables().isEmpty());
 //
-//    assertEquals(7, suite.getTests().size());
+//    assertEquals(7, suiteFilter.getTests().size());
 //
-//    var test1 = suite.getTests().getFirst();
+//    var test1 = suiteFilter.getTests().getFirst();
 //    assertEquals("Test1", test1.getTitle());
 //    assertFalse(test1.getVariables().isEmpty());
 //    assertFalse(test1.getTags().isEmpty());
 //    assertEquals("tag1", test1.getTags().getFirst());
 //    assertEquals("variableTest1", test1.getVariables().getFirst());
 //
-//    var test2 = suite.getTests().get(1);
+//    var test2 = suiteFilter.getTests().get(1);
 //    assertEquals("Test2", test2.getTitle());
 //    assertTrue(test2.getVariables().isEmpty());
 //    assertTrue(test2.getTags().isEmpty());
 //
-//    var test3 = suite.getTests().get(2);
+//    var test3 = suiteFilter.getTests().get(2);
 //    assertEquals("Test3", test3.getTitle());
 //
-//    var test4 = suite.getTests().get(3);
+//    var test4 = suiteFilter.getTests().get(3);
 //    assertEquals("Test4", test4.getTitle());
 //
-//    var test5 = suite.getTests().get(4);
+//    var test5 = suiteFilter.getTests().get(4);
 //    assertEquals("Test5", test5.getTitle());
 //
-//    var test6 = suite.getTests().get(5);
+//    var test6 = suiteFilter.getTests().get(5);
 //    assertEquals("Test6", test6.getTitle());
 //
-//    var test7 = suite.getTests().get(6);
+//    var test7 = suiteFilter.getTests().get(6);
 //    assertEquals("Test7", test7.getTitle());
 //
 //    assertEquals("0040", result.getGroup());
@@ -109,20 +110,20 @@
 //        "/* use group-for-parallelization-0040 */"
 //            + System.lineSeparator()
 //            + "describe('Suite1', function() { "
-//            + "  it('Test1', {tags: ['testTag1']}, function() { /* test code */ });"
+//            + "  it('Test1', {tags: ['testTag1']}, function() { /* testFilter code */ });"
 //            + "  it('Test2', {variables: ['testVariable1'], tags:
-// ['disable-on-e2e-testing-manager']}, function() { /* test code */ });"
+// ['disable-on-e2e-testing-manager']}, function() { /* testFilter code */ });"
 //            + "});";
 //
 //    var result = ConfigurationInternalMapper.build(content, "fullPath");
 //
 //    assertEquals(1, result.getSuites().size());
-//    var suite = result.getSuites().getFirst();
-//    assertEquals("Suite1", suite.getTitle());
+//    var suiteFilter = result.getSuites().getFirst();
+//    assertEquals("Suite1", suiteFilter.getTitle());
 //
-//    assertEquals(1, suite.getTests().size());
+//    assertEquals(1, suiteFilter.getTests().size());
 //
-//    var test1 = suite.getTests().getFirst();
+//    var test1 = suiteFilter.getTests().getFirst();
 //    assertEquals("Test1", test1.getTitle());
 //    assertTrue(test1.getVariables().isEmpty());
 //    assertFalse(test1.getTags().isEmpty());
@@ -137,7 +138,7 @@
 //        "// group-for-parallelization-aasa"
 //            + System.lineSeparator()
 //            + "describe('Suite1', {tags: ['disable-on-e2e-testing-manager']}, function() { "
-//            + "  it('Test1', {tags: ['testTag1']}, function() { /* test code */ });"
+//            + "  it('Test1', {tags: ['testTag1']}, function() { /* testFilter code */ });"
 //            + "});";
 //
 //    var result = ConfigurationInternalMapper.build(content, "fullPath");

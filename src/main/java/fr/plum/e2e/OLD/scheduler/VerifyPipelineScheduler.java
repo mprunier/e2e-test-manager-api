@@ -25,11 +25,11 @@
 //  private final RetrieveGitlabJobService retrieveGitlabJobService;
 //
 //  @Getter
-//  @ConfigProperty(name = "gitlab.old-pipeline-to-verify-in-minutes")
+//  @ConfigProperty(name = "business.scheduler.worker.report.verification.interval-minutes")
 //  Integer oldPipelineToVerifyInMinutes;
 //
 //  @Getter
-//  @ConfigProperty(name = "gitlab.old-pipeline-to-cancel-in-minutes")
+//  @ConfigProperty(name = "business.scheduler.worker.report.cancel-timeout.interval-minutes")
 //  Integer oldPipelineToCancelInMinutes;
 //
 //  private final AtomicBoolean inVerifyProgress = new AtomicBoolean(false);

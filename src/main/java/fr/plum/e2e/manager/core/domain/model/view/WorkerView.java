@@ -56,8 +56,8 @@ public record WorkerView(UUID id, String createdBy, ZonedDateTime createdAt, Wor
         workerUnit.getFilter().fileNames().stream().anyMatch(name -> name.value().equals(fileName));
 
     boolean matchesSuite =
-        workerUnit.getFilter().suiteConfiguration() != null
-            && workerUnit.getFilter().suiteConfiguration().getId().value().equals(suiteId);
+        workerUnit.getFilter().suiteFilter() != null
+            && workerUnit.getFilter().suiteFilter().suiteConfigurationId().value().equals(suiteId);
 
     return matchesFile && matchesSuite;
   }
@@ -67,7 +67,7 @@ public record WorkerView(UUID id, String createdBy, ZonedDateTime createdAt, Wor
       return true;
     }
 
-    return workerUnit.getFilter().testConfiguration() != null
-        && workerUnit.getFilter().testConfiguration().getId().value().equals(testId);
+    return workerUnit.getFilter().testFilter() != null
+        && workerUnit.getFilter().testFilter().testConfigurationId().value().equals(testId);
   }
 }

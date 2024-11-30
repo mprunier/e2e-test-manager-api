@@ -1,34 +1,35 @@
-package fr.plum.e2e.manager.core.domain.usecase.scheduler;
+package fr.plum.e2e.manager.core.domain.usecase.schedulerconfiguration;
 
 import fr.plum.e2e.manager.core.domain.model.command.UpdateSchedulerCommand;
 import fr.plum.e2e.manager.core.domain.model.event.SchedulerUpdatedEvent;
 import fr.plum.e2e.manager.core.domain.port.out.EventPublisherPort;
-import fr.plum.e2e.manager.core.domain.port.out.repository.SchedulerRepositoryPort;
-import fr.plum.e2e.manager.core.domain.service.SchedulerService;
+import fr.plum.e2e.manager.core.domain.port.out.repository.SchedulerConfigurationRepositoryPort;
+import fr.plum.e2e.manager.core.domain.service.SchedulerConfigurationService;
 import fr.plum.e2e.manager.sharedkernel.domain.port.in.CommandUseCase;
 import fr.plum.e2e.manager.sharedkernel.domain.port.out.ClockPort;
 
-public class UpdateSchedulerUseCase implements CommandUseCase<UpdateSchedulerCommand> {
+public class UpdateSchedulerConfigurationUseCase implements CommandUseCase<UpdateSchedulerCommand> {
 
-  private final SchedulerRepositoryPort schedulerRepositoryPort;
+  private final SchedulerConfigurationRepositoryPort schedulerConfigurationRepositoryPort;
   private final ClockPort clockPort;
   private final EventPublisherPort eventPublisherPort;
 
-  private final SchedulerService schedulerService;
+  private final SchedulerConfigurationService schedulerConfigurationService;
 
-  public UpdateSchedulerUseCase(
-      SchedulerRepositoryPort schedulerRepositoryPort,
+  public UpdateSchedulerConfigurationUseCase(
+      SchedulerConfigurationRepositoryPort schedulerConfigurationRepositoryPort,
       EventPublisherPort eventPublisherPort,
       ClockPort clockPort) {
-    this.schedulerRepositoryPort = schedulerRepositoryPort;
+    this.schedulerConfigurationRepositoryPort = schedulerConfigurationRepositoryPort;
     this.clockPort = clockPort;
     this.eventPublisherPort = eventPublisherPort;
-    this.schedulerService = new SchedulerService(schedulerRepositoryPort);
+    this.schedulerConfigurationService =
+        new SchedulerConfigurationService(schedulerConfigurationRepositoryPort);
   }
 
   @Override
   public void execute(UpdateSchedulerCommand schedulerCommand) {
-    var scheduler = schedulerService.getScheduler(schedulerCommand.environmentId());
+    var scheduler = schedulerConfigurationService.getScheduler(schedulerCommand.environmentId());
 
     scheduler.setIsEnabled(schedulerCommand.isEnabled());
     scheduler.setDaysOfWeek(schedulerCommand.daysOfWeek());
@@ -37,7 +38,7 @@ public class UpdateSchedulerUseCase implements CommandUseCase<UpdateSchedulerCom
 
     scheduler.getAuditInfo().update(schedulerCommand.actionUsername(), clockPort.now());
 
-    schedulerRepositoryPort.update(scheduler);
+    schedulerConfigurationRepositoryPort.update(scheduler);
 
     eventPublisherPort.publishAsync(
         new SchedulerUpdatedEvent(

@@ -28,7 +28,7 @@ BEGIN
 
             LOOP
                 -- Compter combien de configuration_test associés ont échoué
-                -- en considérant uniquement le dernier test pour chaque configuration_test
+                -- en considérant uniquement le dernier testFilter pour chaque configuration_test
                 WITH LastTests AS (SELECT ct.configuration_suite_id, t.status
                                    FROM test t
                                             JOIN (SELECT configuration_test_id, MAX(id) AS MaxTestId

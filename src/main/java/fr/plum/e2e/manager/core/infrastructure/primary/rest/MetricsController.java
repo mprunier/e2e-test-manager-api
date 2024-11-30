@@ -4,7 +4,7 @@ import fr.plum.e2e.manager.core.application.MetricsFacade;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.query.GetAllMetricsQuery;
 import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response.MetricsResponse;
-import fr.plum.e2e.manager.core.infrastructure.primary.shared.MetricsHelper;
+import fr.plum.e2e.manager.core.infrastructure.primary.shared.helper.MetricsHelper;
 import io.quarkus.security.Authenticated;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.GET;

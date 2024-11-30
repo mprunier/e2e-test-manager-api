@@ -4,7 +4,7 @@ public enum TestResultStatus {
   SUCCESS,
 
   SKIPPED,
-  PARTIAL_SKIPPED, // Only one test of a configuration can be skipped
+  PARTIAL_SKIPPED, // Only one testFilter of a configuration can be skipped
 
   FAILED,
   SYSTEM_ERROR,

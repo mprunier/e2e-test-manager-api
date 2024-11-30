@@ -2,8 +2,6 @@ package fr.plum.e2e.manager.core.domain.usecase.worker;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.Environment;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.SourceCodeInformation;
-import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.SuiteConfiguration;
-import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.TestConfiguration;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.FileName;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.GroupName;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.Worker;
@@ -11,6 +9,8 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.worker.WorkerType;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.WorkerUnit;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerIsRecordVideo;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerUnitFilter;
+import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerUnitFilterSuite;
+import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerUnitFilterTest;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerVariable;
 import fr.plum.e2e.manager.core.domain.model.command.RunWorkerCommand;
 import fr.plum.e2e.manager.core.domain.model.event.WorkerInProgressEvent;
@@ -148,18 +148,19 @@ public class RunWorkerUseCase implements CommandUseCase<RunWorkerCommand> {
   private void executeSingleWorker(
       RunWorkerCommand command, Environment environment, Worker worker) {
     var fileNamesFilter = new ArrayList<FileName>();
-    SuiteConfiguration suiteFiler = null;
-    TestConfiguration testFilter = null;
+    WorkerUnitFilterSuite suiteFilter = null;
+    WorkerUnitFilterTest testFilter = null;
 
     switch (command.getWorkerType()) {
       case ALL -> filterByAll(environment, fileNamesFilter);
       case GROUP -> filterByGroup(command, environment, fileNamesFilter);
       case FILE -> fileNamesFilter.add(command.fileName());
-      case SUITE -> suiteFiler = filterBySuite(command, environment, fileNamesFilter);
+      case SUITE -> suiteFilter = filterBySuite(command, environment, fileNamesFilter);
       case TEST -> testFilter = filterByTest(command, environment, fileNamesFilter);
     }
 
-    var workerFilter = new WorkerUnitFilter(fileNamesFilter, command.tag(), suiteFiler, testFilter);
+    var workerFilter =
+        new WorkerUnitFilter(fileNamesFilter, command.tag(), suiteFilter, testFilter);
     var workerIsRecordVideo = getWorkerIsRecordVideo(workerFilter);
     runWorker(
         environment.getSourceCodeInformation(),
@@ -180,7 +181,7 @@ public class RunWorkerUseCase implements CommandUseCase<RunWorkerCommand> {
     fileNamesFilter.addAll(fileNames);
   }
 
-  private SuiteConfiguration filterBySuite(
+  private WorkerUnitFilterSuite filterBySuite(
       RunWorkerCommand command, Environment environment, ArrayList<FileName> fileNamesFilter) {
     var fileConfiguration =
         fileConfigurationService.getFileConfigurationBySuiteId(
@@ -188,17 +189,17 @@ public class RunWorkerUseCase implements CommandUseCase<RunWorkerCommand> {
     var suiteConfiguration =
         fileConfiguration.getSuiteConfiguration(command.suiteConfigurationId());
     fileNamesFilter.add(fileConfiguration.getId());
-    return suiteConfiguration;
+    return new WorkerUnitFilterSuite(suiteConfiguration.getId(), suiteConfiguration.getTitle());
   }
 
-  private TestConfiguration filterByTest(
+  private WorkerUnitFilterTest filterByTest(
       RunWorkerCommand command, Environment environment, ArrayList<FileName> fileNamesFilter) {
     var fileConfiguration =
         fileConfigurationService.getFileConfigurationByTestId(
             environment.getId(), command.testConfigurationId());
     var testConfiguration = fileConfiguration.getTestConfiguration(command.testConfigurationId());
     fileNamesFilter.add(fileConfiguration.getId());
-    return testConfiguration;
+    return new WorkerUnitFilterTest(testConfiguration.getId(), testConfiguration.getTitle());
   }
 
   private static WorkerIsRecordVideo getWorkerIsRecordVideo(WorkerUnitFilter workerUnitFilter) {

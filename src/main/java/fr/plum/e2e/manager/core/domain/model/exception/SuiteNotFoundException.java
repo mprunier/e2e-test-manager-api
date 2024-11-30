@@ -8,7 +8,7 @@ public class SuiteNotFoundException extends CustomException {
   public SuiteNotFoundException(SuiteConfigurationId id) {
     super(
         Response.Status.NOT_FOUND,
-        "suite-not-found",
+        "suiteFilter-not-found",
         String.format("Suite with id '%s' not found.", id.value()));
   }
 }

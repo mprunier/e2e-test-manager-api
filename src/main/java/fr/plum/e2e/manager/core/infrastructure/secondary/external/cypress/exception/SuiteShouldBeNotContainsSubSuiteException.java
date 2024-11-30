@@ -9,6 +9,6 @@ public class SuiteShouldBeNotContainsSubSuiteException extends CustomException {
     super(
         Response.Status.BAD_REQUEST,
         "configuration-should-be-not-contains-sub-configuration",
-        "Suite should be not contains sub suite.");
+        "Suite should be not contains sub suiteFilter.");
   }
 }

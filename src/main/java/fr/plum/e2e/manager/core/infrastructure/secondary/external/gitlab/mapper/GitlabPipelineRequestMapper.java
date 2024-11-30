@@ -38,8 +38,7 @@ public final class GitlabPipelineRequestMapper {
                   .collect(Collectors.joining(","))));
     }
 
-    if (workerUnitFilter.suiteConfiguration() != null
-        || workerUnitFilter.testConfiguration() != null) {
+    if (workerUnitFilter.suiteFilter() != null || workerUnitFilter.testFilter() != null) {
       var grep = buildGrep(workerUnitFilter);
       pipelineRequestBuilder.variable(buildCypressTestGrepVariable(grep));
     }
@@ -61,14 +60,14 @@ public final class GitlabPipelineRequestMapper {
 
   private static String buildGrep(WorkerUnitFilter workerUnitFilter) {
     var grep = new StringBuilder();
-    if (workerUnitFilter.suiteConfiguration() != null) {
-      grep.append(workerUnitFilter.suiteConfiguration().getTitle().value());
+    if (workerUnitFilter.suiteFilter() != null) {
+      grep.append(workerUnitFilter.suiteFilter().suiteTitle().value());
     }
-    if (workerUnitFilter.testConfiguration() != null) {
+    if (workerUnitFilter.testFilter() != null) {
       if (!grep.isEmpty()) {
         grep.append(" ");
       }
-      grep.append(workerUnitFilter.testConfiguration().getTitle().value());
+      grep.append(workerUnitFilter.testFilter().testTitle().value());
     }
     return grep.toString();
   }

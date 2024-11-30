@@ -30,13 +30,7 @@ public final class TestResultMapper {
             .duration(domain.getDuration().value())
             .variables(variables)
             .build();
-    testResult.setAuditFields(
-        domain.getAuditInfo().getCreatedAt(),
-        domain.getAuditInfo().getUpdatedAt(),
-        domain.getAuditInfo().getCreatedBy().value(),
-        domain.getAuditInfo().getUpdatedBy() != null
-            ? domain.getAuditInfo().getUpdatedBy().value()
-            : null);
+    testResult.setAuditFields(domain.getAuditInfo());
     return testResult;
   }
 

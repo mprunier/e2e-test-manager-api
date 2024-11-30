@@ -7,7 +7,7 @@ import fr.plum.e2e.manager.core.domain.model.view.EnvironmentView;
 import fr.plum.e2e.manager.core.domain.port.out.EventPublisherPort;
 import fr.plum.e2e.manager.core.domain.port.out.query.ListAllEnvironmentsPort;
 import fr.plum.e2e.manager.core.domain.port.out.repository.EnvironmentRepositoryPort;
-import fr.plum.e2e.manager.core.domain.port.out.repository.SchedulerRepositoryPort;
+import fr.plum.e2e.manager.core.domain.port.out.repository.SchedulerConfigurationRepositoryPort;
 import fr.plum.e2e.manager.core.domain.port.out.repository.SynchronizationRepositoryPort;
 import fr.plum.e2e.manager.core.domain.usecase.environment.CreateEnvironmentUseCase;
 import fr.plum.e2e.manager.core.domain.usecase.environment.GetEnvironmentDetailsUseCase;
@@ -30,7 +30,7 @@ public class EnvironmentFacade {
       EventPublisherPort eventPublisherPort,
       EnvironmentRepositoryPort environmentRepositoryPort,
       SynchronizationRepositoryPort synchronizationRepositoryPort,
-      SchedulerRepositoryPort schedulerRepositoryPort,
+      SchedulerConfigurationRepositoryPort schedulerConfigurationRepositoryPort,
       TransactionManagerPort transactionManagerPort,
       ListAllEnvironmentsPort listAllEnvironmentsPort) {
     this.createEnvironmentUseCase =
@@ -39,7 +39,7 @@ public class EnvironmentFacade {
             eventPublisherPort,
             environmentRepositoryPort,
             synchronizationRepositoryPort,
-            schedulerRepositoryPort,
+            schedulerConfigurationRepositoryPort,
             transactionManagerPort);
     this.updateEnvironmentUseCase =
         new UpdateEnvironmentUseCase(clockPort, eventPublisherPort, environmentRepositoryPort);

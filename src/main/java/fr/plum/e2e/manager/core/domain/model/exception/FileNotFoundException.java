@@ -9,14 +9,14 @@ public class FileNotFoundException extends CustomException {
   public FileNotFoundException(TestConfigurationId id) {
     super(
         Response.Status.NOT_FOUND,
-        "file-test-not-found",
-        String.format("File with test id '%s' not found.", id.value()));
+        "file-testFilter-not-found",
+        String.format("File with testFilter id '%s' not found.", id.value()));
   }
 
   public FileNotFoundException(SuiteConfigurationId id) {
     super(
         Response.Status.NOT_FOUND,
-        "file-suite-not-found",
-        String.format("File with suite id '%s' not found.", id.value()));
+        "file-suiteFilter-not-found",
+        String.format("File with suiteFilter id '%s' not found.", id.value()));
   }
 }

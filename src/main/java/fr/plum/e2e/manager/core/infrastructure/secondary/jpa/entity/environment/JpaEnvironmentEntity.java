@@ -29,27 +29,21 @@ public class JpaEnvironmentEntity extends AbstractAuditableEntity {
 
   @Id private UUID id;
 
-  @Setter
   @Column(name = "description", nullable = false, unique = true)
   private String description;
 
-  @Setter
   @Column(name = "branch", nullable = false)
   private String branch;
 
-  @Setter
   @Column(name = "project_id", nullable = false)
   private String projectId;
 
-  @Setter
   @Column(name = "token", nullable = false)
   private String token;
 
-  @Setter
   @Column(name = "max_parallel_test_number", nullable = false)
   private int maxParallelTestNumber;
 
-  @Setter
   @Column(name = "is_enabled", nullable = false)
   private boolean isEnabled;
 

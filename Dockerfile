@@ -54,7 +54,7 @@
 #    true").
 # - JAVA_DEBUG_PORT: Port used for remote debugging. Defaults to 5005 (example: "8787").
 # - CONTAINER_CORE_LIMIT: A calculated shared limit as described in
-#   https://www.kernel.org/doc/Documentation/scheduler/sched-bwc.txt. (example: "2")
+#   https://www.kernel.org/doc/Documentation/schedulerConfiguration/sched-bwc.txt. (example: "2")
 # - CONTAINER_MAX_MEMORY: Memory limit given to the container (example: "1024").
 # - GC_MIN_HEAP_FREE_RATIO: Minimum percentage of heap free after GC to avoid expansion.
 #   (example: "20")

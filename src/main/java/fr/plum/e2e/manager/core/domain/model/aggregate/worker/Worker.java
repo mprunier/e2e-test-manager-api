@@ -38,13 +38,13 @@ public class Worker extends AggregateRoot<WorkerId> {
         throw new DomainAssertException(
             String.format("Worker filter is required for worker type %s", type));
       }
-      if (type == WorkerType.TEST && workerUnit.getFilter().testConfiguration() == null) {
+      if (type == WorkerType.TEST && workerUnit.getFilter().testFilter() == null) {
         throw new DomainAssertException(
-            "Worker filter must contain test configuration for worker type TEST");
+            "Worker filter must contain testFilter configuration for worker type TEST");
       }
-      if (type == WorkerType.SUITE && workerUnit.getFilter().suiteConfiguration() == null) {
+      if (type == WorkerType.SUITE && workerUnit.getFilter().suiteFilter() == null) {
         throw new DomainAssertException(
-            "Worker filter must contain suite configuration for worker type SUITE");
+            "Worker filter must contain suiteFilter configuration for worker type SUITE");
       }
     }
   }

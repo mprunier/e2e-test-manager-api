@@ -84,11 +84,4 @@ public class JpaFileConfigurationRepositoryAdapter implements FileConfigurationR
         .find(environmentId, testConfigurationId)
         .map(FileConfigurationMapper::toDomain);
   }
-
-  //  @Override
-  //  public List<FileConfiguration> findAllByTag(EnvironmentId environmentId, Tag tag) {
-  //    return repository.findAllByTag(environmentId, tag).stream()
-  //        .map(FileConfigurationMapper::toDomain)
-  //        .toList();
-  //  }
 }

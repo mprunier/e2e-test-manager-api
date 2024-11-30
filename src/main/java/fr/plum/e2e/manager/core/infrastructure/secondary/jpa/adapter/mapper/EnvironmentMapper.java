@@ -72,13 +72,7 @@ public final class EnvironmentMapper {
             .maxParallelTestNumber(domain.getMaxParallelWorkers().value())
             .build();
 
-    environment.setAuditFields(
-        domain.getAuditInfo().getCreatedAt(),
-        domain.getAuditInfo().getUpdatedAt(),
-        domain.getAuditInfo().getCreatedBy().value(),
-        domain.getAuditInfo().getUpdatedBy() != null
-            ? domain.getAuditInfo().getUpdatedBy().value()
-            : null);
+    environment.setAuditFields(domain.getAuditInfo());
 
     var variables =
         domain.getVariables().stream().map(var -> toVariableEntity(var, environment)).toList();

@@ -2,13 +2,13 @@ package fr.plum.e2e.manager.core.domain.usecase.environment;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.Environment;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
-import fr.plum.e2e.manager.core.domain.model.aggregate.scheduler.Scheduler;
+import fr.plum.e2e.manager.core.domain.model.aggregate.schedulerconfiguration.SchedulerConfiguration;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.Synchronization;
 import fr.plum.e2e.manager.core.domain.model.command.CreateUpdateEnvironmentCommand;
 import fr.plum.e2e.manager.core.domain.model.event.EnvironmentCreatedEvent;
 import fr.plum.e2e.manager.core.domain.port.out.EventPublisherPort;
 import fr.plum.e2e.manager.core.domain.port.out.repository.EnvironmentRepositoryPort;
-import fr.plum.e2e.manager.core.domain.port.out.repository.SchedulerRepositoryPort;
+import fr.plum.e2e.manager.core.domain.port.out.repository.SchedulerConfigurationRepositoryPort;
 import fr.plum.e2e.manager.core.domain.port.out.repository.SynchronizationRepositoryPort;
 import fr.plum.e2e.manager.core.domain.service.EnvironmentService;
 import fr.plum.e2e.manager.sharedkernel.domain.port.in.CommandUseCase;
@@ -22,7 +22,7 @@ public class CreateEnvironmentUseCase implements CommandUseCase<CreateUpdateEnvi
   private final EventPublisherPort eventPublisherPort;
   private final EnvironmentRepositoryPort environmentRepositoryPort;
   private final SynchronizationRepositoryPort synchronizationRepositoryPort;
-  private final SchedulerRepositoryPort schedulerRepositoryPort;
+  private final SchedulerConfigurationRepositoryPort schedulerConfigurationRepositoryPort;
   private final TransactionManagerPort transactionManagerPort;
 
   private final EnvironmentService environmentService;
@@ -32,14 +32,14 @@ public class CreateEnvironmentUseCase implements CommandUseCase<CreateUpdateEnvi
       EventPublisherPort eventPublisherPort,
       EnvironmentRepositoryPort environmentRepositoryPort,
       SynchronizationRepositoryPort synchronizationRepositoryPort,
-      SchedulerRepositoryPort schedulerRepositoryPort,
+      SchedulerConfigurationRepositoryPort schedulerConfigurationRepositoryPort,
       TransactionManagerPort transactionManagerPort) {
 
     this.clockPort = clockPort;
     this.eventPublisherPort = eventPublisherPort;
     this.environmentRepositoryPort = environmentRepositoryPort;
     this.synchronizationRepositoryPort = synchronizationRepositoryPort;
-    this.schedulerRepositoryPort = schedulerRepositoryPort;
+    this.schedulerConfigurationRepositoryPort = schedulerConfigurationRepositoryPort;
     this.environmentService = new EnvironmentService(environmentRepositoryPort);
     this.transactionManagerPort = transactionManagerPort;
   }
@@ -63,11 +63,11 @@ public class CreateEnvironmentUseCase implements CommandUseCase<CreateUpdateEnvi
 
   private void createScheduler(CreateUpdateEnvironmentCommand environmentCommand) {
     var scheduler =
-        Scheduler.initialize(
+        SchedulerConfiguration.initialize(
             environmentCommand.environmentId(),
             clockPort.now(),
             environmentCommand.actionUsername());
-    schedulerRepositoryPort.save(scheduler);
+    schedulerConfigurationRepositoryPort.save(scheduler);
   }
 
   private void createSynchronization(

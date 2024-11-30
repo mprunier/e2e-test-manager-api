@@ -1,6 +1,6 @@
 package fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response;
 
-import fr.plum.e2e.manager.core.domain.model.aggregate.scheduler.Scheduler;
+import fr.plum.e2e.manager.core.domain.model.aggregate.schedulerconfiguration.SchedulerConfiguration;
 import java.time.DayOfWeek;
 import java.util.List;
 import lombok.Builder;
@@ -9,12 +9,12 @@ import lombok.Builder;
 public record SchedulerResponse(
     Boolean isEnabled, Integer hour, Integer minute, List<DayOfWeek> daysOfWeek) {
 
-  public static SchedulerResponse fromDomain(Scheduler scheduler) {
+  public static SchedulerResponse fromDomain(SchedulerConfiguration schedulerConfiguration) {
     return builder()
-        .isEnabled(scheduler.getIsEnabled().value())
-        .hour(scheduler.getHour().value())
-        .minute(scheduler.getMinute().value())
-        .daysOfWeek(scheduler.getDaysOfWeek().daysOfWeek())
+        .isEnabled(schedulerConfiguration.getIsEnabled().value())
+        .hour(schedulerConfiguration.getHour().value())
+        .minute(schedulerConfiguration.getMinute().value())
+        .daysOfWeek(schedulerConfiguration.getDaysOfWeek().list())
         .build();
   }
 }

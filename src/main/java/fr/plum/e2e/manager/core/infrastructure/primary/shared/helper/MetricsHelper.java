@@ -1,4 +1,4 @@
-package fr.plum.e2e.manager.core.infrastructure.primary.shared;
+package fr.plum.e2e.manager.core.infrastructure.primary.shared.helper;
 
 import fr.plum.e2e.manager.core.application.MetricsFacade;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;

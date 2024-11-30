@@ -1,4 +1,4 @@
-package fr.plum.e2e.manager.core.infrastructure.primary.consumer.shared;
+package fr.plum.e2e.manager.core.infrastructure.primary.shared.helper;
 
 import fr.plum.e2e.manager.core.application.SuiteFacade;
 import fr.plum.e2e.manager.core.application.WorkerFacade;
@@ -60,9 +60,14 @@ public class WorkerNotificationHelper {
       var searchSuiteQuery =
           SearchSuiteConfigurationQuery.builder()
               .suiteConfigurationId(
-                  worker.getWorkerUnits().getFirst().getFilter().suiteConfiguration().getId())
+                  worker
+                      .getWorkerUnits()
+                      .getFirst()
+                      .getFilter()
+                      .suiteFilter()
+                      .suiteConfigurationId())
               .testConfigurationId(
-                  worker.getWorkerUnits().getFirst().getFilter().testConfiguration().getId())
+                  worker.getWorkerUnits().getFirst().getFilter().testFilter().testConfigurationId())
               .build();
       var suitesPaginated = suiteFacade.searchSuites(searchSuiteQuery);
       if (suitesPaginated != null && !suitesPaginated.getContent().isEmpty()) {

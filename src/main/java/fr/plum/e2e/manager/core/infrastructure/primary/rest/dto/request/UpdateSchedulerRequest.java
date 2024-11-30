@@ -1,10 +1,10 @@
 package fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.request;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
-import fr.plum.e2e.manager.core.domain.model.aggregate.scheduler.vo.SchedulerDaysOfWeek;
-import fr.plum.e2e.manager.core.domain.model.aggregate.scheduler.vo.SchedulerHour;
-import fr.plum.e2e.manager.core.domain.model.aggregate.scheduler.vo.SchedulerIsEnabled;
-import fr.plum.e2e.manager.core.domain.model.aggregate.scheduler.vo.SchedulerMinute;
+import fr.plum.e2e.manager.core.domain.model.aggregate.schedulerconfiguration.vo.SchedulerDaysOfWeek;
+import fr.plum.e2e.manager.core.domain.model.aggregate.schedulerconfiguration.vo.SchedulerHour;
+import fr.plum.e2e.manager.core.domain.model.aggregate.schedulerconfiguration.vo.SchedulerIsEnabled;
+import fr.plum.e2e.manager.core.domain.model.aggregate.schedulerconfiguration.vo.SchedulerMinute;
 import fr.plum.e2e.manager.core.domain.model.command.UpdateSchedulerCommand;
 import jakarta.validation.constraints.NotNull;
 import java.time.DayOfWeek;

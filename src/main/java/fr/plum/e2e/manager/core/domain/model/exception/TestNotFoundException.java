@@ -8,7 +8,7 @@ public class TestNotFoundException extends CustomException {
   public TestNotFoundException(TestConfigurationId id) {
     super(
         Response.Status.NOT_FOUND,
-        "test-not-found",
+        "testFilter-not-found",
         String.format("Test with id '%s' not found.", id.value()));
   }
 }

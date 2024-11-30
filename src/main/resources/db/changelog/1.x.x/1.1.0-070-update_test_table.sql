@@ -4,4 +4,4 @@
 ALTER TABLE test
     DROP COLUMN updated_at;
 
--- rollback ALTER TABLE test DROP COLUMN updated_at;
+-- rollback ALTER TABLE testFilter DROP COLUMN updated_at;

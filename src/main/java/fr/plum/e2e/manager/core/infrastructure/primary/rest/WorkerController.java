@@ -39,7 +39,7 @@ public class WorkerController {
   public void run(
       @NotNull @QueryParam("environmentId") UUID environmentId, @RequestBody RunRequest request) {
     var username = extractUsername(identity);
-    log.info("[{}] ran test(s) on Environment id [{}].", username, environmentId);
+    log.info("[{}] ran testFilter(s) on Environment id [{}].", username, environmentId);
     workerFacade.run(request.toCommand(environmentId, username));
   }
 
@@ -49,7 +49,7 @@ public class WorkerController {
       @NotNull @QueryParam("environmentId") UUID environmentId,
       @PathParam("worker_id") UUID workerId) {
     var username = extractUsername(identity);
-    log.info("[{}] cancel test(s) on Environment id [{}].", username, environmentId);
+    log.info("[{}] cancel testFilter(s) on Environment id [{}].", username, environmentId);
     workerFacade.cancel(
         new CancelWorkerCommand(
             new EnvironmentId(environmentId),

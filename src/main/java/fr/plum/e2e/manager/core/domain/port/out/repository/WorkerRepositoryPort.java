@@ -19,6 +19,8 @@ public interface WorkerRepositoryPort {
 
   int countAll();
 
+  List<Worker> findAll();
+
   List<Worker> findAll(EnvironmentId environmentId);
 
   Optional<Worker> find(EnvironmentId environmentId, WorkerType workerType);

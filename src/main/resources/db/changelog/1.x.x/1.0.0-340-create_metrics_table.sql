@@ -24,6 +24,6 @@ SELECT environment_id,
        skipped,
        pass_percent,
        created_at
-FROM scheduler;
+FROM schedulerConfiguration;
 
 -- rollback DROP TABLE IF EXISTS metrics;
