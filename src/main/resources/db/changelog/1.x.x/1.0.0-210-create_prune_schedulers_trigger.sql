@@ -3,7 +3,7 @@
 
 CREATE TRIGGER prune_schedulers_trigger
     AFTER INSERT
-    ON schedulerConfiguration
+    ON scheduler
     FOR EACH ROW
     EXECUTE FUNCTION prune_schedulers();
 

@@ -9,7 +9,7 @@
     <name>${project.artifactId}</name>
 
     <properties>
-        <quarkus.version>3.15.1</quarkus.version>
+        <quarkus.version>3.15.2</quarkus.version>
         <compiler-plugin.version>3.13.0</compiler-plugin.version>
 
         <maven.compiler.target>21</maven.compiler.target>
@@ -57,7 +57,7 @@
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-schedulerConfiguration</artifactId>
+            <artifactId>quarkus-scheduler</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>

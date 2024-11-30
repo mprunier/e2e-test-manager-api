@@ -6,10 +6,10 @@ CREATE OR REPLACE FUNCTION prune_schedulers()
 $$
 BEGIN
     DELETE
-    FROM schedulerConfiguration
+    FROM scheduler
     WHERE id IN (SELECT id
                  FROM (SELECT id, ROW_NUMBER() OVER (PARTITION BY environment_id ORDER BY created_at DESC) AS rn
-                       FROM schedulerConfiguration) t
+                       FROM scheduler) t
                  WHERE rn > 10);
 
     RETURN NEW;

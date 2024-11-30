@@ -25,7 +25,7 @@ ALTER TABLE pipeline
     RENAME TO old_pipeline;
 ALTER TABLE pipeline_group
     RENAME TO old_pipeline_group;
-ALTER TABLE schedulerConfiguration
+ALTER TABLE scheduler
     RENAME TO old_scheduler;
 ALTER TABLE test
     RENAME TO old_test;
@@ -59,7 +59,7 @@ ALTER TABLE test_video
 -- rollback ALTER TABLE old_pipeline_group
 -- rollback     RENAME TO pipeline_group;
 -- rollback ALTER TABLE old_scheduler
--- rollback     RENAME TO schedulerConfiguration;
+-- rollback     RENAME TO scheduler;
 -- rollback ALTER TABLE old_test
 -- rollback     RENAME TO testFilter;
 -- rollback ALTER TABLE old_test_screenshot
