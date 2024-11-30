@@ -24,6 +24,7 @@ import fr.plum.e2e.manager.core.domain.port.out.repository.WorkerRepositoryPort;
 import fr.plum.e2e.manager.core.domain.service.EnvironmentService;
 import fr.plum.e2e.manager.sharedkernel.domain.port.in.CommandUseCase;
 import fr.plum.e2e.manager.sharedkernel.domain.port.out.ClockPort;
+import fr.plum.e2e.manager.sharedkernel.domain.port.out.TransactionManagerPort;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +39,7 @@ public class ReportWorkerUseCase implements CommandUseCase<ReportWorkerCommand> 
   private final WorkerRepositoryPort workerRepositoryPort;
   private final WorkerExtractorPort workerExtractorPort;
   private final TestResultRepositoryPort testResultRepositoryPort;
+  private final TransactionManagerPort transactionManagerPort;
 
   private final EnvironmentService environmentService;
 
@@ -49,6 +51,7 @@ public class ReportWorkerUseCase implements CommandUseCase<ReportWorkerCommand> 
       WorkerRepositoryPort workerRepositoryPort,
       WorkerExtractorPort workerExtractorPort,
       TestResultRepositoryPort testResultRepositoryPort,
+      TransactionManagerPort transactionManagerPort,
       EnvironmentRepositoryPort environmentRepositoryPort) {
     this.clockPort = clockPort;
     this.eventPublisherPort = eventPublisherPort;
@@ -57,6 +60,7 @@ public class ReportWorkerUseCase implements CommandUseCase<ReportWorkerCommand> 
     this.workerRepositoryPort = workerRepositoryPort;
     this.workerExtractorPort = workerExtractorPort;
     this.testResultRepositoryPort = testResultRepositoryPort;
+    this.transactionManagerPort = transactionManagerPort;
     this.environmentService = new EnvironmentService(environmentRepositoryPort);
   }
 
@@ -84,12 +88,16 @@ public class ReportWorkerUseCase implements CommandUseCase<ReportWorkerCommand> 
 
     handleMissingTests(testConfigurationsToRun, testResults, worker);
 
-    testResultRepositoryPort.saveAll(testResults);
-    publishWorkerUnitCompletedEvent(worker);
+    transactionManagerPort.executeInTransaction(
+        () -> {
+          testResultRepositoryPort.saveAll(testResults);
 
-    if (worker.isCompleted()) {
-      finalizeWorker(worker);
-    }
+          transactionManagerPort.registerAfterCommit(() -> publishWorkerUnitCompletedEvent(worker));
+
+          if (worker.isCompleted()) {
+            finalizeWorker(worker);
+          }
+        });
   }
 
   private List<TestConfigurationId> getTestConfigurationsToRun(
@@ -157,12 +165,11 @@ public class ReportWorkerUseCase implements CommandUseCase<ReportWorkerCommand> 
     report
         .tests()
         .forEach(
-            reportTest -> {
-              testConfigurationRepositoryPort
-                  .findId(report.fileName(), SuiteTitle.noSuite(), reportTest.title())
-                  .ifPresent(
-                      configId -> results.add(createTestResult(worker, configId, reportTest)));
-            });
+            reportTest ->
+                testConfigurationRepositoryPort
+                    .findId(report.fileName(), SuiteTitle.noSuite(), reportTest.title())
+                    .ifPresent(
+                        configId -> results.add(createTestResult(worker, configId, reportTest))));
   }
 
   private void processSuiteTests(Report report, Worker worker, List<TestResult> results) {
@@ -173,13 +180,12 @@ public class ReportWorkerUseCase implements CommandUseCase<ReportWorkerCommand> 
                 suite
                     .tests()
                     .forEach(
-                        test -> {
-                          testConfigurationRepositoryPort
-                              .findId(report.fileName(), suite.title(), test.title())
-                              .ifPresent(
-                                  configId ->
-                                      results.add(createTestResult(worker, configId, test)));
-                        }));
+                        test ->
+                            testConfigurationRepositoryPort
+                                .findId(report.fileName(), suite.title(), test.title())
+                                .ifPresent(
+                                    configId ->
+                                        results.add(createTestResult(worker, configId, test)))));
   }
 
   private List<TestResult> createCanceledResults(
@@ -236,8 +242,10 @@ public class ReportWorkerUseCase implements CommandUseCase<ReportWorkerCommand> 
   private void finalizeWorker(Worker worker) {
     testResultRepositoryPort.clearAllWorkerId(worker.getId());
     workerRepositoryPort.delete(worker.getId());
-    eventPublisherPort.publishAsync(
-        new WorkerCompletedEvent(
-            worker.getEnvironmentId(), worker.getAuditInfo().getCreatedBy(), worker));
+    transactionManagerPort.registerAfterCommit(
+        () ->
+            eventPublisherPort.publishAsync(
+                new WorkerCompletedEvent(
+                    worker.getEnvironmentId(), worker.getAuditInfo().getCreatedBy(), worker)));
   }
 }

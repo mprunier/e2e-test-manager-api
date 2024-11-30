@@ -10,4 +10,6 @@ public interface TransactionManagerPort {
   void rollbackTransaction();
 
   void executeInTransaction(TransactionalOperation operation);
+
+  void registerAfterCommit(Runnable operation);
 }

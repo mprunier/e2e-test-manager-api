@@ -1,5 +1,6 @@
 package fr.plum.e2e.manager.core.application;
 
+import fr.plum.e2e.manager.core.application.locker.CommandLock;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.Worker;
 import fr.plum.e2e.manager.core.domain.model.command.CancelWorkerCommand;
 import fr.plum.e2e.manager.core.domain.model.command.ReportWorkerCommand;
@@ -20,6 +21,7 @@ import fr.plum.e2e.manager.core.domain.usecase.worker.GetTypeAllWorkerUseCase;
 import fr.plum.e2e.manager.core.domain.usecase.worker.ReportWorkerUseCase;
 import fr.plum.e2e.manager.core.domain.usecase.worker.RunWorkerUseCase;
 import fr.plum.e2e.manager.sharedkernel.domain.port.out.ClockPort;
+import fr.plum.e2e.manager.sharedkernel.domain.port.out.TransactionManagerPort;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.List;
 import java.util.Optional;
@@ -43,7 +45,8 @@ public class WorkerFacade {
       ConfigurationPort configurationPort,
       TestConfigurationRepositoryPort testConfigurationRepositoryPort,
       WorkerExtractorPort workerExtractorPort,
-      TestResultRepositoryPort testResultRepositoryPort) {
+      TestResultRepositoryPort testResultRepositoryPort,
+      TransactionManagerPort transactionManagerPort) {
     this.runWorkerUseCase =
         new RunWorkerUseCase(
             clockPort,
@@ -66,6 +69,7 @@ public class WorkerFacade {
             workerRepositoryPort,
             workerExtractorPort,
             testResultRepositoryPort,
+            transactionManagerPort,
             environmentRepositoryPort);
     this.getAllWorkerUseCase = new GetAllWorkerUseCase(workerRepositoryPort);
   }
@@ -74,6 +78,7 @@ public class WorkerFacade {
     runWorkerUseCase.execute(command);
   }
 
+  @CommandLock
   public void cancel(CancelWorkerCommand command) {
     cancelWorkerUseCase.execute(command);
   }
@@ -82,6 +87,7 @@ public class WorkerFacade {
     return getTypeAllWorkerUseCase.execute(query);
   }
 
+  @CommandLock
   public void report(ReportWorkerCommand command) {
     reportWorkerUseCase.execute(command);
   }
