@@ -11,7 +11,7 @@ CREATE TABLE test_result
     error_url             VARCHAR(1024),
     error_message         TEXT,
     error_stacktrace      TEXT,
-    code                  VARCHAR(255),
+    code                  TEXT,
     duration              INTEGER,
     variables             TEXT,
     created_at            TIMESTAMP WITH TIME ZONE NOT NULL,

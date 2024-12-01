@@ -82,7 +82,7 @@ public class WorkerFacade {
 
   @CommandLock
   public void cancel(CancelWorkerCommand command) {
-    log.trace("Cancel worker: {}", command);
+    log.debug("Cancel worker: {}", command);
     cancelWorkerUseCase.execute(command);
   }
 
@@ -92,7 +92,7 @@ public class WorkerFacade {
 
   @CommandLock
   public void report(ReportWorkerCommand command) {
-    log.trace("Report worker: {}", command);
+    log.debug("Report worker: {}", command);
     reportWorkerUseCase.execute(command);
   }
 

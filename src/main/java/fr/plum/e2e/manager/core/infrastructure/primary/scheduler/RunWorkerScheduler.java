@@ -46,20 +46,20 @@ public class RunWorkerScheduler {
     schedulers.forEach(
         scheduler -> {
           if (!scheduler.getIsEnabled().value()) {
-            log.info(
+            log.debug(
                 "Scheduler for environment id [{}] is disabled, skipping...",
                 scheduler.getId().value());
             ScheduledFuture<?> existingTask = existingTasks.get(scheduler.getId());
             if (existingTask != null) {
               existingTask.cancel(false);
-              log.info(
+              log.debug(
                   "Cancelled existing task for disabled scheduler id [{}]",
                   scheduler.getId().value());
             }
             return;
           }
 
-          log.info("Configuring scheduler for environment id [{}]", scheduler.getId().value());
+          log.debug("Configuring scheduler for environment id [{}]", scheduler.getId().value());
           ScheduledFuture<?> existingTask = existingTasks.get(scheduler.getId());
 
           boolean isTaskActiveOrRunning =
@@ -69,7 +69,7 @@ public class RunWorkerScheduler {
                 "Keeping existing active task for environment id [{}]", scheduler.getId().value());
             scheduledTasks.put(scheduler.getId(), existingTask);
           } else {
-            log.info("Scheduling new task for environment id [{}]", scheduler.getId().value());
+            log.debug("Scheduling new task for environment id [{}]", scheduler.getId().value());
             scheduleNextExecution(scheduler);
           }
         });
@@ -78,14 +78,14 @@ public class RunWorkerScheduler {
         (id, task) -> {
           if (!scheduledTasks.containsKey(id)) {
             task.cancel(false);
-            log.info("Cancelled outdated task for environment id [{}]", id.value());
+            log.debug("Cancelled outdated task for environment id [{}]", id.value());
           }
         });
   }
 
   private void scheduleNextExecution(SchedulerConfiguration scheduler) {
     if (!scheduler.getIsEnabled().value()) {
-      log.info(
+      log.debug(
           "Scheduler id [{}] is disabled, skipping execution scheduling",
           scheduler.getId().value());
       return;
@@ -97,7 +97,7 @@ public class RunWorkerScheduler {
 
     if (nextRun != null) {
       long initialDelay = Duration.between(now, nextRun).toMillis();
-      log.info(
+      log.debug(
           "Next execution for environment id [{}] scheduled at: {}",
           scheduler.getId().value(),
           nextRun);
@@ -142,7 +142,7 @@ public class RunWorkerScheduler {
 
   private void executeTask(SchedulerConfiguration schedulerConfiguration) {
     try {
-      log.info("Executing worker for environment id [{}]", schedulerConfiguration.getId().value());
+      log.debug("Executing worker for environment id [{}]", schedulerConfiguration.getId().value());
 
       var command =
           RunWorkerCommand.builder()

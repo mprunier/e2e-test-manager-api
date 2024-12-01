@@ -12,4 +12,5 @@ public final class CypressConstant {
   public static final String CYPRESS_TEST_FUNCTION_NAME = "it";
   public static final String CYPRESS_TAGS_PARAM_NAME = "tags";
   public static final String CYPRESS_VARIABLES_PARAM_NAME = "variables";
+  public static final String SCREENSHOT_EXTENSION = ".png";
 }

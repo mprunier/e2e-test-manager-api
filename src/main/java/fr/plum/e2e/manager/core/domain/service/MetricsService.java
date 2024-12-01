@@ -15,6 +15,6 @@ public class MetricsService {
   public Metrics getLastMetrics(EnvironmentId environmentId, MetricsType metricsType) {
     return metricsRepositoryPort
         .findLastMetrics(environmentId, metricsType)
-        .orElseThrow(() -> new MetricsNotFoundException(environmentId));
+        .orElseThrow(() -> new MetricsNotFoundException(environmentId, metricsType));
   }
 }

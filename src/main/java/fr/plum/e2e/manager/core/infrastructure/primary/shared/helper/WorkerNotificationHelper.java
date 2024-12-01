@@ -60,15 +60,29 @@ public class WorkerNotificationHelper {
     if (WorkerType.SUITE.equals(worker.getType()) || WorkerType.TEST.equals(worker.getType())) {
       var searchSuiteQuery =
           SearchSuiteConfigurationQuery.builder()
+              .environmentId(worker.getEnvironmentId())
+              .sortField("file")
+              .sortOrder("asc")
+              .page(0)
+              .size(1)
               .suiteConfigurationId(
-                  worker
-                      .getWorkerUnits()
-                      .getFirst()
-                      .getFilter()
-                      .suiteFilter()
-                      .suiteConfigurationId())
+                  WorkerType.SUITE.equals(worker.getType())
+                      ? worker
+                          .getWorkerUnits()
+                          .getFirst()
+                          .getFilter()
+                          .suiteFilter()
+                          .suiteConfigurationId()
+                      : null)
               .testConfigurationId(
-                  worker.getWorkerUnits().getFirst().getFilter().testFilter().testConfigurationId())
+                  WorkerType.TEST.equals(worker.getType())
+                      ? worker
+                          .getWorkerUnits()
+                          .getFirst()
+                          .getFilter()
+                          .testFilter()
+                          .testConfigurationId()
+                      : null)
               .build();
       var suitesPaginated = suiteFacade.searchSuites(searchSuiteQuery);
       if (suitesPaginated != null && !suitesPaginated.getContent().isEmpty()) {

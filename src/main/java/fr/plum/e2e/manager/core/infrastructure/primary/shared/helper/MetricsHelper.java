@@ -3,6 +3,7 @@ package fr.plum.e2e.manager.core.infrastructure.primary.shared.helper;
 import fr.plum.e2e.manager.core.application.MetricsFacade;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.MetricsType;
+import fr.plum.e2e.manager.core.domain.model.exception.MetricsNotFoundException;
 import fr.plum.e2e.manager.core.domain.model.query.GetMetricsQuery;
 import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response.MetricsResponse;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -24,9 +25,13 @@ public class MetricsHelper {
               .environmentId(new EnvironmentId(environmentId))
               .metricsType(MetricsType.ALL)
               .build();
-      var lastAllTestsRunAt =
-          metricsFacade.getLastMetrics(secondQuery).getAuditInfo().getCreatedAt();
-      response.addLastAllTestsRunAt(lastAllTestsRunAt);
+      try {
+        var lastAllTestsRunAt =
+            metricsFacade.getLastMetrics(secondQuery).getAuditInfo().getCreatedAt();
+        response.addLastAllTestsRunAt(lastAllTestsRunAt);
+      } catch (MetricsNotFoundException e) {
+        // do nothing
+      }
     }
     return response;
   }

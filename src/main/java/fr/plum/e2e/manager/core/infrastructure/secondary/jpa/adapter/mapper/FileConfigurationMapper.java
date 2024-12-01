@@ -59,7 +59,7 @@ public final class FileConfigurationMapper {
     return entity;
   }
 
-  private static SuiteConfiguration toSuiteDomain(JpaSuiteConfigurationEntity entity) {
+  public static SuiteConfiguration toSuiteDomain(JpaSuiteConfigurationEntity entity) {
     return SuiteConfiguration.builder()
         .id(new SuiteConfigurationId(entity.getId()))
         .title(new SuiteTitle(entity.getTitle()))

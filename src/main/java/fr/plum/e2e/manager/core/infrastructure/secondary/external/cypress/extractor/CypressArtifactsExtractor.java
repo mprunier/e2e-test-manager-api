@@ -106,12 +106,16 @@ public final class CypressArtifactsExtractor {
   private static String normalizeFileName(
       String filename, String pathToRemove, String extensionToRemove) {
     var normalizedPath = filename.replace('\\', '/');
-    var withoutBasePath = normalizedPath.replace(pathToRemove, "");
-    var withoutExtension = withoutBasePath;
+    normalizedPath = normalizedPath.replaceAll("^/+|/+$", "");
+    String withoutBasePath = normalizedPath;
+    if (normalizedPath.toLowerCase().startsWith(pathToRemove.toLowerCase())) {
+      withoutBasePath = normalizedPath.substring(pathToRemove.length());
+    }
+    String withoutExtension = withoutBasePath;
     if (withoutBasePath.toLowerCase().endsWith(extensionToRemove.toLowerCase())) {
       withoutExtension =
           withoutBasePath.substring(0, withoutBasePath.length() - extensionToRemove.length());
     }
-    return withoutExtension.trim().replace("^/+|/+$", "");
+    return withoutExtension.replaceAll("/+", "/").trim();
   }
 }

@@ -38,7 +38,7 @@ public class GitlabWebHookHandler {
   }
 
   private void jobHook(GitlabWebHookRequest request) {
-    log.trace(
+    log.debug(
         "Gitlab WebHook - Job Hook received with worker [{}] and status [{}].",
         request.pipelineId(),
         request.status());
@@ -63,7 +63,7 @@ public class GitlabWebHookHandler {
   }
 
   private void pushHook(GitlabWebHookRequest request) {
-    log.trace(
+    log.debug(
         "Gitlab WebHook - Push Hook received for Project id [{}] and Branch name [{}].",
         request.projectId(),
         request.ref());
@@ -73,7 +73,7 @@ public class GitlabWebHookHandler {
 
     var lockKey = projectId + ":" + branch;
     if (locks.putIfAbsent(lockKey, true) != null) {
-      log.trace(
+      log.debug(
           "Gitlab WebHook - Synchronization is already in progress for Project id [{}] and Branch name [{}].",
           projectId,
           branch);
@@ -92,7 +92,7 @@ public class GitlabWebHookHandler {
                       .username(new ActionUsername("Gitlab Webhook"))
                       .build());
             } catch (SynchronizationAlreadyInProgressException e) {
-              log.trace(
+              log.debug(
                   "Gitlab WebHook - Synchronization is already in progress for Project id [{}] and Branch name [{}] on environment id [{}].",
                   projectId,
                   finalBranch,

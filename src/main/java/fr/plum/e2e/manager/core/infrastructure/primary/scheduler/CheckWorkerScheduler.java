@@ -30,7 +30,7 @@ public class CheckWorkerScheduler {
   @ActivateRequestContext
   public void schedule() {
     if (inVerifyProgress.compareAndSet(false, true)) {
-      log.trace("In progress pipelines verification scheduler started.");
+      log.debug("In progress pipelines verification scheduler started.");
       try {
         var workers = workerFacade.getAll();
         for (var worker : workers) {

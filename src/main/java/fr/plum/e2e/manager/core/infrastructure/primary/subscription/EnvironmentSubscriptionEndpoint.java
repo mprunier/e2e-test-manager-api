@@ -21,7 +21,7 @@ public class EnvironmentSubscriptionEndpoint {
   @OnOpen
   public void onSubscribe(Session session, @PathParam("environment_id") String environmentId) {
     sessionRegistry.registerSession(environmentId, session);
-    log.trace(
+    log.debug(
         "New subscriber for Environment ID [{}]. Total subscribers: {}",
         environmentId,
         sessionRegistry.getTotalSessionCount());
@@ -30,7 +30,7 @@ public class EnvironmentSubscriptionEndpoint {
   @OnClose
   public void onUnsubscribe(Session session, @PathParam("environment_id") String environmentId) {
     sessionRegistry.removeSession(environmentId, session);
-    log.trace(
+    log.debug(
         "Subscriber left for Environment ID [{}]. Total subscribers: {}",
         environmentId,
         sessionRegistry.getTotalSessionCount());

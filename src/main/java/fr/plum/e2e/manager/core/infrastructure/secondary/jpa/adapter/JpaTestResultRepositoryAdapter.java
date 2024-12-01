@@ -43,6 +43,7 @@ public class JpaTestResultRepositoryAdapter implements TestResultRepositoryPort 
                         JpaTestScreenshotEntity.builder()
                             .id(screenshot.getId().value())
                             .testResultId(testResultEntity.getId())
+                            .filename(screenshot.getTitle().value())
                             .screenshot(screenshot.getScreenshot())
                             .build()
                             .persist());

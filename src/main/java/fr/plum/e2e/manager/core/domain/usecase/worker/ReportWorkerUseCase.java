@@ -157,16 +157,37 @@ public class ReportWorkerUseCase implements CommandUseCase<ReportWorkerCommand> 
     var reports = workerExtractorPort.extractWorkerReportArtifacts(reportArtifacts);
     var results = new ArrayList<TestResult>();
 
+    var testConfIdFilter = getTestConfigurationIdsFilter(worker);
+
     reports.forEach(
         report -> {
-          processTestsWithoutSuite(report, worker, results);
-          processSuiteTests(report, worker, results);
+          processTestsWithoutSuite(report, worker, results, testConfIdFilter);
+          processSuiteTests(report, worker, results, testConfIdFilter);
         });
 
     return results;
   }
 
-  private void processTestsWithoutSuite(Report report, Worker worker, List<TestResult> results) {
+  private ArrayList<TestConfigurationId> getTestConfigurationIdsFilter(Worker worker) {
+    var testConfIdFilter = new ArrayList<TestConfigurationId>();
+    if (worker.getWorkerUnits().getFirst().getFilter().testFilter() != null) {
+      testConfIdFilter.add(
+          worker.getWorkerUnits().getFirst().getFilter().testFilter().testConfigurationId());
+    }
+    if (worker.getWorkerUnits().getFirst().getFilter().suiteFilter() != null) {
+      testConfIdFilter.addAll(
+          testConfigurationRepositoryPort.findAllIds(
+              worker.getEnvironmentId(),
+              worker.getWorkerUnits().getFirst().getFilter().suiteFilter().suiteConfigurationId()));
+    }
+    return testConfIdFilter;
+  }
+
+  private void processTestsWithoutSuite(
+      Report report,
+      Worker worker,
+      List<TestResult> results,
+      ArrayList<TestConfigurationId> testConfIdFilter) {
     report
         .tests()
         .forEach(
@@ -174,10 +195,18 @@ public class ReportWorkerUseCase implements CommandUseCase<ReportWorkerCommand> 
                 testConfigurationRepositoryPort
                     .findId(report.fileName(), SuiteTitle.noSuite(), reportTest.title())
                     .ifPresent(
-                        configId -> results.add(createTestResult(worker, configId, reportTest))));
+                        configId -> {
+                          if (testConfIdFilter.isEmpty() || testConfIdFilter.contains(configId)) {
+                            results.add(createTestResult(worker, configId, reportTest));
+                          }
+                        }));
   }
 
-  private void processSuiteTests(Report report, Worker worker, List<TestResult> results) {
+  private void processSuiteTests(
+      Report report,
+      Worker worker,
+      List<TestResult> results,
+      ArrayList<TestConfigurationId> testConfIdFilter) {
     report
         .suites()
         .forEach(
@@ -189,8 +218,12 @@ public class ReportWorkerUseCase implements CommandUseCase<ReportWorkerCommand> 
                             testConfigurationRepositoryPort
                                 .findId(report.fileName(), suite.title(), test.title())
                                 .ifPresent(
-                                    configId ->
-                                        results.add(createTestResult(worker, configId, test)))));
+                                    configId -> {
+                                      if (testConfIdFilter.isEmpty()
+                                          || testConfIdFilter.contains(configId)) {
+                                        results.add(createTestResult(worker, configId, test));
+                                      }
+                                    })));
   }
 
   private List<TestResult> createCanceledResults(

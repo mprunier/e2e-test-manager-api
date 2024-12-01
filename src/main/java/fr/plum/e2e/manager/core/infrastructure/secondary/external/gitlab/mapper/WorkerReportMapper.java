@@ -2,6 +2,9 @@ package fr.plum.e2e.manager.core.infrastructure.secondary.external.gitlab.mapper
 
 import static fr.plum.e2e.manager.core.domain.constant.BusinessConstant.END_TEST_JS_PATH;
 import static fr.plum.e2e.manager.core.domain.constant.BusinessConstant.END_TEST_TS_PATH;
+import static fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.CypressConstant.SCREENSHOT_EXTENSION;
+import static fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.CypressConstant.SCREENSHOT_PATH;
+import static fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.CypressConstant.START_PATH;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import fr.plum.e2e.manager.core.domain.model.aggregate.report.Report;
@@ -43,8 +46,9 @@ public final class WorkerReportMapper {
       MochaReportResultInternal result,
       Map<String, byte[]> screenshots,
       Map<String, byte[]> videos) {
+
     return Report.builder()
-        .fileName(new FileName(result.getFile()))
+        .fileName(new FileName(result.getFile().replace(START_PATH, "")))
         .tests(mapTests(result.getTests(), screenshots, videos, "", result.getFile()))
         .suites(mapSuites(result.getSuites(), screenshots, videos, result.getFile()))
         .build();
@@ -118,7 +122,8 @@ public final class WorkerReportMapper {
     if (context.screenshotError() != null) {
       screenshots.forEach(
           (name, data) -> {
-            if (name.equals(context.screenshotError().replace(".png", ""))) {
+            if (removeScreenshotPrefixAndExtension(context.screenshotError())
+                .contains(removeScreenshotPrefixAndExtension(name))) {
               testScreenshots.add(
                   TestResultScreenshot.builder()
                       .id(TestResultScreenshotId.generate())
@@ -131,7 +136,7 @@ public final class WorkerReportMapper {
       var testPath = generateTestPath(suitePath, testTitle, specFile);
       screenshots.forEach(
           (name, data) -> {
-            if (name.startsWith(testPath)) {
+            if (name.contains(testPath)) {
               var screenshotName =
                   name.substring(name.lastIndexOf(DELIMITER) + DELIMITER.length()).trim();
               testScreenshots.add(
@@ -148,11 +153,22 @@ public final class WorkerReportMapper {
   }
 
   private static TestResultVideo mapVideo(Map<String, byte[]> videos, String specFile) {
-    var videoKey = removeTestFileExtensions(specFile);
-    return TestResultVideo.builder()
-        .id(TestResultVideoId.generate())
-        .video(videos.getOrDefault(videoKey, null))
-        .build();
+    var videoKey = removeVideoPrefixAndExtension(specFile);
+
+    var video =
+        videos.entrySet().stream()
+            .filter(
+                entry ->
+                    removeVideoPrefixAndExtension(entry.getKey()).contains(videoKey)
+                        || videoKey.contains(removeVideoPrefixAndExtension(entry.getKey())))
+            .map(Map.Entry::getValue)
+            .findFirst()
+            .orElse(null);
+
+    if (video != null) {
+      return TestResultVideo.builder().id(TestResultVideoId.generate()).video(video).build();
+    }
+    return null;
   }
 
   private record TestContext(String reference, String urlError, String screenshotError) {}
@@ -199,5 +215,13 @@ public final class WorkerReportMapper {
 
   private static String removeTestFileExtensions(String filename) {
     return filename.replace(END_TEST_JS_PATH, "").replace(END_TEST_TS_PATH, "");
+  }
+
+  private static String removeScreenshotPrefixAndExtension(String screenshotName) {
+    return screenshotName.replace(SCREENSHOT_PATH, "").replace(SCREENSHOT_EXTENSION, "");
+  }
+
+  private static String removeVideoPrefixAndExtension(String screenshotName) {
+    return screenshotName.replace(START_PATH, "");
   }
 }
