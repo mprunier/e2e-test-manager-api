@@ -9,4 +9,6 @@ public interface TestResultRepositoryPort {
   void saveAll(List<TestResult> testResults);
 
   void clearAllWorkerId(WorkerId id);
+
+  void updateParentsConfigurationStatus(WorkerId workerId);
 }

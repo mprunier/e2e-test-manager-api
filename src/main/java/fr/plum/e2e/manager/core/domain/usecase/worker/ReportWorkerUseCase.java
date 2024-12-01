@@ -245,6 +245,7 @@ public class ReportWorkerUseCase implements CommandUseCase<ReportWorkerCommand> 
   }
 
   private void finalizeWorker(Worker worker) {
+
     //    testResultRepositoryPort.clearAllWorkerId(worker.getId());
     //    workerRepositoryPort.delete(worker.getId());
     transactionManagerPort.registerAfterCommit(
