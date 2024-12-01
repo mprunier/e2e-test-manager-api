@@ -7,7 +7,7 @@ CREATE TABLE synchronization_error
     file               TEXT      NOT NULL,
     error              TEXT      NOT NULL,
     error_at           TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT pk_synchronization_error PRIMARY KEY (synchronization_id, file, error, error_at),
+    PRIMARY KEY (synchronization_id, file, error, error_at),
     CONSTRAINT fk__synchronization_error__synchronization_id
         FOREIGN KEY (synchronization_id)
             REFERENCES synchronization (environment_id) ON DELETE CASCADE

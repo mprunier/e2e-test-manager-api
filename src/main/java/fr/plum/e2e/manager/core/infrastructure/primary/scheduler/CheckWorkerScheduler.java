@@ -10,7 +10,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.control.ActivateRequestContext;
 import java.time.ZonedDateTime;
 import java.util.concurrent.atomic.AtomicBoolean;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -22,17 +21,12 @@ public class CheckWorkerScheduler {
 
   private final WorkerFacade workerFacade;
 
-  @Getter
-  @ConfigProperty(name = "business.scheduler.worker.report.verification.interval-minutes")
-  Integer workerVerificationInterval;
-
-  @Getter
   @ConfigProperty(name = "business.scheduler.worker.report.cancel-timeout.interval-minutes")
   Integer workerCancelTimeoutInterval;
 
   private final AtomicBoolean inVerifyProgress = new AtomicBoolean(false);
 
-  @Scheduled(cron = "0 0/1 * * * ?")
+  @Scheduled(cron = "{business.scheduler.worker.report.verification.cron-expr}")
   @ActivateRequestContext
   public void schedule() {
     if (inVerifyProgress.compareAndSet(false, true)) {
@@ -43,7 +37,7 @@ public class CheckWorkerScheduler {
           if (worker
               .getAuditInfo()
               .getCreatedAt()
-              .isBefore(ZonedDateTime.now().minusMinutes(workerVerificationInterval))) {
+              .isBefore(ZonedDateTime.now().minusMinutes(workerCancelTimeoutInterval))) {
             workerFacade.cancel(
                 new CancelWorkerCommand(
                     worker.getEnvironmentId(),

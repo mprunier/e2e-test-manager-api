@@ -9,4 +9,6 @@ CREATE TABLE test_result_video
     CONSTRAINT fk_test_result_video_test_result FOREIGN KEY (test_result_id) REFERENCES test_result (id) ON DELETE CASCADE
 );
 
+CREATE INDEX idx_test_result_video_test_result ON test_result_video (test_result_id);
+
 --rollback DROP TABLE test_result_video;

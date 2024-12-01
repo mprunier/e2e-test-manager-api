@@ -13,6 +13,10 @@ public class JpaMetricsRepository implements PanacheRepositoryBase<JpaMetricsEnt
 
   public Optional<JpaMetricsEntity> findLastMetrics(
       EnvironmentId environmentId, MetricsType metricsType) {
+    if (metricsType == null) {
+      return find("environmentId = ?1 order by createdAt desc", environmentId.value())
+          .firstResultOptional();
+    }
     return find(
             "environmentId = ?1 and type = ?2 order by createdAt desc",
             environmentId.value(),

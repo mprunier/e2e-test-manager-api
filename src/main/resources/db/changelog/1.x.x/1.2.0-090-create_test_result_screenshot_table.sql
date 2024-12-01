@@ -10,4 +10,6 @@ CREATE TABLE test_result_screenshot
     CONSTRAINT fk_test_result_screenshot_test_result FOREIGN KEY (test_result_id) REFERENCES test_result (id) ON DELETE CASCADE
 );
 
+CREATE INDEX idx_test_result_screenshot_test_result ON test_result_screenshot (test_result_id);
+
 --rollback DROP TABLE test_result_screenshot;

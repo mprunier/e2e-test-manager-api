@@ -7,4 +7,5 @@ CREATE TABLE lock_manager
     resource_id   VARCHAR(255) NOT NULL,
     PRIMARY KEY (resource_type, resource_id)
 );
+
 --rollback DROP TABLE lock_manager;

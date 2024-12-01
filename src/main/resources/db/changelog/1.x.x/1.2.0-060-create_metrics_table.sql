@@ -15,4 +15,6 @@ CREATE TABLE metrics
     created_at     TIMESTAMP WITH TIME ZONE NOT NULL
 );
 
+CREATE INDEX idx_metrics_environment_id ON metrics (environment_id);
+
 --rollback DROP TABLE metrics;

@@ -20,4 +20,7 @@ CREATE TABLE test_result
     updated_by            VARCHAR(255)
 );
 
+CREATE INDEX idx_test_result_configuration_test_id ON test_result (configuration_test_id);
+CREATE INDEX idx_test_result_worker_id ON test_result (worker_id);
+
 --rollback DROP TABLE test_result;

@@ -11,6 +11,8 @@ CREATE TABLE synchronization
     updated_at     TIMESTAMP WITH TIME ZONE
 );
 
+CREATE INDEX idx__synchronization__environment_id ON synchronization (environment_id);
+
 INSERT INTO synchronization (environment_id, is_in_progress, created_by, updated_by, created_at, updated_at)
 VALUES ('8d8ea7dd-6115-4437-94f3-67c4999d9468', FALSE, 'Init System', 'Init System', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
