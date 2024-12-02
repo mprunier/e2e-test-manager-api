@@ -1,10 +1,10 @@
 package fr.plum.e2e.manager.core.infrastructure.primary.scheduler;
 
 import fr.plum.e2e.manager.core.application.WorkerFacade;
-import fr.plum.e2e.manager.core.domain.model.aggregate.shared.ActionUsername;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.WorkerUnit;
 import fr.plum.e2e.manager.core.domain.model.command.CancelWorkerCommand;
 import fr.plum.e2e.manager.core.domain.model.command.ReportWorkerCommand;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.ActionUsername;
 import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.control.ActivateRequestContext;

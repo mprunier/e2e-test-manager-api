@@ -4,12 +4,12 @@ import static fr.plum.e2e.manager.core.infrastructure.primary.rest.utils.RestUti
 
 import fr.plum.e2e.manager.core.application.WorkerFacade;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
-import fr.plum.e2e.manager.core.domain.model.aggregate.shared.ActionUsername;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerId;
 import fr.plum.e2e.manager.core.domain.model.command.CancelWorkerCommand;
 import fr.plum.e2e.manager.core.domain.model.query.CommonQuery;
 import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.request.RunRequest;
 import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response.WorkerUnitResponse;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.ActionUsername;
 import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.validation.constraints.NotNull;

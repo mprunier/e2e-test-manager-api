@@ -5,7 +5,7 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.schedulerconfiguration.vo
 import fr.plum.e2e.manager.core.domain.model.aggregate.schedulerconfiguration.vo.SchedulerHour;
 import fr.plum.e2e.manager.core.domain.model.aggregate.schedulerconfiguration.vo.SchedulerIsEnabled;
 import fr.plum.e2e.manager.core.domain.model.aggregate.schedulerconfiguration.vo.SchedulerMinute;
-import fr.plum.e2e.manager.core.domain.model.aggregate.shared.ActionUsername;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.ActionUsername;
 import lombok.Builder;
 
 @Builder

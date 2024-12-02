@@ -5,7 +5,7 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.Environmen
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentIsEnabled;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.MaxParallelWorkers;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.SourceCodeInformation;
-import fr.plum.e2e.manager.core.domain.model.aggregate.shared.AggregateRoot;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AggregateRoot;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Builder;

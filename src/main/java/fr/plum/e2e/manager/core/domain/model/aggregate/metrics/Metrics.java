@@ -8,8 +8,8 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.vo.PassPercentage
 import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.vo.SkippedCount;
 import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.vo.SuiteCount;
 import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.vo.TestCount;
-import fr.plum.e2e.manager.core.domain.model.aggregate.shared.AggregateRoot;
-import fr.plum.e2e.manager.core.domain.model.aggregate.shared.AuditInfo;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AggregateRoot;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AuditInfo;
 import java.time.ZonedDateTime;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;

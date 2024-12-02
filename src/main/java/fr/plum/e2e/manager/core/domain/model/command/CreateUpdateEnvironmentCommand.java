@@ -6,9 +6,9 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.Environmen
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.MaxParallelWorkers;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.SourceCodeInformation;
-import fr.plum.e2e.manager.core.domain.model.aggregate.shared.ActionUsername;
-import fr.plum.e2e.manager.core.domain.model.aggregate.shared.AuditInfo;
 import fr.plum.e2e.manager.core.domain.model.exception.DuplicateEnvironmentVariableException;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.ActionUsername;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AuditInfo;
 import fr.plum.e2e.manager.sharedkernel.domain.port.out.ClockPort;
 import java.util.List;
 

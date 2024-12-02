@@ -3,7 +3,6 @@ package fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration;
 import static fr.plum.e2e.manager.core.domain.constant.BusinessConstant.DISABLE_TAG;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
-import fr.plum.e2e.manager.core.domain.model.aggregate.shared.AggregateRoot;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.FileName;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.GroupName;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.SuiteConfigurationId;
@@ -12,6 +11,7 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.Test
 import fr.plum.e2e.manager.core.domain.model.exception.SuiteNotFoundException;
 import fr.plum.e2e.manager.core.domain.model.exception.TestNotFoundException;
 import fr.plum.e2e.manager.core.domain.model.exception.TitleDuplicationException;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AggregateRoot;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

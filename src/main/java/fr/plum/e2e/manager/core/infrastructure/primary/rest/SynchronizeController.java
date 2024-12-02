@@ -4,10 +4,10 @@ import static fr.plum.e2e.manager.core.infrastructure.primary.rest.utils.RestUti
 
 import fr.plum.e2e.manager.core.application.SynchronizationFacade;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
-import fr.plum.e2e.manager.core.domain.model.aggregate.shared.ActionUsername;
 import fr.plum.e2e.manager.core.domain.model.command.CommonCommand;
 import fr.plum.e2e.manager.core.domain.model.query.CommonQuery;
 import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response.SynchronizationErrorResponse;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.ActionUsername;
 import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.validation.constraints.NotNull;

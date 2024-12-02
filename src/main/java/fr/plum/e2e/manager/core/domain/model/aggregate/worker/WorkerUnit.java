@@ -1,8 +1,8 @@
 package fr.plum.e2e.manager.core.domain.model.aggregate.worker;
 
-import fr.plum.e2e.manager.core.domain.model.aggregate.shared.Entity;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerUnitFilter;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerUnitId;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.Entity;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;

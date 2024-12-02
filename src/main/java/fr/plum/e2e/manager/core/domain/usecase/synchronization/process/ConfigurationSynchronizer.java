@@ -89,7 +89,7 @@ public class ConfigurationSynchronizer {
       } catch (CustomException e) {
         errors.add(
             SynchronizationErrorFactory.createFileError(
-                entry.getKey(), e.getDetail(), clockPort.now()));
+                entry.getKey(), e.getDescription(), clockPort.now()));
       } catch (Exception e) {
         errors.add(
             SynchronizationErrorFactory.createFileError(

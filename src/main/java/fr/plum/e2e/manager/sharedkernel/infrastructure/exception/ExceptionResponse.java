@@ -13,6 +13,6 @@ public class ExceptionResponse {
 
   private Integer status;
   private String title;
-  private String detail;
   private String description;
+  private String detail;
 }

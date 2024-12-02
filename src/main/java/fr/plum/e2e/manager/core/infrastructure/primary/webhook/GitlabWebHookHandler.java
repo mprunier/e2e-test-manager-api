@@ -2,7 +2,6 @@ package fr.plum.e2e.manager.core.infrastructure.primary.webhook;
 
 import fr.plum.e2e.manager.core.application.SynchronizationFacade;
 import fr.plum.e2e.manager.core.application.WorkerFacade;
-import fr.plum.e2e.manager.core.domain.model.aggregate.shared.ActionUsername;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerUnitId;
 import fr.plum.e2e.manager.core.domain.model.command.CommonCommand;
 import fr.plum.e2e.manager.core.domain.model.command.ReportWorkerCommand;
@@ -11,6 +10,7 @@ import fr.plum.e2e.manager.core.domain.port.out.repository.EnvironmentRepository
 import fr.plum.e2e.manager.core.infrastructure.primary.webhook.dto.GitLabWebhookEvent;
 import fr.plum.e2e.manager.core.infrastructure.primary.webhook.dto.GitlabJobStatus;
 import fr.plum.e2e.manager.core.infrastructure.primary.webhook.dto.request.GitlabWebHookRequest;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.ActionUsername;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;

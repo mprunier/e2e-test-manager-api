@@ -1,6 +1,6 @@
 package fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity;
 
-import fr.plum.e2e.manager.core.domain.model.aggregate.shared.AuditInfo;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AuditInfo;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;

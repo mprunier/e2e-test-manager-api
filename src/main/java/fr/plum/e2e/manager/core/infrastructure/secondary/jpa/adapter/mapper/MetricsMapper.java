@@ -8,8 +8,8 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.vo.PassPercentage
 import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.vo.SkippedCount;
 import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.vo.SuiteCount;
 import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.vo.TestCount;
-import fr.plum.e2e.manager.core.domain.model.aggregate.shared.AuditInfo;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.metrics.JpaMetricsEntity;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AuditInfo;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

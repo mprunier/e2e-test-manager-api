@@ -5,9 +5,9 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.schedulerconfiguration.vo
 import fr.plum.e2e.manager.core.domain.model.aggregate.schedulerconfiguration.vo.SchedulerHour;
 import fr.plum.e2e.manager.core.domain.model.aggregate.schedulerconfiguration.vo.SchedulerIsEnabled;
 import fr.plum.e2e.manager.core.domain.model.aggregate.schedulerconfiguration.vo.SchedulerMinute;
-import fr.plum.e2e.manager.core.domain.model.aggregate.shared.ActionUsername;
-import fr.plum.e2e.manager.core.domain.model.aggregate.shared.AggregateRoot;
-import fr.plum.e2e.manager.core.domain.model.aggregate.shared.AuditInfo;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.ActionUsername;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AggregateRoot;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AuditInfo;
 import java.time.ZonedDateTime;
 import lombok.Builder;
 import lombok.Getter;

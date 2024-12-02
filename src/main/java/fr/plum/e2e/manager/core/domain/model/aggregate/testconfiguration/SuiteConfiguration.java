@@ -1,10 +1,10 @@
 package fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration;
 
-import fr.plum.e2e.manager.core.domain.model.aggregate.shared.Entity;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.SuiteConfigurationId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.SuiteTitle;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.Tag;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.Variable;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.Entity;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;

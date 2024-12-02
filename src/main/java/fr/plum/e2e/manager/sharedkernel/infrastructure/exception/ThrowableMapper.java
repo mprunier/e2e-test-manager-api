@@ -29,8 +29,8 @@ public class ThrowableMapper implements ExceptionMapper<Throwable> {
           new ExceptionResponse(
               customException.getStatus(),
               customException.getTitle(),
-              customException.getDetail(),
-              customException.getDescription());
+              customException.getDescription(),
+              customException.getDetails());
     } else {
       if (!(exception instanceof NotFoundException)
           && !(exception instanceof NotAllowedException)) {

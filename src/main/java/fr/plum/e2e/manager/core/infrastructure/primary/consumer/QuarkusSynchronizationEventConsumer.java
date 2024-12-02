@@ -39,7 +39,7 @@ public class QuarkusSynchronizationEventConsumer {
               .build();
       synchronizationFacade.processSynchronization(processCommand);
     } catch (CustomException exception) {
-      logError("process", event.environmentId(), exception.getDetail());
+      logError("process", event.environmentId(), exception.getDescription());
     } catch (Exception exception) {
       logError("process", event.environmentId(), exception.getMessage());
     }
@@ -55,7 +55,7 @@ public class QuarkusSynchronizationEventConsumer {
               .build();
       webSocketNotifier.notifySubscribers(externalEvent);
     } catch (CustomException exception) {
-      logError("finish", event.environmentId(), exception.getDetail());
+      logError("finish", event.environmentId(), exception.getDescription());
     } catch (Exception exception) {
       logError("finish", event.environmentId(), exception.getMessage());
     }

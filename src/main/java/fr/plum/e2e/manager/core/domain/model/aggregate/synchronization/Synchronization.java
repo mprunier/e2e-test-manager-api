@@ -1,12 +1,12 @@
 package fr.plum.e2e.manager.core.domain.model.aggregate.synchronization;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
-import fr.plum.e2e.manager.core.domain.model.aggregate.shared.ActionUsername;
-import fr.plum.e2e.manager.core.domain.model.aggregate.shared.AggregateRoot;
-import fr.plum.e2e.manager.core.domain.model.aggregate.shared.AuditInfo;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationError;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationIsInProgress;
 import fr.plum.e2e.manager.core.domain.model.exception.SynchronizationAlreadyInProgressException;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.ActionUsername;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AggregateRoot;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AuditInfo;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package fr.plum.e2e.manager.core.domain.model.aggregate.shared;
+package fr.plum.e2e.manager.sharedkernel.domain.model.aggregate;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

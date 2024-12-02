@@ -1,13 +1,13 @@
 package fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.request;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
-import fr.plum.e2e.manager.core.domain.model.aggregate.shared.ActionUsername;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.FileName;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.GroupName;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.SuiteConfigurationId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.Tag;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.TestConfigurationId;
 import fr.plum.e2e.manager.core.domain.model.command.RunWorkerCommand;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.ActionUsername;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;

@@ -4,7 +4,7 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.Environmen
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.VariableDescription;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.VariableIsHidden;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.VariableValue;
-import fr.plum.e2e.manager.core.domain.model.aggregate.shared.Entity;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.Entity;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 

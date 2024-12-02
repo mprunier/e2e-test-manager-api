@@ -7,8 +7,8 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.SourceCode
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.sourcecode.SourceCodeBranch;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.sourcecode.SourceCodeProjectId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.sourcecode.SourceCodeToken;
-import fr.plum.e2e.manager.core.domain.model.aggregate.shared.ActionUsername;
 import fr.plum.e2e.manager.core.domain.model.command.CreateUpdateEnvironmentCommand;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.ActionUsername;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

@@ -1,8 +1,8 @@
 package fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter.mapper;
 
-import fr.plum.e2e.manager.core.domain.model.aggregate.shared.ActionUsername;
-import fr.plum.e2e.manager.core.domain.model.aggregate.shared.AuditInfo;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.AbstractAuditableEntity;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.ActionUsername;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AuditInfo;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 

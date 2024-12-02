@@ -1,11 +1,11 @@
 package fr.plum.e2e.manager.core.domain.model.aggregate.worker;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
-import fr.plum.e2e.manager.core.domain.model.aggregate.shared.AggregateRoot;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerUnitId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerVariable;
 import fr.plum.e2e.manager.core.domain.model.exception.DomainAssertException;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AggregateRoot;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Builder;

@@ -1,7 +1,6 @@
 package fr.plum.e2e.manager.core.domain.usecase.synchronization;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
-import fr.plum.e2e.manager.core.domain.model.aggregate.shared.ActionUsername;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SourceCodeProject;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationError;
 import fr.plum.e2e.manager.core.domain.model.command.CommonCommand;
@@ -19,6 +18,7 @@ import fr.plum.e2e.manager.core.domain.usecase.synchronization.process.Configura
 import fr.plum.e2e.manager.core.domain.usecase.synchronization.process.SourceCodeSynchronizer;
 import fr.plum.e2e.manager.core.domain.usecase.synchronization.process.factory.SynchronizationErrorFactory;
 import fr.plum.e2e.manager.sharedkernel.domain.exception.CustomException;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.ActionUsername;
 import fr.plum.e2e.manager.sharedkernel.domain.port.in.CommandUseCase;
 import fr.plum.e2e.manager.sharedkernel.domain.port.out.ClockPort;
 import fr.plum.e2e.manager.sharedkernel.domain.port.out.TransactionManagerPort;
@@ -80,7 +80,7 @@ public class ProcessSynchronizationUseCase implements CommandUseCase<CommonComma
     } catch (CustomException exception) {
       errors.add(
           SynchronizationErrorFactory.createGlobalError(
-              command.environmentId(), exception.getDetail(), clockPort.now()));
+              command.environmentId(), exception.getDescription(), clockPort.now()));
     } catch (Exception exception) {
       errors.add(
           SynchronizationErrorFactory.createGlobalError(
