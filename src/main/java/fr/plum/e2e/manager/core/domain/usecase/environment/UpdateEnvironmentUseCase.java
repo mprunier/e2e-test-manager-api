@@ -1,6 +1,6 @@
 package fr.plum.e2e.manager.core.domain.usecase.environment;
 
-import fr.plum.e2e.manager.core.domain.model.command.CreateUpdateEnvironmentCommand;
+import fr.plum.e2e.manager.core.domain.model.command.UpdateEnvironmentCommand;
 import fr.plum.e2e.manager.core.domain.model.event.EnvironmentUpdatedEvent;
 import fr.plum.e2e.manager.core.domain.port.out.EventPublisherPort;
 import fr.plum.e2e.manager.core.domain.port.out.repository.EnvironmentRepositoryPort;
@@ -8,7 +8,7 @@ import fr.plum.e2e.manager.core.domain.service.EnvironmentService;
 import fr.plum.e2e.manager.sharedkernel.domain.port.in.CommandUseCase;
 import fr.plum.e2e.manager.sharedkernel.domain.port.out.ClockPort;
 
-public class UpdateEnvironmentUseCase implements CommandUseCase<CreateUpdateEnvironmentCommand> {
+public class UpdateEnvironmentUseCase implements CommandUseCase<UpdateEnvironmentCommand> {
 
   private final ClockPort clockPort;
   private final EventPublisherPort eventPublisherPort;
@@ -27,7 +27,7 @@ public class UpdateEnvironmentUseCase implements CommandUseCase<CreateUpdateEnvi
   }
 
   @Override
-  public void execute(CreateUpdateEnvironmentCommand environmentCommand) {
+  public void execute(UpdateEnvironmentCommand environmentCommand) {
     var environment = environmentService.getEnvironment(environmentCommand.environmentId());
 
     if (!environment.getEnvironmentDescription().equals(environmentCommand.description())) {

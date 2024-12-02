@@ -9,10 +9,10 @@ import fr.plum.e2e.manager.core.domain.model.query.CommonQuery;
 import fr.plum.e2e.manager.core.domain.model.query.SearchSuiteConfigurationQuery;
 import fr.plum.e2e.manager.core.domain.model.view.ConfigurationSuiteWithWorkerView;
 import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response.WorkerUnitResponse;
-import fr.plum.e2e.manager.core.infrastructure.secondary.notification.adapter.WebSocketNotifier;
-import fr.plum.e2e.manager.core.infrastructure.secondary.notification.dto.WorkerNotificationStatus;
-import fr.plum.e2e.manager.core.infrastructure.secondary.notification.dto.WorkerUnitUpdatedNotificationEvent;
-import fr.plum.e2e.manager.core.infrastructure.secondary.notification.dto.WorkerUpdatedNotificationEvent;
+import fr.plum.e2e.manager.core.infrastructure.secondary.websocket.adapter.EnvironmentNotifier;
+import fr.plum.e2e.manager.core.infrastructure.secondary.websocket.dto.WorkerNotificationStatus;
+import fr.plum.e2e.manager.core.infrastructure.secondary.websocket.dto.WorkerUnitUpdatedNotificationEvent;
+import fr.plum.e2e.manager.core.infrastructure.secondary.websocket.dto.WorkerUpdatedNotificationEvent;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ public class WorkerNotificationHelper {
   private final WorkerFacade workerFacade;
   private final SuiteFacade suiteFacade;
 
-  private final WebSocketNotifier webSocketNotifier;
+  private final EnvironmentNotifier environmentNotifier;
 
   public void sendWorkerUnitUpdatedNotification(EnvironmentId environmentId, Worker worker) {
     if (WorkerType.ALL.equals(worker.getType())) {
@@ -36,7 +36,7 @@ public class WorkerNotificationHelper {
                 .environmentId(environmentId)
                 .workers(WorkerUnitResponse.fromWorkers(optionalWorker.get().getWorkerUnits()))
                 .build();
-        webSocketNotifier.notifySubscribers(workerUnitUpdatedNotificationEvent);
+        environmentNotifier.notifySubscribers(workerUnitUpdatedNotificationEvent);
       }
     }
   }
@@ -52,7 +52,7 @@ public class WorkerNotificationHelper {
             .status(status)
             .configurationSuiteWithWorkerView(configurationSuiteWithWorkerView)
             .build();
-    webSocketNotifier.notifySubscribers(workerUpdatedNotificationEvent);
+    environmentNotifier.notifySubscribers(workerUpdatedNotificationEvent);
   }
 
   private ConfigurationSuiteWithWorkerView getConfigurationSuiteWithWorkerView(Worker worker) {

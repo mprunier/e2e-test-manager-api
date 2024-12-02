@@ -6,9 +6,9 @@ import fr.plum.e2e.manager.core.domain.model.command.CommonCommand;
 import fr.plum.e2e.manager.core.domain.model.event.EnvironmentIsSynchronizingEvent;
 import fr.plum.e2e.manager.core.domain.model.event.EnvironmentSynchronizedEvent;
 import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response.SynchronizationErrorResponse;
-import fr.plum.e2e.manager.core.infrastructure.secondary.notification.adapter.WebSocketNotifier;
-import fr.plum.e2e.manager.core.infrastructure.secondary.notification.dto.SynchronizationCompletedNotificationEvent;
-import fr.plum.e2e.manager.core.infrastructure.secondary.notification.dto.SynchronizationIsInProgressNotificationEvent;
+import fr.plum.e2e.manager.core.infrastructure.secondary.websocket.adapter.EnvironmentNotifier;
+import fr.plum.e2e.manager.core.infrastructure.secondary.websocket.dto.SynchronizationCompletedNotificationEvent;
+import fr.plum.e2e.manager.core.infrastructure.secondary.websocket.dto.SynchronizationIsInProgressNotificationEvent;
 import fr.plum.e2e.manager.sharedkernel.domain.exception.CustomException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.ObservesAsync;
@@ -22,7 +22,7 @@ public class QuarkusSynchronizationEventConsumer {
 
   private final SynchronizationFacade synchronizationFacade;
 
-  private final WebSocketNotifier webSocketNotifier;
+  private final EnvironmentNotifier environmentNotifier;
 
   public void environmentIsSynchronizing(@ObservesAsync EnvironmentIsSynchronizingEvent event) {
     try {
@@ -30,7 +30,7 @@ public class QuarkusSynchronizationEventConsumer {
           SynchronizationIsInProgressNotificationEvent.builder()
               .environmentId(event.environmentId())
               .build();
-      webSocketNotifier.notifySubscribers(externalEvent);
+      environmentNotifier.notifySubscribers(externalEvent);
 
       var processCommand =
           CommonCommand.builder()
@@ -53,7 +53,7 @@ public class QuarkusSynchronizationEventConsumer {
               .environmentId(event.environmentId())
               .syncErrors(syncErrors)
               .build();
-      webSocketNotifier.notifySubscribers(externalEvent);
+      environmentNotifier.notifySubscribers(externalEvent);
     } catch (CustomException exception) {
       logError("finish", event.environmentId(), exception.getDescription());
     } catch (Exception exception) {

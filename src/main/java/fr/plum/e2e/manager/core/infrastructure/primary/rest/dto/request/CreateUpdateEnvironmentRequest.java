@@ -4,10 +4,8 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.Environmen
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.MaxParallelWorkers;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.SourceCodeInformation;
-import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.sourcecode.SourceCodeBranch;
-import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.sourcecode.SourceCodeProjectId;
-import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.sourcecode.SourceCodeToken;
-import fr.plum.e2e.manager.core.domain.model.command.CreateUpdateEnvironmentCommand;
+import fr.plum.e2e.manager.core.domain.model.command.CreateEnvironmentCommand;
+import fr.plum.e2e.manager.core.domain.model.command.UpdateEnvironmentCommand;
 import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.ActionUsername;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
@@ -31,14 +29,22 @@ public record CreateUpdateEnvironmentRequest(
     }
   }
 
-  public CreateUpdateEnvironmentCommand toCommand(UUID environmentId, String username) {
+  public UpdateEnvironmentCommand toCommand(UUID environmentId, String username) {
     var sourceCodeInformation =
-        new SourceCodeInformation(
-            new SourceCodeProjectId(projectId),
-            new SourceCodeToken(token),
-            new SourceCodeBranch(branch));
-    return new CreateUpdateEnvironmentCommand(
+        SourceCodeInformation.builder().projectId(projectId).token(token).branch(branch).build();
+    return new UpdateEnvironmentCommand(
         environmentId != null ? new EnvironmentId(environmentId) : null,
+        new EnvironmentDescription(description),
+        sourceCodeInformation,
+        new MaxParallelWorkers(maxParallelWorkers),
+        variables.stream().map(CreateUpdateEnvironmentVariableRequest::toCommand).toList(),
+        new ActionUsername(username));
+  }
+
+  public CreateEnvironmentCommand toCommand(String username) {
+    var sourceCodeInformation =
+        SourceCodeInformation.builder().projectId(projectId).token(token).branch(branch).build();
+    return new CreateEnvironmentCommand(
         new EnvironmentDescription(description),
         sourceCodeInformation,
         new MaxParallelWorkers(maxParallelWorkers),

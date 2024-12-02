@@ -1,18 +1,20 @@
 package fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.Environment;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
 public record EnvironmentDetailsResponse(
-    UUID id,
+    @NotNull UUID id,
     String description,
-    String projectId,
-    String branch,
-    String token,
-    Boolean isEnabled,
-    int maxParallelTests,
+    @NotBlank String projectId,
+    @NotBlank String branch,
+    @NotBlank String token,
+    @NotNull Boolean isEnabled,
+    @NotNull int maxParallelWorkers,
     List<EnvironmentVariableResponse> variables,
     String createdBy,
     String updatedBy,
@@ -23,9 +25,9 @@ public record EnvironmentDetailsResponse(
     return new EnvironmentDetailsResponse(
         environment.getId().value(),
         environment.getEnvironmentDescription().value(),
-        environment.getSourceCodeInformation().sourceCodeProjectId().value(),
-        environment.getSourceCodeInformation().sourceCodeBranch().value(),
-        environment.getSourceCodeInformation().sourceCodeToken().getMaskedValue(),
+        environment.getSourceCodeInformation().projectId(),
+        environment.getSourceCodeInformation().branch(),
+        environment.getSourceCodeInformation().getMaskedValue(),
         environment.getIsEnabled().value(),
         environment.getMaxParallelWorkers().value(),
         environment.getVariables().stream().map(EnvironmentVariableResponse::from).toList(),

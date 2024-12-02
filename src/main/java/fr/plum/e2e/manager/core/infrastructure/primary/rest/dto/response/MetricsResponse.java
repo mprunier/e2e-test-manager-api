@@ -2,6 +2,7 @@ package fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.Metrics;
 import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.MetricsType;
+import jakarta.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -17,23 +18,23 @@ import lombok.ToString;
 @Builder
 public class MetricsResponse {
 
-  private ZonedDateTime at;
+  @NotNull private ZonedDateTime at;
 
-  private MetricsType type;
+  @NotNull private MetricsType type;
 
-  private Integer suites;
+  @NotNull private Integer suites;
 
-  private Integer tests;
+  @NotNull private Integer tests;
 
-  private Integer passes;
+  @NotNull private Integer passes;
 
-  private Integer failures;
+  @NotNull private Integer failures;
 
-  private Integer skipped;
+  @NotNull private Integer skipped;
 
-  private Integer passPercent;
+  @NotNull private Integer passPercent;
 
-  private ZonedDateTime lastAllTestsRunAt;
+  @NotNull private ZonedDateTime lastAllTestsRunAt;
 
   public static MetricsResponse fromDomain(Metrics metrics) {
     return builder()

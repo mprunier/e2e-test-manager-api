@@ -12,7 +12,7 @@ import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AuditInfo;
 import fr.plum.e2e.manager.sharedkernel.domain.port.out.ClockPort;
 import java.util.List;
 
-public record CreateUpdateEnvironmentCommand(
+public record UpdateEnvironmentCommand(
     EnvironmentId environmentId,
     EnvironmentDescription description,
     SourceCodeInformation sourceCodeInformation,
@@ -20,7 +20,7 @@ public record CreateUpdateEnvironmentCommand(
     List<EnvironmentVariableCommand> variables,
     ActionUsername actionUsername) {
 
-  public CreateUpdateEnvironmentCommand {
+  public UpdateEnvironmentCommand {
     if (variables.stream().map(EnvironmentVariableCommand::name).distinct().count()
         != variables.size()) {
       throw new DuplicateEnvironmentVariableException("Duplicate variable id");
@@ -29,7 +29,7 @@ public record CreateUpdateEnvironmentCommand(
 
   public Environment toDomain(ClockPort clockPort) {
     return Environment.builder()
-        .id(EnvironmentId.generate())
+        .id(environmentId)
         .environmentDescription(description)
         .sourceCodeInformation(sourceCodeInformation)
         .auditInfo(AuditInfo.create(actionUsername, clockPort.now()))

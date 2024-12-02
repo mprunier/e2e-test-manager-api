@@ -16,15 +16,19 @@ import jakarta.ws.rs.QueryParam;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
+@Tag(name = "SuiteApi")
 @Slf4j
 @Authenticated
 @Path("/auth/suites/search")
 @RequiredArgsConstructor
-public class SuiteController {
+public class SuiteResource {
 
   private final SuiteFacade suiteFacade;
 
+  @Operation(operationId = "searchSuites")
   @GET
   public PaginatedView<ConfigurationSuiteWithWorkerView> searchSuites(
       @NotNull @QueryParam("environmentId") UUID environmentId,
@@ -32,6 +36,7 @@ public class SuiteController {
     return suiteFacade.searchSuites(request.toQuery(environmentId));
   }
 
+  @Operation(operationId = "getSearchCriteria")
   @GET
   @Path("/criteria")
   public SearchCriteriaView getSearchCriteria(

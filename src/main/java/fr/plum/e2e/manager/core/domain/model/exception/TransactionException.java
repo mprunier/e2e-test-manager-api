@@ -9,6 +9,7 @@ public class TransactionException extends CustomException {
         Response.Status.INTERNAL_SERVER_ERROR,
         "transaction-sql-error",
         "An error occurred. Please contact the administrator.",
-        exception);
+        exception,
+        exception.getMessage());
   }
 }

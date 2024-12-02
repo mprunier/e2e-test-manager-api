@@ -19,17 +19,21 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
+@Tag(name = "SynchronizeApi")
 @Slf4j
 @Authenticated
 @Path("/auth/synchronize")
 @RequiredArgsConstructor
-public class SynchronizeController {
+public class SynchronizeResource {
 
   private final SynchronizationFacade synchronizationFacade;
 
   private final SecurityIdentity identity;
 
+  @Operation(operationId = "synchronize")
   @POST
   public void synchronize(@NotNull @QueryParam("environmentId") UUID environmentId) {
     var username = extractUsername(identity);
@@ -42,6 +46,7 @@ public class SynchronizeController {
     synchronizationFacade.startSynchronization(command);
   }
 
+  @Operation(operationId = "getErrors")
   @GET
   @Path("/errors")
   public List<SynchronizationErrorResponse> retrieveErrors(

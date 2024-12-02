@@ -4,7 +4,7 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.environment.Environment;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.schedulerconfiguration.SchedulerConfiguration;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.Synchronization;
-import fr.plum.e2e.manager.core.domain.model.command.CreateUpdateEnvironmentCommand;
+import fr.plum.e2e.manager.core.domain.model.command.CreateEnvironmentCommand;
 import fr.plum.e2e.manager.core.domain.model.event.EnvironmentCreatedEvent;
 import fr.plum.e2e.manager.core.domain.port.out.EventPublisherPort;
 import fr.plum.e2e.manager.core.domain.port.out.repository.EnvironmentRepositoryPort;
@@ -16,7 +16,7 @@ import fr.plum.e2e.manager.sharedkernel.domain.port.out.ClockPort;
 import fr.plum.e2e.manager.sharedkernel.domain.port.out.TransactionManagerPort;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class CreateEnvironmentUseCase implements CommandUseCase<CreateUpdateEnvironmentCommand> {
+public class CreateEnvironmentUseCase implements CommandUseCase<CreateEnvironmentCommand> {
 
   private final ClockPort clockPort;
   private final EventPublisherPort eventPublisherPort;
@@ -45,7 +45,7 @@ public class CreateEnvironmentUseCase implements CommandUseCase<CreateUpdateEnvi
   }
 
   @Override
-  public void execute(CreateUpdateEnvironmentCommand environmentCommand) {
+  public void execute(CreateEnvironmentCommand environmentCommand) {
     environmentService.assertEnvironmentDescriptionNotExist(environmentCommand.description());
 
     AtomicReference<EnvironmentId> environmentId = new AtomicReference<>();
@@ -53,7 +53,7 @@ public class CreateEnvironmentUseCase implements CommandUseCase<CreateUpdateEnvi
         () -> {
           var environment = createEnvironment(environmentCommand);
           createSynchronization(environmentCommand, environment);
-          createScheduler(environmentCommand);
+          createScheduler(environmentCommand, environment);
           environmentId.set(environment.getId());
         });
 
@@ -61,24 +61,23 @@ public class CreateEnvironmentUseCase implements CommandUseCase<CreateUpdateEnvi
         new EnvironmentCreatedEvent(environmentId.get(), environmentCommand.actionUsername()));
   }
 
-  private void createScheduler(CreateUpdateEnvironmentCommand environmentCommand) {
+  private void createScheduler(
+      CreateEnvironmentCommand environmentCommand, Environment environment) {
     var scheduler =
         SchedulerConfiguration.initialize(
-            environmentCommand.environmentId(),
-            clockPort.now(),
-            environmentCommand.actionUsername());
+            environment.getId(), clockPort.now(), environmentCommand.actionUsername());
     schedulerConfigurationRepositoryPort.save(scheduler);
   }
 
   private void createSynchronization(
-      CreateUpdateEnvironmentCommand environmentCommand, Environment environment) {
+      CreateEnvironmentCommand environmentCommand, Environment environment) {
     var synchronization =
         Synchronization.initialize(
             environment.getId(), clockPort.now(), environmentCommand.actionUsername());
     synchronizationRepositoryPort.save(synchronization);
   }
 
-  private Environment createEnvironment(CreateUpdateEnvironmentCommand environmentCommand) {
+  private Environment createEnvironment(CreateEnvironmentCommand environmentCommand) {
     var environment = environmentCommand.toDomain(clockPort);
     environmentRepositoryPort.save(environment);
     return environment;

@@ -24,24 +24,29 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
+@Tag(name = "EnvironmentApi")
 @Slf4j
 @Authenticated
 @Path("/auth/environments")
 @RequiredArgsConstructor
-public class EnvironmentController {
+public class EnvironmentResource {
 
   private final EnvironmentFacade environmentFacade;
 
   private final SecurityIdentity identity;
 
+  @Operation(operationId = "listAll")
   @CacheResult(cacheName = CACHE_HTTP_LIST_ALL_ENVIRONMENTS)
   @GET
   public List<EnvironmentResponse> listAll() {
     return EnvironmentResponse.from(environmentFacade.listAllEnvironments());
   }
 
+  @Operation(operationId = "get")
   @CacheResult(cacheName = CACHE_HTTP_GET_ENVIRONMENT_DETAILS)
   @GET
   @Path("/{id}")
@@ -51,14 +56,16 @@ public class EnvironmentController {
     return EnvironmentDetailsResponse.from(environment);
   }
 
+  @Operation(operationId = "create")
   @POST
   public void create(@Valid @RequestBody CreateUpdateEnvironmentRequest request) {
     var username = extractUsername(identity);
     log.info("[{}] created a new environment [{}].", username, request.description());
-    var command = request.toCommand(null, username);
+    var command = request.toCommand(username);
     environmentFacade.createEnvironment(command);
   }
 
+  @Operation(operationId = "update")
   @PUT
   @Path("/{id}")
   public void update(

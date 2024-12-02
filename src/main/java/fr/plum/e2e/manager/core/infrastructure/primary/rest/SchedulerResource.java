@@ -18,16 +18,20 @@ import jakarta.ws.rs.QueryParam;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
+@Tag(name = "SchedulerApi")
 @Slf4j
 @Authenticated
 @Path("/auth/schedulers")
 @RequiredArgsConstructor
-public class SchedulerController {
+public class SchedulerResource {
 
   private final SchedulerFacade schedulerFacade;
 
+  @Operation(operationId = "get")
   @GET
   @CacheResult(cacheName = CACHE_HTTP_GET_SCHEDULER_DETAILS)
   public SchedulerResponse retrieve(
@@ -37,6 +41,7 @@ public class SchedulerController {
     return SchedulerResponse.fromDomain(scheduler);
   }
 
+  @Operation(operationId = "update")
   @PUT
   public void update(
       @NotNull @QueryParam("environmentId") UUID environmentId,

@@ -12,7 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Path("/gitlab-webhook")
 @RequiredArgsConstructor
-public class GitlabWebHookController {
+public class GitlabWebHookResource {
 
   private final GitlabWebHookHandler gitlabWebHookHandler;
 
@@ -26,9 +26,8 @@ public class GitlabWebHookController {
           } catch (CustomException e) {
             log.debug(
                 "Business Webhook Async Error : {}",
-                e
-                    .getDescription()); // Hook likely coming from another configured branch or
-                                        // similar.
+                e.getDescription()); // Hook likely coming from another configured branch or
+            // similar.
             // So not important.
           } catch (Exception e) {
             log.error("Webhook Async Error : {}", e.getMessage());

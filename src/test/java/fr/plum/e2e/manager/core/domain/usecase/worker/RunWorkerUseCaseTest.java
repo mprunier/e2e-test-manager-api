@@ -11,9 +11,6 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.Environmen
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.MaxParallelWorkers;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.SourceCodeInformation;
-import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.sourcecode.SourceCodeBranch;
-import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.sourcecode.SourceCodeProjectId;
-import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.sourcecode.SourceCodeToken;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.FileConfiguration;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.SuiteConfiguration;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.TestConfiguration;
@@ -193,10 +190,11 @@ class RunWorkerUseCaseTest {
 
   private Environment createTestEnvironment(int maxParallelWorkers) {
     SourceCodeInformation sourceCodeInfo =
-        new SourceCodeInformation(
-            new SourceCodeProjectId("test-project"),
-            new SourceCodeToken("test-token"),
-            new SourceCodeBranch("main"));
+        SourceCodeInformation.builder()
+            .projectId("testProject")
+            .token("testToken")
+            .branch("main")
+            .build();
 
     return Environment.builder()
         .id(ENV_ID)

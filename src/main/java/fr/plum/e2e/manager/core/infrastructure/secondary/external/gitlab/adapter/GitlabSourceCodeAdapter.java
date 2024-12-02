@@ -24,24 +24,18 @@ public class GitlabSourceCodeAdapter implements SourceCodePort {
   public SourceCodeProject cloneRepository(SourceCodeInformation sourceCodeInformation) {
     var repoUrl =
         gitlabClient
-            .getProjectDetail(
-                sourceCodeInformation.sourceCodeToken().value(),
-                sourceCodeInformation.sourceCodeProjectId().value())
+            .getProjectDetail(sourceCodeInformation.token(), sourceCodeInformation.projectId())
             .getRepoUrl();
     var credentialsProvider =
-        new UsernamePasswordCredentialsProvider(
-            "oauth2", sourceCodeInformation.sourceCodeToken().value());
+        new UsernamePasswordCredentialsProvider("oauth2", sourceCodeInformation.token());
     var tempDirectory =
         new File(
-            "./tmp/config/sync/"
-                + sourceCodeInformation.sourceCodeProjectId().value()
-                + "/"
-                + UUID.randomUUID());
+            "./tmp/config/sync/" + sourceCodeInformation.projectId() + "/" + UUID.randomUUID());
     try (Git ignored =
         Git.cloneRepository()
             .setURI(repoUrl)
             .setDirectory(tempDirectory)
-            .setBranch(sourceCodeInformation.sourceCodeBranch().value())
+            .setBranch(sourceCodeInformation.branch())
             .setCredentialsProvider(credentialsProvider)
             .call()) {
       return new SourceCodeProject(tempDirectory);

@@ -22,15 +22,19 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
+@Tag(name = "TestResultApi")
 @Slf4j
 @Authenticated
 @Path("/auth/test-results")
 @RequiredArgsConstructor
-public class TestResultController {
+public class TestResultResource {
 
   private final TestResultFacade testResultFacade;
 
+  @Operation(operationId = "getAll")
   @GET
   public List<TestResultResponse> getAllTestResult(
       @NotNull @QueryParam("testConfigurationId") UUID testConfigurationId) {
@@ -38,6 +42,7 @@ public class TestResultController {
     return TestResultResponse.fromTestResultViews(testResultFacade.getAllTestResult(query));
   }
 
+  @Operation(operationId = "getErrorDetails")
   @GET
   @Path("/{id}/error-details")
   public TestResultErrorDetailsResponse getTestResultErrorDetails(
@@ -47,6 +52,7 @@ public class TestResultController {
         testResultFacade.getTestResultErrorDetails(query));
   }
 
+  @Operation(operationId = "downloadVideo")
   @GET
   @Path("/medias/videos/{id}")
   @Produces("video/mp4")
@@ -54,6 +60,7 @@ public class TestResultController {
     return testResultFacade.downloadVideo(new DownloadVideoQuery(new TestResultVideoId(id)));
   }
 
+  @Operation(operationId = "downloadScreenshot")
   @GET
   @Path("/medias/screenshots/{id}")
   @Produces("image/png")

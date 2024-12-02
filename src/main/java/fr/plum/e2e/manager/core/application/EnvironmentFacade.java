@@ -1,7 +1,8 @@
 package fr.plum.e2e.manager.core.application;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.Environment;
-import fr.plum.e2e.manager.core.domain.model.command.CreateUpdateEnvironmentCommand;
+import fr.plum.e2e.manager.core.domain.model.command.CreateEnvironmentCommand;
+import fr.plum.e2e.manager.core.domain.model.command.UpdateEnvironmentCommand;
 import fr.plum.e2e.manager.core.domain.model.query.CommonQuery;
 import fr.plum.e2e.manager.core.domain.model.view.EnvironmentView;
 import fr.plum.e2e.manager.core.domain.port.out.EventPublisherPort;
@@ -47,11 +48,11 @@ public class EnvironmentFacade {
     this.listAllEnvironmentsUseCase = new ListAllEnvironmentsUseCase(listAllEnvironmentsPort);
   }
 
-  public void createEnvironment(CreateUpdateEnvironmentCommand command) {
+  public void createEnvironment(CreateEnvironmentCommand command) {
     createEnvironmentUseCase.execute(command);
   }
 
-  public void updateEnvironment(CreateUpdateEnvironmentCommand command) {
+  public void updateEnvironment(UpdateEnvironmentCommand command) {
     updateEnvironmentUseCase.execute(command);
   }
 

@@ -28,7 +28,7 @@ public final class GitlabPipelineRequestMapper {
     var pipelineRequestBuilder =
         PipelineRequest.builder()
             .variable(buildCypressTestEnabledVariable())
-            .ref(sourceCodeInformation.sourceCodeBranch().value());
+            .ref(sourceCodeInformation.branch());
 
     if (!workerUnitFilter.fileNames().isEmpty()) {
       pipelineRequestBuilder.variable(

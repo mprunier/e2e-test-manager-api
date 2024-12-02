@@ -2,6 +2,8 @@ package fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.TestResultStatus;
 import fr.plum.e2e.manager.core.domain.model.view.TestResultView;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -9,13 +11,13 @@ import lombok.Builder;
 
 @Builder
 public record TestResultResponse(
-    UUID id,
-    TestResultStatus status,
+    @NotNull UUID id,
+    @NotNull TestResultStatus status,
     String reference,
-    ZonedDateTime createdAt,
+    @NotNull ZonedDateTime createdAt,
     String errorUrl,
-    Integer duration,
-    String createdBy,
+    @NotNull Integer duration,
+    @NotBlank String createdBy,
     List<TestResultScreenshotResponse> screenshots,
     Boolean hasVideo,
     List<TestResultVariableResponse> variables) {

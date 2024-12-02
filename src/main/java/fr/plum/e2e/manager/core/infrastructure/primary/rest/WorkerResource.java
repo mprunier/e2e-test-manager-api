@@ -23,18 +23,22 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
+@Tag(name = "WorkerApi")
 @Slf4j
 @Authenticated
 @Path("/auth/workers")
 @RequiredArgsConstructor
-public class WorkerController {
+public class WorkerResource {
 
   private final WorkerFacade workerFacade;
 
   private final SecurityIdentity identity;
 
+  @Operation(operationId = "run")
   @POST
   public void run(
       @NotNull @QueryParam("environmentId") UUID environmentId, @RequestBody RunRequest request) {
@@ -43,20 +47,17 @@ public class WorkerController {
     workerFacade.run(request.toCommand(environmentId, username));
   }
 
+  @Operation(operationId = "cancel")
   @DELETE
   @Path("/{worker_id}/cancel")
-  public void cancel(
-      @NotNull @QueryParam("environmentId") UUID environmentId,
-      @PathParam("worker_id") UUID workerId) {
+  public void cancel(@PathParam("worker_id") UUID workerId) {
     var username = extractUsername(identity);
-    log.info("[{}] cancel worker on Environment id [{}].", username, environmentId);
+    log.info("[{}] cancel worker.", username);
     workerFacade.cancel(
-        new CancelWorkerCommand(
-            new EnvironmentId(environmentId),
-            new ActionUsername(username),
-            new WorkerId(workerId)));
+        new CancelWorkerCommand(new ActionUsername(username), new WorkerId(workerId)));
   }
 
+  @Operation(operationId = "getTypeAll")
   @GET
   @Path("/type-all")
   public List<WorkerUnitResponse> get(@NotNull @QueryParam("environmentId") UUID environmentId) {

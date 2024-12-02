@@ -2,8 +2,7 @@ package fr.plum.e2e.manager.core.infrastructure.secondary.external.gitlab.adapte
 
 import static fr.plum.e2e.manager.sharedkernel.infrastructure.cache.CacheNamesConstant.CACHE_GITLAB_JOB;
 
-import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.sourcecode.SourceCodeProjectId;
-import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.sourcecode.SourceCodeToken;
+import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.SourceCodeInformation;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.WorkerUnitStatus;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerUnitId;
 import fr.plum.e2e.manager.core.infrastructure.secondary.external.gitlab.client.GitlabClient;
@@ -21,12 +20,17 @@ public class GitlabJobHandler {
   @CacheName(CACHE_GITLAB_JOB)
   Cache cache;
 
-  public GitlabResponse getJobId(
-      SourceCodeProjectId projectId, SourceCodeToken token, WorkerUnitId id) {
-    var cacheKey = String.format("%s-%s-%s", projectId.value(), token.value(), id.value());
+  public GitlabResponse getJobId(SourceCodeInformation sourceCodeInformation, WorkerUnitId id) {
+    var cacheKey =
+        String.format(
+            "%s-%s-%s",
+            sourceCodeInformation.projectId(), sourceCodeInformation.token(), id.value());
 
     var response =
-        cache.get(cacheKey, k -> fetchJobFromGitlab(token, projectId, id)).await().indefinitely();
+        cache
+            .get(cacheKey, k -> fetchJobFromGitlab(sourceCodeInformation, id))
+            .await()
+            .indefinitely();
 
     if (response.getStatus().toWorkerStatus() == WorkerUnitStatus.IN_PROGRESS) {
       cache.invalidate(cacheKey).await().indefinitely();
@@ -36,8 +40,10 @@ public class GitlabJobHandler {
   }
 
   private GitlabResponse fetchJobFromGitlab(
-      SourceCodeToken token, SourceCodeProjectId projectId, WorkerUnitId workerUnitId) {
-    var jobs = gitlabClient.getJobs(token.value(), projectId.value(), workerUnitId.value());
+      SourceCodeInformation sourceCodeInformation, WorkerUnitId workerUnitId) {
+    var jobs =
+        gitlabClient.getJobs(
+            sourceCodeInformation.token(), sourceCodeInformation.projectId(), workerUnitId.value());
     if (jobs.size() > 1) {
       throw new MoreOneJobException(workerUnitId.value());
     }

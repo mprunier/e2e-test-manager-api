@@ -11,9 +11,6 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.SourceCode
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.VariableDescription;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.VariableIsHidden;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.VariableValue;
-import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.sourcecode.SourceCodeBranch;
-import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.sourcecode.SourceCodeProjectId;
-import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.sourcecode.SourceCodeToken;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.environment.JpaEnvironmentEntity;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.environment.JpaEnvironmentVariableEntity;
 import java.util.ArrayList;
@@ -25,10 +22,11 @@ public final class EnvironmentMapper {
 
   public static Environment toDomain(JpaEnvironmentEntity entity) {
     var sourceCodeInformation =
-        new SourceCodeInformation(
-            new SourceCodeProjectId(entity.getProjectId()),
-            new SourceCodeToken(entity.getToken()),
-            new SourceCodeBranch(entity.getBranch()));
+        SourceCodeInformation.builder()
+            .projectId(entity.getProjectId())
+            .token(entity.getToken())
+            .branch(entity.getBranch())
+            .build();
     var environment =
         Environment.builder()
             .id(new EnvironmentId(entity.getId()))
@@ -65,9 +63,9 @@ public final class EnvironmentMapper {
         JpaEnvironmentEntity.builder()
             .id(domain.getId().value())
             .description(domain.getEnvironmentDescription().value())
-            .projectId(domain.getSourceCodeInformation().sourceCodeProjectId().value())
-            .token(domain.getSourceCodeInformation().sourceCodeToken().value())
-            .branch(domain.getSourceCodeInformation().sourceCodeBranch().value())
+            .projectId(domain.getSourceCodeInformation().projectId())
+            .token(domain.getSourceCodeInformation().token())
+            .branch(domain.getSourceCodeInformation().branch())
             .isEnabled(domain.getIsEnabled().value())
             .maxParallelTestNumber(domain.getMaxParallelWorkers().value())
             .build();

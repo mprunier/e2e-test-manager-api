@@ -1,4 +1,4 @@
-package fr.plum.e2e.manager.core.infrastructure.secondary.notification.dto;
+package fr.plum.e2e.manager.core.infrastructure.secondary.websocket.dto;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.AllArgsConstructor;

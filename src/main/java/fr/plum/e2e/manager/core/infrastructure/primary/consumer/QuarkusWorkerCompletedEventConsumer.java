@@ -6,9 +6,9 @@ import fr.plum.e2e.manager.core.domain.model.command.AddMetricsCommand;
 import fr.plum.e2e.manager.core.domain.model.event.WorkerCompletedEvent;
 import fr.plum.e2e.manager.core.infrastructure.primary.shared.helper.MetricsHelper;
 import fr.plum.e2e.manager.core.infrastructure.primary.shared.helper.WorkerNotificationHelper;
-import fr.plum.e2e.manager.core.infrastructure.secondary.notification.adapter.WebSocketNotifier;
-import fr.plum.e2e.manager.core.infrastructure.secondary.notification.dto.UpdateFinalMetricsNotificationsEvent;
-import fr.plum.e2e.manager.core.infrastructure.secondary.notification.dto.WorkerNotificationStatus;
+import fr.plum.e2e.manager.core.infrastructure.secondary.websocket.adapter.EnvironmentNotifier;
+import fr.plum.e2e.manager.core.infrastructure.secondary.websocket.dto.UpdateFinalMetricsNotificationsEvent;
+import fr.plum.e2e.manager.core.infrastructure.secondary.websocket.dto.WorkerNotificationStatus;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.ObservesAsync;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,7 @@ public class QuarkusWorkerCompletedEventConsumer {
 
   private final WorkerNotificationHelper workerNotificationHelper;
   private final MetricsFacade metricsFacade;
-  private final WebSocketNotifier webSocketNotifier;
+  private final EnvironmentNotifier environmentNotifier;
   private final MetricsHelper metricsHelper;
 
   public void workerCompleted(@ObservesAsync WorkerCompletedEvent event) {
@@ -46,6 +46,6 @@ public class QuarkusWorkerCompletedEventConsumer {
             .environmentId(event.environmentId())
             .metrics(metricsResponse)
             .build();
-    webSocketNotifier.notifySubscribers(updateFinalMetricsNotificationsEvent);
+    environmentNotifier.notifySubscribers(updateFinalMetricsNotificationsEvent);
   }
 }

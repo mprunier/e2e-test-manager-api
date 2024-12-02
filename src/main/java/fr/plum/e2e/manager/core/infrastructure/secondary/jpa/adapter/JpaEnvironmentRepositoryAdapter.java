@@ -64,8 +64,8 @@ public class JpaEnvironmentRepositoryAdapter implements EnvironmentRepositoryPor
         CACHE_JPA_ENVIRONMENT_BY_ID, environment.getId().value().toString());
     cacheManager.invalidateCacheByKey(
         CACHE_JPA_ENVIRONMENTS_BY_PROJECT_BRANCH,
-        environment.getSourceCodeInformation().sourceCodeProjectId().value()
+        environment.getSourceCodeInformation().projectId()
             + ":"
-            + environment.getSourceCodeInformation().sourceCodeBranch().value());
+            + environment.getSourceCodeInformation().branch());
   }
 }

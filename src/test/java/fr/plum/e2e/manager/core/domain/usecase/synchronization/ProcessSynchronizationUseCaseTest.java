@@ -8,9 +8,6 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.environment.Environment;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentDescription;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.SourceCodeInformation;
-import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.sourcecode.SourceCodeBranch;
-import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.sourcecode.SourceCodeProjectId;
-import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.sourcecode.SourceCodeToken;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.Synchronization;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SourceCodeProject;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationFileContent;
@@ -165,10 +162,11 @@ class ProcessSynchronizationUseCaseTest {
 
   private Environment createTestEnvironment() {
     SourceCodeInformation sourceCodeInfo =
-        new SourceCodeInformation(
-            new SourceCodeProjectId("test-project"),
-            new SourceCodeToken("test-token"),
-            new SourceCodeBranch("main"));
+        SourceCodeInformation.builder()
+            .projectId("testProject")
+            .token("testToken")
+            .branch("main")
+            .build();
 
     return Environment.builder()
         .id(ENV_ID)

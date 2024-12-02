@@ -1,4 +1,4 @@
-package fr.plum.e2e.manager.core.infrastructure.primary.subscription;
+package fr.plum.e2e.manager.core.infrastructure.primary.websocket;
 
 import fr.plum.e2e.manager.sharedkernel.infrastructure.websocket.WebSocketSessionRegistry;
 import jakarta.websocket.OnClose;

@@ -15,16 +15,20 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
+@Tag(name = "MetricsApi")
 @Slf4j
 @Authenticated
 @Path("/auth/metrics")
 @RequiredArgsConstructor
-public class MetricsController {
+public class MetricsResource {
 
   private final MetricsFacade metricsFacade;
   private final MetricsHelper metricsHelper;
 
+  @Operation(operationId = "getAll")
   @GET
   @Path("/history")
   public List<MetricsResponse> getAllMetrics(
@@ -39,6 +43,7 @@ public class MetricsController {
     return MetricsResponse.fromDomain(metricsFacade.getAllMetrics(query));
   }
 
+  @Operation(operationId = "getLast")
   @GET
   @Path("/last")
   public MetricsResponse getLastMetrics(@NotNull @QueryParam("environmentId") UUID environmentId) {

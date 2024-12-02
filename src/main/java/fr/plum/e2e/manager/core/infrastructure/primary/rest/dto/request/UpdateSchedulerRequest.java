@@ -17,14 +17,15 @@ public record UpdateSchedulerRequest(
     @NotNull Boolean isEnabled,
     @NotNull Integer hour,
     @NotNull Integer minute,
-    @NotNull List<DayOfWeek> daysOfWeek) {
+    List<DayOfWeek> daysOfWeek) {
+
   public UpdateSchedulerCommand toCommand(UUID environmentId) {
     return UpdateSchedulerCommand.builder()
         .environmentId(new EnvironmentId(environmentId))
         .isEnabled(new SchedulerIsEnabled(isEnabled))
         .schedulerHour(new SchedulerHour(hour))
         .schedulerMinute(new SchedulerMinute(minute))
-        .daysOfWeek(new SchedulerDaysOfWeek(daysOfWeek))
+        .daysOfWeek(daysOfWeek != null ? new SchedulerDaysOfWeek(daysOfWeek) : null)
         .build();
   }
 }

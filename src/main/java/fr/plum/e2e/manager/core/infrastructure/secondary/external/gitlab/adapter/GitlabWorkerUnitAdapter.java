@@ -38,44 +38,28 @@ public class GitlabWorkerUnitAdapter implements WorkerUnitPort {
 
     var gitlabResponse =
         gitlabClient.runPipeline(
-            sourceCodeInformation.sourceCodeToken().value(),
-            sourceCodeInformation.sourceCodeProjectId().value(),
-            pipelineRequest);
+            sourceCodeInformation.token(), sourceCodeInformation.projectId(), pipelineRequest);
     return new WorkerUnitId(gitlabResponse.getId());
   }
 
   @Override
   public WorkerUnitStatus getWorkerStatus(
       SourceCodeInformation sourceCodeInformation, WorkerUnitId workerUnitId) {
-    var job =
-        gitlabJobHandler.getJobId(
-            sourceCodeInformation.sourceCodeProjectId(),
-            sourceCodeInformation.sourceCodeToken(),
-            workerUnitId);
+    var job = gitlabJobHandler.getJobId(sourceCodeInformation, workerUnitId);
     return job.getStatus().toWorkerStatus();
   }
 
   @Override
   public Object getWorkerReportArtifacts(
       SourceCodeInformation sourceCodeInformation, WorkerUnitId workerUnitId) {
-    var jobId =
-        gitlabJobHandler
-            .getJobId(
-                sourceCodeInformation.sourceCodeProjectId(),
-                sourceCodeInformation.sourceCodeToken(),
-                workerUnitId)
-            .getId();
+    var jobId = gitlabJobHandler.getJobId(sourceCodeInformation, workerUnitId).getId();
     return gitlabClient.getJobArtifacts(
-        sourceCodeInformation.sourceCodeToken().value(),
-        sourceCodeInformation.sourceCodeProjectId().value(),
-        jobId);
+        sourceCodeInformation.token(), sourceCodeInformation.projectId(), jobId);
   }
 
   @Override
   public void cancel(SourceCodeInformation sourceCodeInformation, WorkerUnitId id) {
     gitlabClient.cancelPipeline(
-        sourceCodeInformation.sourceCodeToken().value(),
-        sourceCodeInformation.sourceCodeProjectId().value(),
-        id.value());
+        sourceCodeInformation.token(), sourceCodeInformation.projectId(), id.value());
   }
 }
