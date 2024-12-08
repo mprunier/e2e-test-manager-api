@@ -7,6 +7,8 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.Suit
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.Tag;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.TestConfigurationId;
 import fr.plum.e2e.manager.core.domain.model.query.SearchSuiteConfigurationQuery;
+import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.enumeration.SearchSuiteConfigurationSortField;
+import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.enumeration.SearchSuiteConfigurationSortOrder;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.QueryParam;
 import java.util.UUID;
@@ -45,11 +47,11 @@ public class SearchSuiteConfigurationRequest {
 
   @QueryParam("sortField")
   @DefaultValue("file")
-  private String sortField;
+  private SearchSuiteConfigurationSortField sortField;
 
   @QueryParam("sortOrder")
   @DefaultValue("desc")
-  private String sortOrder;
+  private SearchSuiteConfigurationSortOrder sortOrder;
 
   public SearchSuiteConfigurationQuery toQuery(UUID environmentId) {
     return SearchSuiteConfigurationQuery.builder()
@@ -64,8 +66,8 @@ public class SearchSuiteConfigurationRequest {
         .allNotSuccess(allNotSuccess != null ? allNotSuccess : false)
         .page(page)
         .size(size)
-        .sortField(sortField)
-        .sortOrder(sortOrder)
+        .sortField(sortField.getField())
+        .sortOrder(sortOrder.getOrder())
         .build();
   }
 }

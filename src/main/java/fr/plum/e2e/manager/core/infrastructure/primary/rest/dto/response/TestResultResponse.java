@@ -19,7 +19,7 @@ public record TestResultResponse(
     @NotNull Integer duration,
     @NotBlank String createdBy,
     List<TestResultScreenshotResponse> screenshots,
-    Boolean hasVideo,
+    UUID videoId,
     List<TestResultVariableResponse> variables) {
 
   public static TestResultResponse fromTestResultView(TestResultView testResultView) {
@@ -35,7 +35,7 @@ public record TestResultResponse(
             testResultView.screenshots().stream()
                 .map(TestResultScreenshotResponse::fromTestResultScreenshotView)
                 .toList())
-        .hasVideo(testResultView.hasVideo())
+        .videoId(testResultView.videoId())
         .variables(
             testResultView.variables().stream()
                 .map(TestResultVariableResponse::fromTestResultVariableView)
@@ -43,7 +43,7 @@ public record TestResultResponse(
         .build();
   }
 
-  public static List<TestResultResponse> fromTestResultViews(List<TestResultView> testResultViews) {
+  public static List<TestResultResponse> fromDomain(List<TestResultView> testResultViews) {
     return testResultViews.stream().map(TestResultResponse::fromTestResultView).toList();
   }
 }

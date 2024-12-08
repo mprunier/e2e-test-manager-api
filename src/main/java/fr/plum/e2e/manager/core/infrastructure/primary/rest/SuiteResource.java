@@ -2,10 +2,10 @@ package fr.plum.e2e.manager.core.infrastructure.primary.rest;
 
 import fr.plum.e2e.manager.core.application.SuiteFacade;
 import fr.plum.e2e.manager.core.domain.model.query.CommonQuery;
-import fr.plum.e2e.manager.core.domain.model.view.ConfigurationSuiteWithWorkerView;
-import fr.plum.e2e.manager.core.domain.model.view.PaginatedView;
-import fr.plum.e2e.manager.core.domain.model.view.SearchCriteriaView;
 import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.request.SearchSuiteConfigurationRequest;
+import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response.ConfigurationSuiteWithWorkerResponse;
+import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response.PaginatedResponse;
+import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response.SearchCriteriaResponse;
 import io.quarkus.security.Authenticated;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -30,17 +30,20 @@ public class SuiteResource {
 
   @Operation(operationId = "searchSuites")
   @GET
-  public PaginatedView<ConfigurationSuiteWithWorkerView> searchSuites(
+  public PaginatedResponse<ConfigurationSuiteWithWorkerResponse> searchSuites(
       @NotNull @QueryParam("environmentId") UUID environmentId,
       @Valid @BeanParam SearchSuiteConfigurationRequest request) {
-    return suiteFacade.searchSuites(request.toQuery(environmentId));
+    return PaginatedResponse.fromDomain(
+        suiteFacade.searchSuites(request.toQuery(environmentId)),
+        ConfigurationSuiteWithWorkerResponse::fromDomain);
   }
 
   @Operation(operationId = "getSearchCriteria")
   @GET
   @Path("/criteria")
-  public SearchCriteriaView getSearchCriteria(
+  public SearchCriteriaResponse getSearchCriteria(
       @NotNull @QueryParam("environmentId") UUID environmentId) {
-    return suiteFacade.getSearchCriteria(CommonQuery.fromEnvironmentUUID(environmentId));
+    return SearchCriteriaResponse.fromDomain(
+        suiteFacade.getSearchCriteria(CommonQuery.fromEnvironmentUUID(environmentId)));
   }
 }

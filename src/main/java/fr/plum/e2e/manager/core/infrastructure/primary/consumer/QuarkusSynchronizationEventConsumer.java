@@ -28,7 +28,7 @@ public class QuarkusSynchronizationEventConsumer {
     try {
       var externalEvent =
           SynchronizationIsInProgressNotificationEvent.builder()
-              .environmentId(event.environmentId())
+              .environmentId(event.environmentId().value())
               .build();
       environmentNotifier.notifySubscribers(externalEvent);
 
@@ -50,7 +50,7 @@ public class QuarkusSynchronizationEventConsumer {
       var syncErrors = SynchronizationErrorResponse.fromDomain(event.synchronizationErrors());
       var externalEvent =
           SynchronizationCompletedNotificationEvent.builder()
-              .environmentId(event.environmentId())
+              .environmentId(event.environmentId().value())
               .syncErrors(syncErrors)
               .build();
       environmentNotifier.notifySubscribers(externalEvent);

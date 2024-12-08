@@ -7,7 +7,7 @@ import lombok.Builder;
 public record TestResultErrorDetailsResponse(
     String errorMessage, String errorStacktrace, String code) {
 
-  public static TestResultErrorDetailsResponse fromTestResultErrorDetailView(
+  public static TestResultErrorDetailsResponse fromDomain(
       TestResultErrorDetailsView testResultErrorDetails) {
     return builder()
         .errorMessage(testResultErrorDetails.errorMessage())

@@ -26,7 +26,7 @@ public class WorkerUpdatedNotificationEvent extends AbstractNotificationEvent {
       WorkerType workerType,
       WorkerNotificationStatus status,
       ConfigurationSuiteWithWorkerView configurationSuiteWithWorkerView) {
-    super(environmentId);
+    super(environmentId.value());
     this.workerType = workerType;
     this.status = status;
     this.configurationSuiteWithWorkerView = configurationSuiteWithWorkerView;

@@ -33,7 +33,7 @@ public class WorkerNotificationHelper {
       if (optionalWorker.isPresent()) {
         var workerUnitUpdatedNotificationEvent =
             WorkerUnitUpdatedNotificationEvent.builder()
-                .environmentId(environmentId)
+                .environmentId(environmentId.value())
                 .workers(WorkerUnitResponse.fromWorkers(optionalWorker.get().getWorkerUnits()))
                 .build();
         environmentNotifier.notifySubscribers(workerUnitUpdatedNotificationEvent);

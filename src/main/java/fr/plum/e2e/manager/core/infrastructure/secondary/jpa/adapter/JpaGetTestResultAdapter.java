@@ -15,6 +15,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.transaction.Transactional;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -55,11 +56,19 @@ public class JpaGetTestResultAdapter implements GetTestResultPort {
               var videoQuery =
                   entityManager.createQuery(
                       """
-              SELECT COUNT(v) FROM JpaTestVideoEntity v
-              WHERE v.testResultId = :testResultId
-              """,
-                      Long.class);
+                      SELECT v.id FROM JpaTestVideoEntity v
+                      WHERE v.testResultId = :testResultId
+                      """,
+                      UUID.class);
               videoQuery.setParameter("testResultId", entity.getId());
+              videoQuery.setMaxResults(1);
+
+              UUID videoId;
+              try {
+                videoId = videoQuery.setMaxResults(1).getSingleResult();
+              } catch (NoResultException e) {
+                videoId = null;
+              }
 
               return TestResultView.builder()
                   .id(entity.getId())
@@ -70,7 +79,7 @@ public class JpaGetTestResultAdapter implements GetTestResultPort {
                   .duration(entity.getDuration())
                   .createdBy(entity.getCreatedBy())
                   .screenshots(screenshotsQuery.getResultList())
-                  .hasVideo(videoQuery.getSingleResult() > 0)
+                  .videoId(videoId)
                   .variables(
                       entity.getVariables() != null
                           ? entity.getVariables().entrySet().stream()

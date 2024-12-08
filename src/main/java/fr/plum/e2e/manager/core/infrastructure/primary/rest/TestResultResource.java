@@ -39,7 +39,7 @@ public class TestResultResource {
   public List<TestResultResponse> getAllTestResult(
       @NotNull @QueryParam("testConfigurationId") UUID testConfigurationId) {
     var query = new GetAllTestResultQuery(new TestConfigurationId(testConfigurationId));
-    return TestResultResponse.fromTestResultViews(testResultFacade.getAllTestResult(query));
+    return TestResultResponse.fromDomain(testResultFacade.getAllTestResult(query));
   }
 
   @Operation(operationId = "getErrorDetails")
@@ -48,7 +48,7 @@ public class TestResultResource {
   public TestResultErrorDetailsResponse getTestResultErrorDetails(
       @NotNull @PathParam("id") UUID testResultId) {
     var query = new GetTestResultErrorDetailsQuery(new TestResultId(testResultId));
-    return TestResultErrorDetailsResponse.fromTestResultErrorDetailView(
+    return TestResultErrorDetailsResponse.fromDomain(
         testResultFacade.getTestResultErrorDetails(query));
   }
 

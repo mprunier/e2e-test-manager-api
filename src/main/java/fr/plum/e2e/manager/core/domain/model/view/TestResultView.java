@@ -16,5 +16,5 @@ public record TestResultView(
     Integer duration,
     String createdBy,
     List<TestResultScreenshotView> screenshots,
-    Boolean hasVideo,
+    UUID videoId,
     List<TestResultVariableView> variables) {}

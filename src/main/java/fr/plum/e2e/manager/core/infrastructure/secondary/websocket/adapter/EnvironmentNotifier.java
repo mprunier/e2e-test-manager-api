@@ -25,7 +25,7 @@ public class EnvironmentNotifier {
     log.debug(
         "Send consumer [{}] on environment [{}].",
         event.getClass().getSimpleName(),
-        event.getEnvironmentId().value());
+        event.getEnvironmentId());
 
     String message;
     try {
@@ -35,7 +35,7 @@ public class EnvironmentNotifier {
       return;
     }
 
-    var envId = event.getEnvironmentId().value().toString();
+    var envId = event.getEnvironmentId().toString();
     var sessions = registry.getSessionsForEnvironment(envId);
 
     sessions.stream()

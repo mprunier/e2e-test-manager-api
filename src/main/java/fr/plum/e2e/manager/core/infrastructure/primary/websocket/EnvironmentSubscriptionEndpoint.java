@@ -10,7 +10,7 @@ import jakarta.websocket.server.ServerEndpoint;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@ServerEndpoint("/consumer/environments/{environment_id}")
+@ServerEndpoint("/environments/{environment_id}")
 public class EnvironmentSubscriptionEndpoint {
   private final WebSocketSessionRegistry sessionRegistry;
 

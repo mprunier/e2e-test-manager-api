@@ -43,7 +43,7 @@ public class QuarkusWorkerCompletedEventConsumer {
     var metricsResponse = metricsHelper.getLastMetrics(event.environmentId().value());
     var updateFinalMetricsNotificationsEvent =
         UpdateFinalMetricsNotificationsEvent.builder()
-            .environmentId(event.environmentId())
+            .environmentId(event.environmentId().value())
             .metrics(metricsResponse)
             .build();
     environmentNotifier.notifySubscribers(updateFinalMetricsNotificationsEvent);

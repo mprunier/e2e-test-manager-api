@@ -9,14 +9,11 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record CreateUpdateEnvironmentVariableRequest(
-    @NotBlank String name,
-    @NotBlank String defaultValue,
-    String description,
-    @NotNull Boolean isHidden) {
+    @NotBlank String name, @NotBlank String value, String description, @NotNull Boolean isHidden) {
   public EnvironmentVariableCommand toCommand() {
     return new EnvironmentVariableCommand(
         new EnvironmentVariableId(name),
-        new VariableValue(defaultValue),
+        new VariableValue(value),
         new VariableDescription(description),
         new VariableIsHidden(isHidden));
   }

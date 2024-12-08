@@ -40,9 +40,7 @@ public class CheckWorkerScheduler {
               .isBefore(ZonedDateTime.now().minusMinutes(workerCancelTimeoutInterval))) {
             workerFacade.cancel(
                 new CancelWorkerCommand(
-                    worker.getEnvironmentId(),
-                    new ActionUsername("System Timeout Checker"),
-                    worker.getId()));
+                    new ActionUsername("System Timeout Checker"), worker.getId()));
           } else {
             for (WorkerUnit workerUnit : worker.getWorkerUnits()) {
               workerFacade.report(new ReportWorkerCommand(workerUnit.getId()));
