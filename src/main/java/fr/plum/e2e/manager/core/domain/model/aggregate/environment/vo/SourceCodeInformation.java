@@ -11,14 +11,4 @@ public record SourceCodeInformation(String projectId, String token, String branc
     Assert.notBlank("source code token", token);
     Assert.notBlank("source code branch", branch);
   }
-
-  public String getMaskedValue() {
-    if (token.length() <= 6) return "**********";
-
-    var masked = new StringBuilder(token);
-    for (int i = 3; i < token.length() - 3; i++) {
-      masked.setCharAt(i, '*');
-    }
-    return masked.toString();
-  }
 }

@@ -8,8 +8,8 @@ import lombok.experimental.SuperBuilder;
 
 @Getter
 @SuperBuilder
-@JsonTypeName("WORKER_UNIT_UPDATED_EVENT")
-public class WorkerUnitUpdatedNotificationEvent extends AbstractNotificationEvent {
+@JsonTypeName("TYPE_ALL_WORKER_UNITS_UPDATED_EVENT")
+public class TypeAllWorkerUnitsUpdatedNotificationEvent extends AbstractNotificationEvent {
 
-  private List<WorkerUnitResponse> workers;
+  private List<WorkerUnitResponse> workerUnits;
 }

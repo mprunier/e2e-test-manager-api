@@ -8,10 +8,11 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.worker.WorkerType;
 import fr.plum.e2e.manager.core.domain.model.query.CommonQuery;
 import fr.plum.e2e.manager.core.domain.model.query.SearchSuiteConfigurationQuery;
 import fr.plum.e2e.manager.core.domain.model.view.ConfigurationSuiteWithWorkerView;
+import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response.ConfigurationSuiteWithWorkerResponse;
 import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response.WorkerUnitResponse;
 import fr.plum.e2e.manager.core.infrastructure.secondary.websocket.adapter.EnvironmentNotifier;
+import fr.plum.e2e.manager.core.infrastructure.secondary.websocket.dto.TypeAllWorkerUnitsUpdatedNotificationEvent;
 import fr.plum.e2e.manager.core.infrastructure.secondary.websocket.dto.WorkerNotificationStatus;
-import fr.plum.e2e.manager.core.infrastructure.secondary.websocket.dto.WorkerUnitUpdatedNotificationEvent;
 import fr.plum.e2e.manager.core.infrastructure.secondary.websocket.dto.WorkerUpdatedNotificationEvent;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
@@ -32,9 +33,9 @@ public class WorkerNotificationHelper {
       var optionalWorker = workerFacade.get(new CommonQuery(environmentId));
       if (optionalWorker.isPresent()) {
         var workerUnitUpdatedNotificationEvent =
-            WorkerUnitUpdatedNotificationEvent.builder()
+            TypeAllWorkerUnitsUpdatedNotificationEvent.builder()
                 .environmentId(environmentId.value())
-                .workers(WorkerUnitResponse.fromWorkers(optionalWorker.get().getWorkerUnits()))
+                .workerUnits(WorkerUnitResponse.fromWorkers(optionalWorker.get().getWorkerUnits()))
                 .build();
         environmentNotifier.notifySubscribers(workerUnitUpdatedNotificationEvent);
       }
@@ -50,7 +51,8 @@ public class WorkerNotificationHelper {
             .environmentId(environmentId)
             .workerType(worker.getType())
             .status(status)
-            .configurationSuiteWithWorkerView(configurationSuiteWithWorkerView)
+            .configurationSuiteWithWorker(
+                ConfigurationSuiteWithWorkerResponse.fromDomain(configurationSuiteWithWorkerView))
             .build();
     environmentNotifier.notifySubscribers(workerUpdatedNotificationEvent);
   }

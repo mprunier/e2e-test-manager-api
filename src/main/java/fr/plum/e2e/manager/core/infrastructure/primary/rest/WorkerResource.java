@@ -57,10 +57,11 @@ public class WorkerResource {
         new CancelWorkerCommand(new ActionUsername(username), new WorkerId(workerId)));
   }
 
-  @Operation(operationId = "getTypeAll")
+  @Operation(operationId = "getTypeAllWorkerUnits")
   @GET
-  @Path("/type-all")
-  public List<WorkerUnitResponse> get(@NotNull @QueryParam("environmentId") UUID environmentId) {
+  @Path("/units/type-all")
+  public List<WorkerUnitResponse> getTypeAllWorkerUnits(
+      @NotNull @QueryParam("environmentId") UUID environmentId) {
     var optionalWorker = workerFacade.get(new CommonQuery(new EnvironmentId(environmentId)));
     if (optionalWorker.isPresent()) {
       return WorkerUnitResponse.fromWorkers(optionalWorker.get().getWorkerUnits());

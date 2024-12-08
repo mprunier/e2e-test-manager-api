@@ -6,6 +6,8 @@ import static fr.plum.e2e.manager.sharedkernel.infrastructure.cache.CacheNamesCo
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.Environment;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentDescription;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
+import fr.plum.e2e.manager.core.domain.model.exception.EnvironmentNotFoundException;
+import fr.plum.e2e.manager.core.domain.model.view.EnvironmentDetailsView;
 import fr.plum.e2e.manager.core.domain.port.out.repository.EnvironmentRepositoryPort;
 import fr.plum.e2e.manager.core.infrastructure.secondary.cache.QuarkusCacheManager;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter.mapper.EnvironmentMapper;
@@ -13,6 +15,8 @@ import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.repository.JpaEnvir
 import io.quarkus.cache.CacheKey;
 import io.quarkus.cache.CacheResult;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 public class JpaEnvironmentRepositoryAdapter implements EnvironmentRepositoryPort {
 
   private final JpaEnvironmentRepository repository;
+  private final EntityManager entityManager;
   private final QuarkusCacheManager cacheManager;
 
   @CacheResult(cacheName = CACHE_JPA_ENVIRONMENT_BY_ID)
@@ -57,6 +62,46 @@ public class JpaEnvironmentRepositoryAdapter implements EnvironmentRepositoryPor
   @Override
   public boolean exist(EnvironmentDescription description) {
     return repository.count("description", description.value()) > 0;
+  }
+
+  @Override
+  public EnvironmentDetailsView findDetails(EnvironmentId environmentId) {
+    var query =
+        entityManager.createQuery(
+            """
+                    SELECT NEW fr.plum.e2e.manager.core.domain.model.view.EnvironmentDetailsView(
+                        e.id,
+                        e.description,
+                        e.projectId,
+                        e.branch,
+                        e.token,
+                        e.isEnabled,
+                        e.maxParallelTestNumber,
+                        COALESCE(s.isInProgress, false),
+                        (SELECT NEW fr.plum.e2e.manager.core.domain.model.view.EnvironmentDetailsVariableView(
+                            v.name,
+                            v.defaultValue,
+                            v.description,
+                            v.isHidden)
+                         FROM JpaEnvironmentVariableEntity v
+                         WHERE v.environment = e
+                         ORDER BY v.name ASC),
+                        e.createdBy,
+                        e.updatedBy,
+                        e.createdAt,
+                        e.updatedAt)
+                    FROM JpaEnvironmentEntity e
+                    LEFT JOIN JpaSynchronizationEntity s ON s.environmentId = e.id
+                    WHERE e.id = :environmentId
+                    """,
+            EnvironmentDetailsView.class);
+    query.setParameter("environmentId", environmentId.value());
+
+    try {
+      return query.getSingleResult();
+    } catch (NoResultException e) {
+      throw new EnvironmentNotFoundException(environmentId);
+    }
   }
 
   private void invalidateCaches(Environment environment) {
