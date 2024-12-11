@@ -7,16 +7,19 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.environment.Environment;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentDescription;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.exception.EnvironmentNotFoundException;
+import fr.plum.e2e.manager.core.domain.model.view.EnvironmentDetailsVariableView;
 import fr.plum.e2e.manager.core.domain.model.view.EnvironmentDetailsView;
 import fr.plum.e2e.manager.core.domain.port.out.repository.EnvironmentRepositoryPort;
 import fr.plum.e2e.manager.core.infrastructure.secondary.cache.QuarkusCacheManager;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter.mapper.EnvironmentMapper;
+import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.environment.JpaEnvironmentEntity;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.repository.JpaEnvironmentRepository;
 import io.quarkus.cache.CacheKey;
 import io.quarkus.cache.CacheResult;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
+import jakarta.persistence.Tuple;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
@@ -69,36 +72,50 @@ public class JpaEnvironmentRepositoryAdapter implements EnvironmentRepositoryPor
     var query =
         entityManager.createQuery(
             """
-                    SELECT NEW fr.plum.e2e.manager.core.domain.model.view.EnvironmentDetailsView(
-                        e.id,
-                        e.description,
-                        e.projectId,
-                        e.branch,
-                        e.token,
-                        e.isEnabled,
-                        e.maxParallelTestNumber,
-                        COALESCE(s.isInProgress, false),
-                        (SELECT NEW fr.plum.e2e.manager.core.domain.model.view.EnvironmentDetailsVariableView(
-                            v.name,
-                            v.defaultValue,
-                            v.description,
-                            v.isHidden)
-                         FROM JpaEnvironmentVariableEntity v
-                         WHERE v.environment = e
-                         ORDER BY v.name ASC),
-                        e.createdBy,
-                        e.updatedBy,
-                        e.createdAt,
-                        e.updatedAt)
-                    FROM JpaEnvironmentEntity e
-                    LEFT JOIN JpaSynchronizationEntity s ON s.environmentId = e.id
-                    WHERE e.id = :environmentId
-                    """,
-            EnvironmentDetailsView.class);
+            SELECT e, COALESCE(s.isInProgress, false) as syncInProgress
+            FROM JpaEnvironmentEntity e
+            LEFT JOIN JpaSynchronizationEntity s ON s.environmentId = e.id
+            WHERE e.id = :environmentId
+            """,
+            Tuple.class);
     query.setParameter("environmentId", environmentId.value());
 
     try {
-      return query.getSingleResult();
+      var result = query.getSingleResult();
+      var environment = (JpaEnvironmentEntity) result.get(0);
+      var syncInProgress = (Boolean) result.get(1);
+
+      var variablesQuery =
+          entityManager.createQuery(
+              """
+              SELECT NEW fr.plum.e2e.manager.core.domain.model.view.EnvironmentDetailsVariableView(
+                  v.name,
+                  v.defaultValue,
+                  v.description,
+                  v.isHidden)
+              FROM JpaEnvironmentVariableEntity v
+              WHERE v.environment.id = :environmentId
+              ORDER BY v.name ASC
+              """,
+              EnvironmentDetailsVariableView.class);
+      variablesQuery.setParameter("environmentId", environmentId.value());
+
+      var variables = variablesQuery.getResultList();
+
+      return new EnvironmentDetailsView(
+          environment.getId(),
+          environment.getDescription(),
+          environment.getProjectId(),
+          environment.getBranch(),
+          environment.getToken(),
+          environment.isEnabled(),
+          environment.getMaxParallelTestNumber(),
+          syncInProgress,
+          variables,
+          environment.getCreatedBy(),
+          environment.getUpdatedBy(),
+          environment.getCreatedAt(),
+          environment.getUpdatedAt());
     } catch (NoResultException e) {
       throw new EnvironmentNotFoundException(environmentId);
     }

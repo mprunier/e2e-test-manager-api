@@ -8,6 +8,6 @@ public class MissingMandatoryValueException extends CustomException {
     super(
         Response.Status.BAD_REQUEST,
         "missing-mandatory-value",
-        "Missing mandatory value in " + field);
+        String.format("The field %s is mandatory and cannot be empty or null.", field));
   }
 }

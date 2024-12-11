@@ -15,8 +15,4 @@ public class EnvironmentVariable extends Entity<EnvironmentVariableId> {
   private VariableValue value;
   private VariableDescription description;
   private VariableIsHidden isHidden;
-
-  public VariableValue getDisplayValue() {
-    return isHidden.value() ? new VariableValue("**********") : value;
-  }
 }

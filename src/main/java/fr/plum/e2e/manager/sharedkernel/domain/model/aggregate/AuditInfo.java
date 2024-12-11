@@ -1,19 +1,32 @@
 package fr.plum.e2e.manager.sharedkernel.domain.model.aggregate;
 
+import fr.plum.e2e.manager.sharedkernel.domain.assertion.Assert;
 import java.time.ZonedDateTime;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 @Builder
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class AuditInfo {
-  private final ActionUsername createdBy;
-  private final ZonedDateTime createdAt;
+  private ActionUsername createdBy;
+  private ZonedDateTime createdAt;
   private ActionUsername updatedBy;
   private ZonedDateTime updatedAt;
+
+  public AuditInfo(
+      ActionUsername createdBy,
+      ZonedDateTime createdAt,
+      ActionUsername updatedBy,
+      ZonedDateTime updatedAt) {
+    Assert.notNull("created by", createdBy);
+    Assert.notNull("created at", createdAt);
+    Assert.notNull("updated by", updatedBy);
+    Assert.notNull("updated at", updatedAt);
+    this.createdBy = createdBy;
+    this.createdAt = createdAt;
+    this.updatedBy = updatedBy;
+    this.updatedAt = updatedAt;
+  }
 
   public static AuditInfo create(ZonedDateTime createdAt) {
     return builder()
@@ -34,6 +47,8 @@ public class AuditInfo {
   }
 
   public void update(ActionUsername updatedBy, ZonedDateTime updatedAt) {
+    Assert.notNull("updated by", updatedBy);
+    Assert.notNull("updated at", updatedAt);
     this.updatedBy = updatedBy;
     this.updatedAt = updatedAt;
   }

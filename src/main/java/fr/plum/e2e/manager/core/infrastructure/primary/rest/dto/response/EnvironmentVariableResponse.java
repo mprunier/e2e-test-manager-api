@@ -11,7 +11,7 @@ public record EnvironmentVariableResponse(
       EnvironmentDetailsVariableView environmentVariable) {
     return new EnvironmentVariableResponse(
         environmentVariable.name(),
-        environmentVariable.value(),
+        environmentVariable.getDisplayValue(),
         environmentVariable.description(),
         environmentVariable.isHidden());
   }

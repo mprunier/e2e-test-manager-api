@@ -7,8 +7,10 @@ import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+@Slf4j
 @Provider
 public class ThrowableMapper implements ExceptionMapper<Throwable> {
 
@@ -21,9 +23,11 @@ public class ThrowableMapper implements ExceptionMapper<Throwable> {
         && StringUtils.isNotBlank(customException.getTitle())) {
       status = Response.Status.fromStatusCode(customException.getStatus());
       if (Response.Status.Family.SERVER_ERROR.equals(status.getFamily())) {
-        Log.error(String.format("EXCEPTION <-!-> %s", exception));
+        Log.error(
+            String.format("EXCEPTION <-!-> %s", ((CustomException) exception).getDescription()));
       } else if (Response.Status.Family.CLIENT_ERROR.equals(status.getFamily())) {
-        Log.warn(String.format("EXCEPTION <-!-> %s", exception));
+        Log.warn(
+            String.format("EXCEPTION <-!-> %s", ((CustomException) exception).getDescription()));
       }
       exceptionResponse =
           new ExceptionResponse(
@@ -40,8 +44,8 @@ public class ThrowableMapper implements ExceptionMapper<Throwable> {
       exceptionResponse =
           new ExceptionResponse(
               status.getStatusCode(),
-              "publisher-error",
-              "An error has occurred, please try again later or contact our customer orchestration.",
+              "internal-error",
+              "An error has occurred, please try again later or contact our customer service.",
               null);
     }
 
