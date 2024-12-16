@@ -1,5 +1,6 @@
 package fr.plum.e2e.manager.core.infrastructure.primary.rest;
 
+import static fr.plum.e2e.manager.core.infrastructure.primary.rest.utils.RestUtils.extractUsername;
 import static fr.plum.e2e.manager.sharedkernel.infrastructure.cache.CacheNamesConstant.CACHE_HTTP_GET_SCHEDULER_DETAILS;
 
 import fr.plum.e2e.manager.core.application.SchedulerFacade;
@@ -10,6 +11,7 @@ import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response.Schedul
 import io.quarkus.cache.CacheKey;
 import io.quarkus.cache.CacheResult;
 import io.quarkus.security.Authenticated;
+import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.PUT;
@@ -31,7 +33,9 @@ public class SchedulerResource {
 
   private final SchedulerFacade schedulerFacade;
 
-  @Operation(operationId = "get")
+  private final SecurityIdentity identity;
+
+  @Operation(operationId = "getScheduler")
   @GET
   @CacheResult(cacheName = CACHE_HTTP_GET_SCHEDULER_DETAILS)
   public SchedulerResponse retrieve(
@@ -41,11 +45,13 @@ public class SchedulerResource {
     return SchedulerResponse.fromDomain(scheduler);
   }
 
-  @Operation(operationId = "update")
+  @Operation(operationId = "updateScheduler")
   @PUT
   public void update(
       @NotNull @QueryParam("environmentId") UUID environmentId,
       @RequestBody UpdateSchedulerRequest request) {
-    schedulerFacade.updateScheduler(request.toCommand(environmentId));
+    var username = extractUsername(identity);
+    log.info("[{}] updated scheduler on Environment id [{}].", username, environmentId);
+    schedulerFacade.updateScheduler(request.toCommand(environmentId, username));
   }
 }

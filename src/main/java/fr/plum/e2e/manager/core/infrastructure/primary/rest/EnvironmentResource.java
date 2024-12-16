@@ -39,14 +39,14 @@ public class EnvironmentResource {
 
   private final SecurityIdentity identity;
 
-  @Operation(operationId = "listAll")
+  @Operation(operationId = "listAllEnvironments")
   @CacheResult(cacheName = CACHE_HTTP_LIST_ALL_ENVIRONMENTS)
   @GET
   public List<EnvironmentResponse> listAll() {
     return EnvironmentResponse.from(environmentFacade.listAllEnvironments());
   }
 
-  @Operation(operationId = "get")
+  @Operation(operationId = "getEnvironment")
   @CacheResult(cacheName = CACHE_HTTP_GET_ENVIRONMENT_DETAILS)
   @GET
   @Path("/{id}")
@@ -56,7 +56,7 @@ public class EnvironmentResource {
     return EnvironmentDetailsResponse.from(environment);
   }
 
-  @Operation(operationId = "create")
+  @Operation(operationId = "createEnvironment")
   @POST
   public void create(@Valid @RequestBody CreateUpdateEnvironmentRequest request) {
     var username = extractUsername(identity);
@@ -65,7 +65,7 @@ public class EnvironmentResource {
     environmentFacade.createEnvironment(command);
   }
 
-  @Operation(operationId = "update")
+  @Operation(operationId = "updateEnvironment")
   @PUT
   @Path("/{id}")
   public void update(

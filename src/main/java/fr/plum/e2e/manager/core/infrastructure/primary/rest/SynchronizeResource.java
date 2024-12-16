@@ -46,7 +46,7 @@ public class SynchronizeResource {
     synchronizationFacade.startSynchronization(command);
   }
 
-  @Operation(operationId = "getErrors")
+  @Operation(operationId = "getSynchronizeErrors")
   @GET
   @Path("/errors")
   public List<SynchronizationErrorResponse> retrieveErrors(

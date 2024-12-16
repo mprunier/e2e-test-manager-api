@@ -6,6 +6,7 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.schedulerconfiguration.vo
 import fr.plum.e2e.manager.core.domain.model.aggregate.schedulerconfiguration.vo.SchedulerIsEnabled;
 import fr.plum.e2e.manager.core.domain.model.aggregate.schedulerconfiguration.vo.SchedulerMinute;
 import fr.plum.e2e.manager.core.domain.model.command.UpdateSchedulerCommand;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.ActionUsername;
 import jakarta.validation.constraints.NotNull;
 import java.time.DayOfWeek;
 import java.util.List;
@@ -19,13 +20,14 @@ public record UpdateSchedulerRequest(
     @NotNull Integer minute,
     List<DayOfWeek> daysOfWeek) {
 
-  public UpdateSchedulerCommand toCommand(UUID environmentId) {
+  public UpdateSchedulerCommand toCommand(UUID environmentId, String username) {
     return UpdateSchedulerCommand.builder()
         .environmentId(new EnvironmentId(environmentId))
         .isEnabled(new SchedulerIsEnabled(isEnabled))
         .schedulerHour(new SchedulerHour(hour))
         .schedulerMinute(new SchedulerMinute(minute))
         .daysOfWeek(daysOfWeek != null ? new SchedulerDaysOfWeek(daysOfWeek) : null)
+        .actionUsername(new ActionUsername(username))
         .build();
   }
 }

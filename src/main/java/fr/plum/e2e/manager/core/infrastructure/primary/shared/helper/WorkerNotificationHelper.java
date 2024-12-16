@@ -52,7 +52,10 @@ public class WorkerNotificationHelper {
             .workerType(worker.getType())
             .status(status)
             .configurationSuiteWithWorker(
-                ConfigurationSuiteWithWorkerResponse.fromDomain(configurationSuiteWithWorkerView))
+                configurationSuiteWithWorkerView != null
+                    ? ConfigurationSuiteWithWorkerResponse.fromDomain(
+                        configurationSuiteWithWorkerView)
+                    : null)
             .build();
     environmentNotifier.notifySubscribers(workerUpdatedNotificationEvent);
   }

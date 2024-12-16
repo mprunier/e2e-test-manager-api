@@ -6,12 +6,14 @@ import fr.plum.e2e.manager.core.application.WorkerFacade;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerId;
 import fr.plum.e2e.manager.core.domain.model.command.CancelWorkerCommand;
+import fr.plum.e2e.manager.core.domain.model.command.RunWorkerCommand;
 import fr.plum.e2e.manager.core.domain.model.query.CommonQuery;
 import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.request.RunRequest;
 import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response.WorkerUnitResponse;
 import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.ActionUsername;
 import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -41,10 +43,19 @@ public class WorkerResource {
   @Operation(operationId = "run")
   @POST
   public void run(
-      @NotNull @QueryParam("environmentId") UUID environmentId, @RequestBody RunRequest request) {
+      @NotNull @QueryParam("environmentId") UUID environmentId,
+      @Nullable @RequestBody RunRequest request) {
     var username = extractUsername(identity);
     log.info("[{}] ran worker on Environment id [{}].", username, environmentId);
-    workerFacade.run(request.toCommand(environmentId, username));
+    if (request == null) {
+      workerFacade.run(
+          RunWorkerCommand.builder()
+              .environmentId(new EnvironmentId(environmentId))
+              .username(new ActionUsername(username))
+              .build());
+    } else {
+      workerFacade.run(request.toCommand(environmentId, username));
+    }
   }
 
   @Operation(operationId = "cancel")

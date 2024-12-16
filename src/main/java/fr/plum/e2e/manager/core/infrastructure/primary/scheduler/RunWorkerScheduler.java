@@ -35,6 +35,7 @@ public class RunWorkerScheduler {
 
   @PostConstruct
   void init() {
+    log.info("Initializing RunWorkerScheduler");
     updateSchedule();
   }
 

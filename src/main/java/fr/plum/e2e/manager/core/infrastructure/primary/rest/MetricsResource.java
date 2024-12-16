@@ -28,7 +28,7 @@ public class MetricsResource {
   private final MetricsFacade metricsFacade;
   private final MetricsHelper metricsHelper;
 
-  @Operation(operationId = "getAll")
+  @Operation(operationId = "getAllMetrics")
   @GET
   @Path("/history")
   public List<MetricsResponse> getAllMetrics(
@@ -43,7 +43,7 @@ public class MetricsResource {
     return MetricsResponse.fromDomain(metricsFacade.getAllMetrics(query));
   }
 
-  @Operation(operationId = "getLast")
+  @Operation(operationId = "getLastMetrics")
   @GET
   @Path("/last")
   public MetricsResponse getLastMetrics(@NotNull @QueryParam("environmentId") UUID environmentId) {

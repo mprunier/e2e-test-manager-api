@@ -29,7 +29,7 @@ public class TestResultResource {
 
   private final TestResultFacade testResultFacade;
 
-  @Operation(operationId = "getAll")
+  @Operation(operationId = "getAllTestResult")
   @GET
   public List<TestResultResponse> getAllTestResult(
       @NotNull @QueryParam("testConfigurationId") UUID testConfigurationId) {
