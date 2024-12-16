@@ -26,7 +26,8 @@ public class GitlabWebHookResource {
           } catch (CustomException e) {
             log.debug(
                 "Business Webhook Async Error : {}",
-                e.getDescription()); // Hook likely coming from another configured branch or
+                e.getDescription(),
+                e); // Hook likely coming from another configured branch or
             // similar.
             // So not important.
           } catch (Exception e) {
