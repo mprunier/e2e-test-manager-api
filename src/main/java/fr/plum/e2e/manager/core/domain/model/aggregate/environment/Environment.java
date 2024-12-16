@@ -31,7 +31,16 @@ public class Environment extends AggregateRoot<EnvironmentId> {
       SourceCodeInformation sourceCodeInformation,
       MaxParallelWorkers mawWorkers) {
     this.environmentDescription = description;
-    this.sourceCodeInformation = sourceCodeInformation;
+    if (sourceCodeInformation.token().contains("****")) {
+      this.sourceCodeInformation =
+          SourceCodeInformation.builder()
+              .projectId(sourceCodeInformation.projectId())
+              .token(this.sourceCodeInformation.token())
+              .branch(sourceCodeInformation.branch())
+              .build();
+    } else {
+      this.sourceCodeInformation = sourceCodeInformation;
+    }
     this.maxParallelWorkers = mawWorkers;
   }
 

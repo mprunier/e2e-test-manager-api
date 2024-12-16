@@ -23,7 +23,9 @@ import fr.plum.e2e.manager.sharedkernel.domain.port.in.CommandUseCase;
 import fr.plum.e2e.manager.sharedkernel.domain.port.out.ClockPort;
 import fr.plum.e2e.manager.sharedkernel.domain.port.out.TransactionManagerPort;
 import java.util.ArrayList;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class ProcessSynchronizationUseCase implements CommandUseCase<CommonCommand> {
 
   private final ClockPort clockPort;
@@ -78,13 +80,14 @@ public class ProcessSynchronizationUseCase implements CommandUseCase<CommonComma
                   command.environmentId(), processedFiles, errors));
 
     } catch (CustomException exception) {
+      log.error("Error during synchronization for Environment id [{}].", command.environmentId().value(), exception);
       errors.add(
           SynchronizationErrorFactory.createGlobalError(
-              command.environmentId(), exception.getDescription(), clockPort.now()));
+             exception.getDescription(), clockPort.now()));
     } catch (Exception exception) {
+      log.error("Error during synchronization for Environment id [{}].", command.environmentId().value(), exception);
       errors.add(
-          SynchronizationErrorFactory.createGlobalError(
-              command.environmentId(), exception.getMessage(), clockPort.now()));
+          SynchronizationErrorFactory.createGlobalError(exception.getMessage(), clockPort.now()));
     } finally {
       sourceCodeSynchronizer.cleanup(command.environmentId(), sourceCodeProject, errors);
     }

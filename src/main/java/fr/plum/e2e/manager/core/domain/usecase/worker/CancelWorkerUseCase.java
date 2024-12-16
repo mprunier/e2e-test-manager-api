@@ -42,7 +42,7 @@ public class CancelWorkerUseCase implements CommandUseCase<CancelWorkerCommand> 
       workerRepositoryPort.delete(worker.getId());
       var workerCanceledEvent =
           new WorkerCanceledEvent(worker.getEnvironmentId(), command.actionUsername(), worker);
-      eventPublisherPort.publish(workerCanceledEvent);
+      eventPublisherPort.publishAsync(workerCanceledEvent);
     }
   }
 }

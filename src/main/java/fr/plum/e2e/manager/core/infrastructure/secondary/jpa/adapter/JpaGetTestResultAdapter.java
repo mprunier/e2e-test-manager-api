@@ -14,7 +14,10 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 
@@ -30,66 +33,62 @@ public class JpaGetTestResultAdapter implements GetTestResultPort {
     var query =
         entityManager.createQuery(
             """
-        SELECT tr FROM JpaTestResultEntity tr
-        WHERE tr.configurationTestId = :testConfigurationId
-        ORDER BY tr.createdAt DESC
-        """,
-            JpaTestResultEntity.class);
+                SELECT DISTINCT tr,
+                       s.id as screenshot_id,
+                       s.filename as screenshot_name,
+                       v.id as video_id
+                FROM JpaTestResultEntity tr
+                LEFT JOIN JpaTestScreenshotEntity s ON s.testResultId = tr.id
+                LEFT JOIN JpaTestVideoEntity v ON v.testResultId = tr.id
+                WHERE tr.configurationTestId = :testConfigurationId
+                ORDER BY tr.createdAt DESC
+                """,
+            Object[].class);
     query.setParameter("testConfigurationId", testConfigurationId.value());
 
-    return query.getResultList().stream()
+    Map<UUID, List<TestResultScreenshotView>> screenshotsPerTest = new HashMap<>();
+    Map<UUID, UUID> videoPerTest = new HashMap<>();
+    Map<UUID, JpaTestResultEntity> entities = new HashMap<>();
+
+    for (Object[] row : query.getResultList()) {
+      JpaTestResultEntity entity = (JpaTestResultEntity) row[0];
+      UUID screenshotId = (UUID) row[1];
+      String screenshotName = (String) row[2];
+      UUID videoId = (UUID) row[3];
+
+      entities.putIfAbsent(entity.getId(), entity);
+
+      if (videoId != null) {
+        videoPerTest.putIfAbsent(entity.getId(), videoId);
+      }
+
+      if (screenshotId != null && screenshotName != null) {
+        screenshotsPerTest
+            .computeIfAbsent(entity.getId(), k -> new ArrayList<>())
+            .add(new TestResultScreenshotView(screenshotId, screenshotName));
+      }
+    }
+
+    return entities.values().stream()
         .map(
-            entity -> {
-              var screenshotsQuery =
-                  entityManager.createQuery(
-                      """
-              SELECT NEW fr.plum.e2e.manager.core.domain.model.view.TestResultScreenshotView(
-                  s.id,
-                  s.filename
-              )
-              FROM JpaTestScreenshotEntity s
-              WHERE s.testResultId = :testResultId
-              """,
-                      TestResultScreenshotView.class);
-              screenshotsQuery.setParameter("testResultId", entity.getId());
-
-              var videoQuery =
-                  entityManager.createQuery(
-                      """
-                      SELECT v.id FROM JpaTestVideoEntity v
-                      WHERE v.testResultId = :testResultId
-                      """,
-                      UUID.class);
-              videoQuery.setParameter("testResultId", entity.getId());
-              videoQuery.setMaxResults(1);
-
-              UUID videoId;
-              try {
-                videoId = videoQuery.setMaxResults(1).getSingleResult();
-              } catch (NoResultException e) {
-                videoId = null;
-              }
-
-              return TestResultView.builder()
-                  .id(entity.getId())
-                  .status(entity.getStatus())
-                  .reference(entity.getReference())
-                  .createdAt(entity.getCreatedAt())
-                  .errorUrl(entity.getErrorUrl())
-                  .duration(entity.getDuration())
-                  .createdBy(entity.getCreatedBy())
-                  .screenshots(screenshotsQuery.getResultList())
-                  .videoId(videoId)
-                  .variables(
-                      entity.getVariables() != null
-                          ? entity.getVariables().entrySet().stream()
-                              .map(
-                                  entry ->
-                                      new TestResultVariableView(entry.getKey(), entry.getValue()))
-                              .toList()
-                          : List.of())
-                  .build();
-            })
+            entity ->
+                new TestResultView(
+                    entity.getId(),
+                    entity.getStatus(),
+                    entity.getReference(),
+                    entity.getCreatedAt(),
+                    entity.getErrorUrl(),
+                    entity.getDuration(),
+                    entity.getCreatedBy(),
+                    screenshotsPerTest.getOrDefault(entity.getId(), List.of()),
+                    videoPerTest.get(entity.getId()),
+                    entity.getVariables() != null
+                        ? entity.getVariables().entrySet().stream()
+                            .map(
+                                entry ->
+                                    new TestResultVariableView(entry.getKey(), entry.getValue()))
+                            .toList()
+                        : List.of()))
         .toList();
   }
 

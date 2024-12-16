@@ -16,7 +16,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor
 public class ConfigurationSynchronizer {
 
@@ -40,10 +42,13 @@ public class ConfigurationSynchronizer {
       if (!changes.toUpdate().isEmpty()) {
         fileConfigurationRepositoryPort.update(changes.toUpdate());
       }
-    } catch (Exception e) {
+    } catch (Exception exception) {
+      log.error(
+          "Error during synchronization for Environment id [{}].",
+          environmentId.value(),
+          exception);
       errors.add(
-          SynchronizationErrorFactory.createGlobalError(
-              environmentId, e.getMessage(), clockPort.now()));
+          SynchronizationErrorFactory.createGlobalError(exception.getMessage(), clockPort.now()));
     }
   }
 

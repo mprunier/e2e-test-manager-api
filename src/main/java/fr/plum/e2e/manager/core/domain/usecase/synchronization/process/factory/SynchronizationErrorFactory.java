@@ -2,7 +2,6 @@ package fr.plum.e2e.manager.core.domain.usecase.synchronization.process.factory;
 
 import static fr.plum.e2e.manager.core.domain.constant.BusinessConstant.GLOBAL_ENVIRONMENT_ERROR;
 
-import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationError;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationErrorValue;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationFileName;
@@ -24,9 +23,7 @@ public final class SynchronizationErrorFactory {
         at);
   }
 
-  public static SynchronizationError createGlobalError(
-      EnvironmentId envId, String message, ZonedDateTime at) {
-    log.error("Error during synchronization for Environment id [{}] : {}.", envId.value(), message);
+  public static SynchronizationError createGlobalError(String message, ZonedDateTime at) {
     return new SynchronizationError(
         new SynchronizationFileName(GLOBAL_ENVIRONMENT_ERROR),
         new SynchronizationErrorValue(message),

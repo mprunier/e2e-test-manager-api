@@ -69,6 +69,7 @@ public class ReportWorkerUseCase implements CommandUseCase<ReportWorkerCommand> 
     var worker = workerRepositoryPort.find(command.workerUnitId()).orElse(null);
 
     if (worker == null) {
+      log.trace("Worker Unit {} not found", command.workerUnitId());
       return;
     }
 
@@ -278,6 +279,7 @@ public class ReportWorkerUseCase implements CommandUseCase<ReportWorkerCommand> 
   }
 
   private void finalizeWorker(Worker worker) {
+    log.trace("Finalizing worker {}", worker.getId());
     testResultRepositoryPort.updateParentsConfigurationStatus(worker.getId());
     testResultRepositoryPort.clearAllWorkerId(worker.getId());
     workerRepositoryPort.delete(worker.getId());

@@ -94,8 +94,8 @@ public class SourceCodeSynchronizer {
       try {
         FileUtils.deleteDirectory(project.project());
       } catch (IOException e) {
-        errors.add(
-            SynchronizationErrorFactory.createGlobalError(envId, e.getMessage(), clockPort.now()));
+        log.error("Error during synchronization for Environment id [{}].", envId.value(), e);
+        errors.add(SynchronizationErrorFactory.createGlobalError(e.getMessage(), clockPort.now()));
       }
     }
   }

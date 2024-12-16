@@ -31,7 +31,7 @@ public class GitlabWebHookResource {
             // similar.
             // So not important.
           } catch (Exception e) {
-            log.error("Webhook Async Error : {}", e.getMessage());
+            log.error("Webhook Async Error : {}", e.getMessage(), e);
           }
         });
   }
