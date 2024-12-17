@@ -16,7 +16,7 @@ As permitted under Section 7 of the AGPLv3, you are also required to:
 
 2. Commercial Support:
     - Any commercial support, maintenance, or development services for this software must be provided exclusively by or authorized by the original developers
-    - Contact maxprunier@gmail.com for commercial support inquiries
+    - Contact https://www.linkedin.com/in/maximeprunier for commercial support inquiries
 
 3. Modifications and Contributions:
     - You are free to modify and contribute to the project
