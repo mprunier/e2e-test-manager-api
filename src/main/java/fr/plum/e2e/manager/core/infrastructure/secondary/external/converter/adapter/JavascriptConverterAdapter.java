@@ -1,6 +1,7 @@
 package fr.plum.e2e.manager.core.infrastructure.secondary.external.converter.adapter;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationFileContent;
+import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationFileName;
 import fr.plum.e2e.manager.core.domain.port.out.JavascriptConverterPort;
 import fr.plum.e2e.manager.core.infrastructure.secondary.external.converter.client.ConverterClient;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -16,14 +17,29 @@ public class JavascriptConverterAdapter implements JavascriptConverterPort {
   @RestClient private ConverterClient converterClient;
 
   @Override
-  public SynchronizationFileContent convertTsToJs(SynchronizationFileContent content) {
-    log.info("Convert TS to JS");
-    return new SynchronizationFileContent(converterClient.convertTs(content.value()));
+  public SynchronizationFileContent convertTsToJs(
+      SynchronizationFileName fileName, SynchronizationFileContent content) {
+    log.trace("Converting TS to JS for file [{}]...", fileName.value());
+    try {
+      var fileContent = converterClient.convertTs(content.value());
+      return new SynchronizationFileContent(fileContent);
+    } catch (Exception exception) {
+      log.warn(
+          "Error converting TS to JS for file [{}]: {}", fileName.value(), exception.getMessage());
+      throw exception;
+    }
   }
 
   @Override
-  public SynchronizationFileContent transpileJs(SynchronizationFileContent content) {
-    log.info("Transpile JS");
-    return new SynchronizationFileContent(converterClient.transpileJs(content.value()));
+  public SynchronizationFileContent transpileJs(
+      SynchronizationFileName fileName, SynchronizationFileContent content) {
+    log.trace("Transpiling JS for file [{}]...", fileName.value());
+    try {
+      var fileContent = converterClient.transpileJs(content.value());
+      return new SynchronizationFileContent(fileContent);
+    } catch (Exception exception) {
+      log.warn("Error transpiling JS for file [{}]: {}", fileName.value(), exception.getMessage());
+      throw exception;
+    }
   }
 }

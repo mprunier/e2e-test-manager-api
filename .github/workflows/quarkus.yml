@@ -1,0 +1,58 @@
+name: E2E Test Manager CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+    tags: [ "*" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
+
+      - name: Run Tests
+        run: mvn test
+
+  publish:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push Docker image with Jib
+        run: |
+          mvn package -Dquarkus.container-image.build=true \
+            -Dquarkus.container-image.push=true \
+            -Dquarkus.container-image.registry=docker.io \
+            -Dquarkus.container-image.username=${{ secrets.DOCKERHUB_USERNAME }} \
+            -Dquarkus.container-image.password=${{ secrets.DOCKERHUB_TOKEN }} \
+            -Dquarkus.container-image.tag=${GITHUB_REF#refs/tags/}

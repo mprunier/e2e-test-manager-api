@@ -28,6 +28,8 @@
         <archunit-junit5.version>1.3.0</archunit-junit5.version>
         <surefire-plugin.version>3.5.0</surefire-plugin.version>
         <assertj-core.version>3.26.3</assertj-core.version>
+
+        <jib-maven-plugin.version>3.4.0</jib-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -125,11 +127,6 @@
         </dependency>
 
 
-        <!--        <dependency>-->
-        <!--            <groupId>io.quarkus</groupId>-->
-        <!--            <artifactId>quarkus-opentelemetry</artifactId>-->
-        <!--        </dependency>-->
-
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -202,21 +199,40 @@
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>${jib-maven-plugin.version}</version>
+                <configuration>
+                    <from>
+                        <image>registry.access.redhat.com/ubi8/openjdk-21:1.18</image>
+                    </from>
+                    <to>
+                        <image>{auto}</image>
+                        <tags>
+                            <tag>${project.version}</tag>
+                        </tags>
+                    </to>
+                    <extraDirectories>
+                        <paths>
+                            <path>
+                                <from>target/quarkus-app</from>
+                                <into>/deployments</into>
+                            </path>
+                        </paths>
+                    </extraDirectories>
+                    <container>
+                        <environment>
+                            <JAVA_APP_JAR>/deployments/quarkus-run.jar</JAVA_APP_JAR>
+                        </environment>
+                        <entrypoint>
+                            <arg>/opt/jboss/container/java/run/run-java.sh</arg>
+                        </entrypoint>
+                        <user>185</user>
+                    </container>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>native</id>
-            <activation>
-                <property>
-                    <name>native</name>
-                </property>
-            </activation>
-            <properties>
-                <quarkus.package.type>native</quarkus.package.type>
-            </properties>
-        </profile>
-    </profiles>
 
 </project>

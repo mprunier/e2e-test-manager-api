@@ -69,7 +69,7 @@ public class SourceCodeSynchronizer {
 
     if (fileName.value().endsWith(END_TEST_TS_PATH)) {
       try {
-        content = javascriptConverterPort.convertTsToJs(content);
+        content = javascriptConverterPort.convertTsToJs(fileName, content);
       } catch (Exception e) {
         errors.add(
             SynchronizationErrorFactory.createFileError(
@@ -79,7 +79,7 @@ public class SourceCodeSynchronizer {
     }
 
     try {
-      return Optional.of(javascriptConverterPort.transpileJs(content));
+      return Optional.of(javascriptConverterPort.transpileJs(fileName, content));
     } catch (Exception e) {
       errors.add(
           SynchronizationErrorFactory.createFileError(

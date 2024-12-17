@@ -6,6 +6,7 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.schedulerconfiguration.Sc
 import fr.plum.e2e.manager.core.domain.model.command.RunWorkerCommand;
 import fr.plum.e2e.manager.core.domain.port.out.repository.SchedulerConfigurationRepositoryPort;
 import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.ActionUsername;
+import io.quarkus.runtime.Startup;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -13,106 +14,95 @@ import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 @Slf4j
+@Startup
 @ApplicationScoped
-@AllArgsConstructor
 public class RunWorkerScheduler {
+
+  @ConfigProperty(name = "scheduler.enabled", defaultValue = "true")
+  boolean enabled;
 
   private final WorkerFacade workerFacade;
   private final SchedulerConfigurationRepositoryPort schedulerConfigurationRepositoryPort;
   private final Map<EnvironmentId, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
   private final ScheduledExecutorService schedulerExecutor = Executors.newScheduledThreadPool(1);
 
+  public RunWorkerScheduler(
+      WorkerFacade workerFacade,
+      SchedulerConfigurationRepositoryPort schedulerConfigurationRepositoryPort) {
+    this.workerFacade = workerFacade;
+    this.schedulerConfigurationRepositoryPort = schedulerConfigurationRepositoryPort;
+  }
+
   @PostConstruct
-  void init() {
-    log.info("Initializing RunWorkerScheduler");
+  public void init() {
+    if (!enabled) {
+      log.info("RunWorkerScheduler is disabled by configuration.");
+      return;
+    }
+    log.info("Initializing RunWorkerScheduler...");
     updateSchedule();
   }
 
   public void updateSchedule() {
-    var existingTasks = new HashMap<>(scheduledTasks);
+    if (!enabled) {
+      log.debug("Scheduler is disabled, ignoring update request.");
+      return;
+    }
+
+    log.info("Starting schedule update...");
+    var configurations = schedulerConfigurationRepositoryPort.findAll();
+
+    scheduledTasks.forEach((id, future) -> future.cancel(false));
     scheduledTasks.clear();
 
-    var schedulers = schedulerConfigurationRepositoryPort.findAll();
-    schedulers.forEach(
+    configurations.forEach(
         scheduler -> {
           if (!scheduler.getIsEnabled().value()) {
-            log.debug(
-                "Scheduler for environment id [{}] is disabled, skipping...",
-                scheduler.getId().value());
-            ScheduledFuture<?> existingTask = existingTasks.get(scheduler.getId());
-            if (existingTask != null) {
-              existingTask.cancel(false);
-              log.debug(
-                  "Cancelled existing task for disabled scheduler id [{}]",
-                  scheduler.getId().value());
-            }
+            log.info("Scheduler for environment [{}] is disabled.", scheduler.getId().value());
             return;
           }
-
-          log.debug("Configuring scheduler for environment id [{}]", scheduler.getId().value());
-          ScheduledFuture<?> existingTask = existingTasks.get(scheduler.getId());
-
-          boolean isTaskActiveOrRunning =
-              existingTask != null && !existingTask.isCancelled() && !existingTask.isDone();
-          if (isTaskActiveOrRunning) {
-            log.debug(
-                "Keeping existing active task for environment id [{}]", scheduler.getId().value());
-            scheduledTasks.put(scheduler.getId(), existingTask);
-          } else {
-            log.debug("Scheduling new task for environment id [{}]", scheduler.getId().value());
-            scheduleNextExecution(scheduler);
-          }
+          scheduleNextExecution(scheduler);
         });
 
-    existingTasks.forEach(
-        (id, task) -> {
-          if (!scheduledTasks.containsKey(id)) {
-            task.cancel(false);
-            log.debug("Cancelled outdated task for environment id [{}]", id.value());
-          }
-        });
+    logScheduledTasks();
   }
 
   private void scheduleNextExecution(SchedulerConfiguration scheduler) {
     if (!scheduler.getIsEnabled().value()) {
-      log.debug(
-          "Scheduler id [{}] is disabled, skipping execution scheduling",
-          scheduler.getId().value());
       return;
     }
 
     var scheduledTime = LocalTime.of(scheduler.getHour().value(), scheduler.getMinute().value(), 0);
-    LocalDateTime now = LocalDateTime.now();
-    LocalDateTime nextRun = findNextExecutionTime(now, scheduledTime, scheduler);
+    LocalDateTime nextRun = findNextExecutionTime(LocalDateTime.now(), scheduledTime, scheduler);
 
     if (nextRun != null) {
-      long initialDelay = Duration.between(now, nextRun).toMillis();
-      log.debug(
-          "Next execution for environment id [{}] scheduled at: {}",
-          scheduler.getId().value(),
-          nextRun);
-
+      long initialDelay = Duration.between(LocalDateTime.now(), nextRun).toMillis();
       ScheduledFuture<?> task =
           schedulerExecutor.schedule(
               () -> {
-                if (scheduler.getIsEnabled().value()) {
-                  executeTask(scheduler);
+                try {
+                  if (scheduler.getIsEnabled().value()) {
+                    executeTask(scheduler);
+                    scheduleNextExecution(scheduler);
+                    logScheduledTasks();
+                  }
+                } catch (Exception e) {
+                  log.error(
+                      "Error executing task for environment id [{}].",
+                      scheduler.getId().value(),
+                      e);
                   scheduleNextExecution(scheduler);
-                } else {
-                  log.info(
-                      "Skipping execution for disabled scheduler id [{}]",
-                      scheduler.getId().value());
+                  logScheduledTasks();
                 }
               },
               initialDelay,
@@ -120,6 +110,21 @@ public class RunWorkerScheduler {
 
       scheduledTasks.put(scheduler.getId(), task);
     }
+  }
+
+  private void logScheduledTasks() {
+    if (scheduledTasks.isEmpty()) {
+      log.info("No active scheduled tasks.");
+      return;
+    }
+
+    log.info("Current scheduled tasks:");
+    scheduledTasks.forEach(
+        (envId, future) -> {
+          long delayInMillis = future.getDelay(TimeUnit.MILLISECONDS);
+          LocalDateTime scheduledTime = LocalDateTime.now().plus(Duration.ofMillis(delayInMillis));
+          log.info("Environment [{}] scheduled for: {}.", envId.value(), scheduledTime);
+        });
   }
 
   private LocalDateTime findNextExecutionTime(
@@ -141,24 +146,36 @@ public class RunWorkerScheduler {
     return null;
   }
 
-  private void executeTask(SchedulerConfiguration schedulerConfiguration) {
-    try {
-      log.debug("Executing worker for environment id [{}]", schedulerConfiguration.getId().value());
+  private void executeTask(SchedulerConfiguration scheduler) {
+    log.debug("Executing worker for environment id [{}]...", scheduler.getId().value());
+    var command =
+        RunWorkerCommand.builder()
+            .environmentId(scheduler.getId())
+            .username(new ActionUsername("Scheduler"))
+            .build();
 
-      var command =
-          RunWorkerCommand.builder()
-              .environmentId(schedulerConfiguration.getId())
-              .username(new ActionUsername("Scheduler"))
-              .build();
-      workerFacade.run(command);
-
-    } catch (Exception e) {
-      log.error("Error executing task", e);
-    }
+    workerFacade.run(command);
   }
 
   @PreDestroy
-  void shutdown() {
+  public void shutdown() {
+    if (!enabled) {
+      return;
+    }
+
+    log.info("Shutting down RunWorkerScheduler...");
+    scheduledTasks.values().forEach(future -> future.cancel(false));
     schedulerExecutor.shutdown();
+
+    try {
+      if (!schedulerExecutor.awaitTermination(1, TimeUnit.MINUTES)) {
+        log.warn("Some tasks did not terminate within 1 minute, forcing shutdown.");
+        schedulerExecutor.shutdownNow();
+      }
+    } catch (InterruptedException e) {
+      log.warn("Shutdown interrupted, forcing immediate shutdown.");
+      Thread.currentThread().interrupt();
+      schedulerExecutor.shutdownNow();
+    }
   }
 }
