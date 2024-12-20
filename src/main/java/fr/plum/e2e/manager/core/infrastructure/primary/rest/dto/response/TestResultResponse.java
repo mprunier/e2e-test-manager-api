@@ -1,7 +1,7 @@
 package fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.TestResultStatus;
-import fr.plum.e2e.manager.core.domain.model.view.TestResultView;
+import fr.plum.e2e.manager.core.domain.model.projection.TestResultProjection;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
@@ -22,7 +22,7 @@ public record TestResultResponse(
     UUID videoId,
     List<TestResultVariableResponse> variables) {
 
-  public static TestResultResponse fromTestResultView(TestResultView testResultView) {
+  public static TestResultResponse fromTestResultView(TestResultProjection testResultView) {
     return builder()
         .id(testResultView.id())
         .status(testResultView.status())
@@ -43,7 +43,7 @@ public record TestResultResponse(
         .build();
   }
 
-  public static List<TestResultResponse> fromDomain(List<TestResultView> testResultViews) {
+  public static List<TestResultResponse> fromDomain(List<TestResultProjection> testResultViews) {
     return testResultViews.stream().map(TestResultResponse::fromTestResultView).toList();
   }
 }

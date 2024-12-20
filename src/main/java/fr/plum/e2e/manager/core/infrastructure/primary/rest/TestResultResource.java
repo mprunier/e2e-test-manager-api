@@ -1,6 +1,7 @@
 package fr.plum.e2e.manager.core.infrastructure.primary.rest;
 
-import fr.plum.e2e.manager.core.application.TestResultFacade;
+import fr.plum.e2e.manager.core.application.query.testresult.GetAllTestResultQueryHandler;
+import fr.plum.e2e.manager.core.application.query.testresult.GetTestResultErrorDetailsQueryHandler;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.TestConfigurationId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.vo.TestResultId;
 import fr.plum.e2e.manager.core.domain.model.query.GetAllTestResultQuery;
@@ -27,14 +28,15 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 @RequiredArgsConstructor
 public class TestResultResource {
 
-  private final TestResultFacade testResultFacade;
+  private final GetAllTestResultQueryHandler getAllTestResultQueryHandler;
+  private final GetTestResultErrorDetailsQueryHandler getTestResultErrorDetailsQueryHandler;
 
   @Operation(operationId = "getAllTestResult")
   @GET
   public List<TestResultResponse> getAllTestResult(
       @NotNull @QueryParam("testConfigurationId") UUID testConfigurationId) {
     var query = new GetAllTestResultQuery(new TestConfigurationId(testConfigurationId));
-    return TestResultResponse.fromDomain(testResultFacade.getAllTestResult(query));
+    return TestResultResponse.fromDomain(getAllTestResultQueryHandler.execute(query));
   }
 
   @Operation(operationId = "getErrorDetails")
@@ -44,6 +46,6 @@ public class TestResultResource {
       @NotNull @PathParam("id") UUID testResultId) {
     var query = new GetTestResultErrorDetailsQuery(new TestResultId(testResultId));
     return TestResultErrorDetailsResponse.fromDomain(
-        testResultFacade.getTestResultErrorDetails(query));
+        getTestResultErrorDetailsQueryHandler.execute(query));
   }
 }

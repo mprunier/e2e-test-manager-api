@@ -1,7 +1,7 @@
 package fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.ConfigurationStatus;
-import fr.plum.e2e.manager.core.domain.model.view.ConfigurationSuiteWithWorkerView;
+import fr.plum.e2e.manager.core.domain.model.projection.ConfigurationSuiteWithWorkerProjection;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -23,7 +23,7 @@ public record ConfigurationSuiteWithWorkerResponse(
     List<WorkerResponse> workers) {
 
   public static ConfigurationSuiteWithWorkerResponse fromDomain(
-      ConfigurationSuiteWithWorkerView domain) {
+      ConfigurationSuiteWithWorkerProjection domain) {
     return new ConfigurationSuiteWithWorkerResponse(
         domain.id(),
         domain.title(),

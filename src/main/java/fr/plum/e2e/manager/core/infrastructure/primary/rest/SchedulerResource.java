@@ -3,7 +3,8 @@ package fr.plum.e2e.manager.core.infrastructure.primary.rest;
 import static fr.plum.e2e.manager.core.infrastructure.primary.rest.utils.RestUtils.extractUsername;
 import static fr.plum.e2e.manager.sharedkernel.infrastructure.cache.CacheNamesConstant.CACHE_HTTP_GET_SCHEDULER_DETAILS;
 
-import fr.plum.e2e.manager.core.application.SchedulerFacade;
+import fr.plum.e2e.manager.core.application.command.schedulerconfiguration.UpdateSchedulerConfigurationCommandHandler;
+import fr.plum.e2e.manager.core.application.query.schedulerconfiguration.GetSchdulerConfigurationQueryHandler;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.query.CommonQuery;
 import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.request.UpdateSchedulerRequest;
@@ -31,7 +32,9 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 @RequiredArgsConstructor
 public class SchedulerResource {
 
-  private final SchedulerFacade schedulerFacade;
+  private final UpdateSchedulerConfigurationCommandHandler
+      updateSchedulerConfigurationCommandHandler;
+  private final GetSchdulerConfigurationQueryHandler getSchdulerConfigurationQueryHandler;
 
   private final SecurityIdentity identity;
 
@@ -41,7 +44,7 @@ public class SchedulerResource {
   public SchedulerResponse retrieve(
       @CacheKey @NotNull @QueryParam("environmentId") UUID environmentId) {
     var query = CommonQuery.builder().environmentId(new EnvironmentId(environmentId)).build();
-    var scheduler = schedulerFacade.getSchedulerDetails(query);
+    var scheduler = getSchdulerConfigurationQueryHandler.execute(query);
     return SchedulerResponse.fromDomain(scheduler);
   }
 
@@ -52,6 +55,6 @@ public class SchedulerResource {
       @RequestBody UpdateSchedulerRequest request) {
     var username = extractUsername(identity);
     log.info("[{}] updated scheduler on Environment id [{}].", username, environmentId);
-    schedulerFacade.updateScheduler(request.toCommand(environmentId, username));
+    updateSchedulerConfigurationCommandHandler.execute(request.toCommand(environmentId, username));
   }
 }

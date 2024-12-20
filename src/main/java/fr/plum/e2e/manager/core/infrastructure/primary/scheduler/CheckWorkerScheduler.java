@@ -1,6 +1,8 @@
 package fr.plum.e2e.manager.core.infrastructure.primary.scheduler;
 
-import fr.plum.e2e.manager.core.application.WorkerFacade;
+import fr.plum.e2e.manager.core.application.command.worker.CancelWorkerCommandHandler;
+import fr.plum.e2e.manager.core.application.command.worker.ReportWorkerCommandHandler;
+import fr.plum.e2e.manager.core.application.query.worker.GetAllWorkerQueryHandler;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.WorkerUnit;
 import fr.plum.e2e.manager.core.domain.model.command.CancelWorkerCommand;
 import fr.plum.e2e.manager.core.domain.model.command.ReportWorkerCommand;
@@ -19,7 +21,9 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 @RequiredArgsConstructor
 public class CheckWorkerScheduler {
 
-  private final WorkerFacade workerFacade;
+  private final CancelWorkerCommandHandler cancelWorkerCommandHandler;
+  private final GetAllWorkerQueryHandler getAllWorkerQueryHandler;
+  private final ReportWorkerCommandHandler reportWorkerCommandHandler;
 
   @ConfigProperty(name = "business.scheduler.worker.report.cancel-timeout.interval-minutes")
   Integer workerCancelTimeoutInterval;
@@ -32,18 +36,18 @@ public class CheckWorkerScheduler {
     if (inVerifyProgress.compareAndSet(false, true)) {
       log.debug("In progress pipelines verification scheduler starting...");
       try {
-        var workers = workerFacade.getAll();
+        var workers = getAllWorkerQueryHandler.execute();
         for (var worker : workers) {
           if (worker
               .getAuditInfo()
               .getCreatedAt()
               .isBefore(ZonedDateTime.now().minusMinutes(workerCancelTimeoutInterval))) {
-            workerFacade.cancel(
+            cancelWorkerCommandHandler.execute(
                 new CancelWorkerCommand(
                     new ActionUsername("System Timeout Checker"), worker.getId()));
           } else {
             for (WorkerUnit workerUnit : worker.getWorkerUnits()) {
-              workerFacade.report(new ReportWorkerCommand(workerUnit.getId()));
+              reportWorkerCommandHandler.execute(new ReportWorkerCommand(workerUnit.getId()));
             }
           }
         }

@@ -1,6 +1,6 @@
 package fr.plum.e2e.manager.core.infrastructure.primary.rest;
 
-import fr.plum.e2e.manager.core.application.MetricsFacade;
+import fr.plum.e2e.manager.core.application.query.metrics.ListAllMetricsQueryHandler;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.query.GetAllMetricsQuery;
 import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response.MetricsResponse;
@@ -25,7 +25,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 @RequiredArgsConstructor
 public class MetricsResource {
 
-  private final MetricsFacade metricsFacade;
+  private final ListAllMetricsQueryHandler listAllMetricsQueryHandler;
   private final MetricsHelper metricsHelper;
 
   @Operation(operationId = "getAllMetrics")
@@ -40,7 +40,7 @@ public class MetricsResource {
             .environmentId(new EnvironmentId(environmentId))
             .sinceAt(since)
             .build();
-    return MetricsResponse.fromDomain(metricsFacade.getAllMetrics(query));
+    return MetricsResponse.fromDomain(listAllMetricsQueryHandler.execute(query));
   }
 
   @Operation(operationId = "getLastMetrics")

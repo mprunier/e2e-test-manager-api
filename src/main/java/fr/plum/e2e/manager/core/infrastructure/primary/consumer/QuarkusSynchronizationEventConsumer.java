@@ -1,6 +1,6 @@
 package fr.plum.e2e.manager.core.infrastructure.primary.consumer;
 
-import fr.plum.e2e.manager.core.application.SynchronizationFacade;
+import fr.plum.e2e.manager.core.application.command.synchronization.ProcessSynchronizationCommandHandler;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.command.CommonCommand;
 import fr.plum.e2e.manager.core.domain.model.event.EnvironmentIsSynchronizingEvent;
@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class QuarkusSynchronizationEventConsumer {
 
-  private final SynchronizationFacade synchronizationFacade;
+  private final ProcessSynchronizationCommandHandler processSynchronizationCommandHandler;
 
   private final EnvironmentNotifier environmentNotifier;
 
@@ -37,7 +37,7 @@ public class QuarkusSynchronizationEventConsumer {
               .environmentId(event.environmentId())
               .username(event.username())
               .build();
-      synchronizationFacade.processSynchronization(processCommand);
+      processSynchronizationCommandHandler.execute(processCommand);
     } catch (CustomException exception) {
       logError("process", event.environmentId(), exception.getDescription());
     } catch (Exception exception) {

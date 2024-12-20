@@ -2,12 +2,12 @@ package fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.ConfigurationStatus;
+import fr.plum.e2e.manager.core.domain.model.projection.ConfigurationSuiteProjection;
+import fr.plum.e2e.manager.core.domain.model.projection.CriteriaOptionProjection;
+import fr.plum.e2e.manager.core.domain.model.projection.PaginatedProjection;
+import fr.plum.e2e.manager.core.domain.model.projection.SearchCriteriaProjection;
 import fr.plum.e2e.manager.core.domain.model.query.SearchSuiteConfigurationQuery;
-import fr.plum.e2e.manager.core.domain.model.view.ConfigurationSuiteView;
-import fr.plum.e2e.manager.core.domain.model.view.CriteriaOptionView;
-import fr.plum.e2e.manager.core.domain.model.view.PaginatedView;
-import fr.plum.e2e.manager.core.domain.model.view.SearchCriteriaView;
-import fr.plum.e2e.manager.core.domain.port.out.query.SearchSuiteConfigurationPort;
+import fr.plum.e2e.manager.core.domain.port.out.view.SearchSuiteConfigurationPort;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter.mapper.SuiteMapper;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.testconfiguration.JpaSuiteConfigurationEntity;
 import io.quarkus.hibernate.orm.panache.PanacheQuery;
@@ -28,7 +28,8 @@ public class JpaSearchSuiteConfigurationAdapter implements SearchSuiteConfigurat
   private final EntityManager entityManager;
 
   @Override
-  public PaginatedView<ConfigurationSuiteView> search(SearchSuiteConfigurationQuery query) {
+  public PaginatedProjection<ConfigurationSuiteProjection> search(
+      SearchSuiteConfigurationQuery query) {
 
     StringBuilder queryStr =
         new StringBuilder(
@@ -107,16 +108,16 @@ public class JpaSearchSuiteConfigurationAdapter implements SearchSuiteConfigurat
           .getResultList();
     }
 
-    List<ConfigurationSuiteView> content =
+    List<ConfigurationSuiteProjection> content =
         results.stream().map(SuiteMapper::toSuiteResponse).toList();
 
-    return new PaginatedView<>(
+    return new PaginatedProjection<>(
         content, query.page(), panacheQuery.pageCount(), query.size(), panacheQuery.count());
   }
 
   @Override
-  public SearchCriteriaView findAllCriteria(EnvironmentId environmentId) {
-    List<CriteriaOptionView> suites =
+  public SearchCriteriaProjection findAllCriteria(EnvironmentId environmentId) {
+    List<CriteriaOptionProjection> suites =
         entityManager
             .createQuery(
                 "SELECT id, title FROM JpaSuiteConfigurationEntity WHERE fileConfiguration.environmentId = :envId ORDER BY LOWER(title)",
@@ -124,10 +125,10 @@ public class JpaSearchSuiteConfigurationAdapter implements SearchSuiteConfigurat
             .setParameter("envId", environmentId.value())
             .getResultList()
             .stream()
-            .map(result -> new CriteriaOptionView(result[0].toString(), (String) result[1]))
+            .map(result -> new CriteriaOptionProjection(result[0].toString(), (String) result[1]))
             .toList();
 
-    List<CriteriaOptionView> tests =
+    List<CriteriaOptionProjection> tests =
         entityManager
             .createQuery(
                 "SELECT id, title FROM JpaTestConfigurationEntity WHERE suiteConfiguration.fileConfiguration.environmentId = :envId ORDER BY LOWER(title)",
@@ -135,10 +136,10 @@ public class JpaSearchSuiteConfigurationAdapter implements SearchSuiteConfigurat
             .setParameter("envId", environmentId.value())
             .getResultList()
             .stream()
-            .map(result -> new CriteriaOptionView(result[0].toString(), (String) result[1]))
+            .map(result -> new CriteriaOptionProjection(result[0].toString(), (String) result[1]))
             .toList();
 
-    List<CriteriaOptionView> files =
+    List<CriteriaOptionProjection> files =
         entityManager
             .createQuery(
                 "SELECT fileName FROM JpaFileConfigurationEntity WHERE environmentId = :envId ORDER BY LOWER(fileName)",
@@ -146,15 +147,15 @@ public class JpaSearchSuiteConfigurationAdapter implements SearchSuiteConfigurat
             .setParameter("envId", environmentId.value())
             .getResultList()
             .stream()
-            .map(fileName -> new CriteriaOptionView(fileName, fileName))
+            .map(fileName -> new CriteriaOptionProjection(fileName, fileName))
             .toList();
 
     var tags = mergeTags(environmentId);
 
-    return new SearchCriteriaView(suites, tests, files, tags);
+    return new SearchCriteriaProjection(suites, tests, files, tags);
   }
 
-  private List<CriteriaOptionView> mergeTags(EnvironmentId environmentId) {
+  private List<CriteriaOptionProjection> mergeTags(EnvironmentId environmentId) {
     @SuppressWarnings("unchecked")
     List<String> suiteTags =
         entityManager
@@ -202,7 +203,7 @@ public class JpaSearchSuiteConfigurationAdapter implements SearchSuiteConfigurat
         .filter(tag -> tag != null && !tag.isEmpty())
         .distinct()
         .sorted(String.CASE_INSENSITIVE_ORDER)
-        .map(tag -> new CriteriaOptionView(tag, tag))
+        .map(tag -> new CriteriaOptionProjection(tag, tag))
         .toList();
   }
 }

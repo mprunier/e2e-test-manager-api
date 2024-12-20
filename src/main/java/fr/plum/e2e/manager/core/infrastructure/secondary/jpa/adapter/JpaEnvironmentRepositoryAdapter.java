@@ -6,9 +6,8 @@ import static fr.plum.e2e.manager.sharedkernel.infrastructure.cache.CacheNamesCo
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.Environment;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentDescription;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
-import fr.plum.e2e.manager.core.domain.model.exception.EnvironmentNotFoundException;
-import fr.plum.e2e.manager.core.domain.model.view.EnvironmentDetailsVariableView;
-import fr.plum.e2e.manager.core.domain.model.view.EnvironmentDetailsView;
+import fr.plum.e2e.manager.core.domain.model.projection.EnvironmentDetailsProjection;
+import fr.plum.e2e.manager.core.domain.model.projection.EnvironmentDetailsVariableProjection;
 import fr.plum.e2e.manager.core.domain.port.out.repository.EnvironmentRepositoryPort;
 import fr.plum.e2e.manager.core.infrastructure.secondary.cache.QuarkusCacheManager;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter.mapper.EnvironmentMapper;
@@ -68,7 +67,7 @@ public class JpaEnvironmentRepositoryAdapter implements EnvironmentRepositoryPor
   }
 
   @Override
-  public EnvironmentDetailsView findDetails(EnvironmentId environmentId) {
+  public EnvironmentDetailsProjection findDetails(EnvironmentId environmentId) {
     var query =
         entityManager.createQuery(
             """
@@ -88,7 +87,7 @@ public class JpaEnvironmentRepositoryAdapter implements EnvironmentRepositoryPor
       var variablesQuery =
           entityManager.createQuery(
               """
-              SELECT NEW fr.plum.e2e.manager.core.domain.model.view.EnvironmentDetailsVariableView(
+              SELECT NEW fr.plum.e2e.manager.core.domain.model.projection.EnvironmentDetailsVariableProjection(
                   v.name,
                   v.defaultValue,
                   v.description,
@@ -97,12 +96,12 @@ public class JpaEnvironmentRepositoryAdapter implements EnvironmentRepositoryPor
               WHERE v.environment.id = :environmentId
               ORDER BY v.name ASC
               """,
-              EnvironmentDetailsVariableView.class);
+              EnvironmentDetailsVariableProjection.class);
       variablesQuery.setParameter("environmentId", environmentId.value());
 
       var variables = variablesQuery.getResultList();
 
-      return new EnvironmentDetailsView(
+      return new EnvironmentDetailsProjection(
           environment.getId(),
           environment.getDescription(),
           environment.getProjectId(),
@@ -117,7 +116,7 @@ public class JpaEnvironmentRepositoryAdapter implements EnvironmentRepositoryPor
           environment.getCreatedAt(),
           environment.getUpdatedAt());
     } catch (NoResultException e) {
-      throw new EnvironmentNotFoundException(environmentId);
+      return null;
     }
   }
 
