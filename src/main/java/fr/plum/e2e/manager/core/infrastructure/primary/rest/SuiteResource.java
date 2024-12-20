@@ -1,6 +1,7 @@
 package fr.plum.e2e.manager.core.infrastructure.primary.rest;
 
-import fr.plum.e2e.manager.core.application.SuiteFacade;
+import fr.plum.e2e.manager.core.application.query.suite.GetSuiteSearchCriteriaQueryHandler;
+import fr.plum.e2e.manager.core.application.query.suite.SearchSuiteQueryHandler;
 import fr.plum.e2e.manager.core.domain.model.query.CommonQuery;
 import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.request.SearchSuiteConfigurationRequest;
 import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response.ConfigurationSuiteWithWorkerResponse;
@@ -26,17 +27,8 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 @RequiredArgsConstructor
 public class SuiteResource {
 
-  private final SuiteFacade suiteFacade;
-
-  @Operation(operationId = "searchSuites")
-  @GET
-  public PaginatedResponse<ConfigurationSuiteWithWorkerResponse> searchSuites(
-      @NotNull @QueryParam("environmentId") UUID environmentId,
-      @Valid @BeanParam SearchSuiteConfigurationRequest request) {
-    return PaginatedResponse.fromDomain(
-        suiteFacade.searchSuites(request.toQuery(environmentId)),
-        ConfigurationSuiteWithWorkerResponse::fromDomain);
-  }
+  private final GetSuiteSearchCriteriaQueryHandler getSuiteSearchCriteriaQueryHandler;
+  private final SearchSuiteQueryHandler searchSuiteQueryHandler;
 
   @Operation(operationId = "getSearchCriteria")
   @GET
@@ -44,6 +36,16 @@ public class SuiteResource {
   public SearchCriteriaResponse getSearchCriteria(
       @NotNull @QueryParam("environmentId") UUID environmentId) {
     return SearchCriteriaResponse.fromDomain(
-        suiteFacade.getSearchCriteria(CommonQuery.fromEnvironmentUUID(environmentId)));
+        getSuiteSearchCriteriaQueryHandler.execute(CommonQuery.fromEnvironmentUUID(environmentId)));
+  }
+
+  @Operation(operationId = "searchSuites")
+  @GET
+  public PaginatedResponse<ConfigurationSuiteWithWorkerResponse> searchSuites(
+      @NotNull @QueryParam("environmentId") UUID environmentId,
+      @Valid @BeanParam SearchSuiteConfigurationRequest request) {
+    return PaginatedResponse.fromDomain(
+        searchSuiteQueryHandler.execute(request.toQuery(environmentId)),
+        ConfigurationSuiteWithWorkerResponse::fromDomain);
   }
 }

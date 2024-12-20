@@ -1,7 +1,7 @@
 package fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.ConfigurationStatus;
-import fr.plum.e2e.manager.core.domain.model.view.ConfigurationTestView;
+import fr.plum.e2e.manager.core.domain.model.projection.ConfigurationTestProjection;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
@@ -15,7 +15,7 @@ public record ConfigurationTestResponse(
     List<String> variables,
     List<String> tags,
     ZonedDateTime lastPlayedAt) {
-  public static ConfigurationTestResponse fromDomain(ConfigurationTestView domain) {
+  public static ConfigurationTestResponse fromDomain(ConfigurationTestProjection domain) {
     return new ConfigurationTestResponse(
         domain.id(),
         domain.title(),
@@ -25,7 +25,8 @@ public record ConfigurationTestResponse(
         domain.lastPlayedAt());
   }
 
-  public static List<ConfigurationTestResponse> fromDomain(List<ConfigurationTestView> domains) {
+  public static List<ConfigurationTestResponse> fromDomain(
+      List<ConfigurationTestProjection> domains) {
     return domains.stream().map(ConfigurationTestResponse::fromDomain).toList();
   }
 }

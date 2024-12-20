@@ -1,6 +1,6 @@
 package fr.plum.e2e.manager.core.infrastructure.primary.consumer;
 
-import fr.plum.e2e.manager.core.application.MetricsFacade;
+import fr.plum.e2e.manager.core.application.command.metrics.AddMetricsCommandHandler;
 import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.MetricsType;
 import fr.plum.e2e.manager.core.domain.model.command.AddMetricsCommand;
 import fr.plum.e2e.manager.core.domain.model.event.WorkerCompletedEvent;
@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 public class QuarkusWorkerCompletedEventConsumer {
 
   private final WorkerNotificationHelper workerNotificationHelper;
-  private final MetricsFacade metricsFacade;
+  private final AddMetricsCommandHandler addMetricsCommandHandler;
   private final EnvironmentNotifier environmentNotifier;
   private final MetricsHelper metricsHelper;
 
@@ -38,7 +38,7 @@ public class QuarkusWorkerCompletedEventConsumer {
     var addMetricsCommand =
         new AddMetricsCommand(
             event.environmentId(), MetricsType.fromWorkerType(event.worker().getType()));
-    metricsFacade.addMetrics(addMetricsCommand);
+    addMetricsCommandHandler.execute(addMetricsCommand);
 
     var metricsResponse = metricsHelper.getLastMetrics(event.environmentId().value());
     var updateFinalMetricsNotificationsEvent =

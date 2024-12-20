@@ -4,11 +4,11 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.Test
 import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.vo.TestResultId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.vo.TestResultScreenshotId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.vo.TestResultVideoId;
-import fr.plum.e2e.manager.core.domain.model.view.TestResultErrorDetailsView;
-import fr.plum.e2e.manager.core.domain.model.view.TestResultScreenshotView;
-import fr.plum.e2e.manager.core.domain.model.view.TestResultVariableView;
-import fr.plum.e2e.manager.core.domain.model.view.TestResultView;
-import fr.plum.e2e.manager.core.domain.port.out.query.GetTestResultPort;
+import fr.plum.e2e.manager.core.domain.model.projection.TestResultErrorDetailsProjection;
+import fr.plum.e2e.manager.core.domain.model.projection.TestResultProjection;
+import fr.plum.e2e.manager.core.domain.model.projection.TestResultScreenshotProjection;
+import fr.plum.e2e.manager.core.domain.model.projection.TestResultVariableProjection;
+import fr.plum.e2e.manager.core.domain.port.out.view.GetTestResultPort;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.testresult.JpaTestResultEntity;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
@@ -29,7 +29,7 @@ public class JpaGetTestResultAdapter implements GetTestResultPort {
   private final EntityManager entityManager;
 
   @Override
-  public List<TestResultView> findAll(TestConfigurationId testConfigurationId) {
+  public List<TestResultProjection> findAll(TestConfigurationId testConfigurationId) {
     var query =
         entityManager.createQuery(
             """
@@ -46,7 +46,7 @@ public class JpaGetTestResultAdapter implements GetTestResultPort {
             Object[].class);
     query.setParameter("testConfigurationId", testConfigurationId.value());
 
-    Map<UUID, List<TestResultScreenshotView>> screenshotsPerTest = new HashMap<>();
+    Map<UUID, List<TestResultScreenshotProjection>> screenshotsPerTest = new HashMap<>();
     Map<UUID, UUID> videoPerTest = new HashMap<>();
     Map<UUID, JpaTestResultEntity> entities = new HashMap<>();
 
@@ -65,14 +65,14 @@ public class JpaGetTestResultAdapter implements GetTestResultPort {
       if (screenshotId != null && screenshotName != null) {
         screenshotsPerTest
             .computeIfAbsent(entity.getId(), k -> new ArrayList<>())
-            .add(new TestResultScreenshotView(screenshotId, screenshotName));
+            .add(new TestResultScreenshotProjection(screenshotId, screenshotName));
       }
     }
 
     return entities.values().stream()
         .map(
             entity ->
-                new TestResultView(
+                new TestResultProjection(
                     entity.getId(),
                     entity.getStatus(),
                     entity.getReference(),
@@ -86,18 +86,19 @@ public class JpaGetTestResultAdapter implements GetTestResultPort {
                         ? entity.getVariables().entrySet().stream()
                             .map(
                                 entry ->
-                                    new TestResultVariableView(entry.getKey(), entry.getValue()))
+                                    new TestResultVariableProjection(
+                                        entry.getKey(), entry.getValue()))
                             .toList()
                         : List.of()))
         .toList();
   }
 
   @Override
-  public TestResultErrorDetailsView findErrorDetail(TestResultId testResultId) {
+  public TestResultErrorDetailsProjection findErrorDetail(TestResultId testResultId) {
     var query =
         entityManager.createQuery(
             """
-      SELECT NEW fr.plum.e2e.manager.core.domain.model.view.TestResultErrorDetailsView(
+      SELECT NEW fr.plum.e2e.manager.core.domain.model.projection.TestResultErrorDetailsProjection(
           tr.errorMessage,
           tr.errorStacktrace,
           tr.code
@@ -105,7 +106,7 @@ public class JpaGetTestResultAdapter implements GetTestResultPort {
       FROM JpaTestResultEntity tr
       WHERE tr.id = :testResultId
       """,
-            TestResultErrorDetailsView.class);
+            TestResultErrorDetailsProjection.class);
     query.setParameter("testResultId", testResultId.value());
 
     try {

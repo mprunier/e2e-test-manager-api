@@ -1,6 +1,6 @@
 package fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response;
 
-import fr.plum.e2e.manager.core.domain.model.view.PaginatedView;
+import fr.plum.e2e.manager.core.domain.model.projection.PaginatedProjection;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.function.Function;
@@ -13,7 +13,7 @@ public record PaginatedResponse<T>(
     @NotNull Long totalElements) {
 
   public static <T, D> PaginatedResponse<T> fromDomain(
-      PaginatedView<D> domain, Function<D, T> mapper) {
+      PaginatedProjection<D> domain, Function<D, T> mapper) {
     List<T> mappedContent =
         domain.getContent() != null ? domain.getContent().stream().map(mapper).toList() : List.of();
 

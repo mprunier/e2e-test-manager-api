@@ -1,7 +1,7 @@
 package fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.WorkerType;
-import fr.plum.e2e.manager.core.domain.model.view.WorkerView;
+import fr.plum.e2e.manager.core.domain.model.projection.WorkerProjection;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
@@ -13,11 +13,11 @@ public record WorkerResponse(
     @NotBlank String createdBy,
     @NotNull ZonedDateTime createdAt,
     @NotNull WorkerType type) {
-  public static WorkerResponse fromDomain(WorkerView domain) {
+  public static WorkerResponse fromDomain(WorkerProjection domain) {
     return new WorkerResponse(domain.id(), domain.createdBy(), domain.createdAt(), domain.type());
   }
 
-  public static List<WorkerResponse> fromDomain(List<WorkerView> domains) {
+  public static List<WorkerResponse> fromDomain(List<WorkerProjection> domains) {
     return domains.stream().map(WorkerResponse::fromDomain).toList();
   }
 }

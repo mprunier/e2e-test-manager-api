@@ -2,7 +2,8 @@ package fr.plum.e2e.manager.core.infrastructure.primary.rest;
 
 import static fr.plum.e2e.manager.core.infrastructure.primary.rest.utils.RestUtils.extractUsername;
 
-import fr.plum.e2e.manager.core.application.SynchronizationFacade;
+import fr.plum.e2e.manager.core.application.command.synchronization.StartSynchronizationCommandHandler;
+import fr.plum.e2e.manager.core.application.query.synchronization.ListAllSynchronizationErrorsQueryHandler;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.command.CommonCommand;
 import fr.plum.e2e.manager.core.domain.model.query.CommonQuery;
@@ -29,7 +30,8 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 @RequiredArgsConstructor
 public class SynchronizeResource {
 
-  private final SynchronizationFacade synchronizationFacade;
+  private final StartSynchronizationCommandHandler startSynchronizationCommandHandler;
+  private final ListAllSynchronizationErrorsQueryHandler listAllSynchronizationErrorsQueryHandler;
 
   private final SecurityIdentity identity;
 
@@ -43,7 +45,7 @@ public class SynchronizeResource {
             .environmentId(new EnvironmentId(environmentId))
             .username(new ActionUsername(username))
             .build();
-    synchronizationFacade.startSynchronization(command);
+    startSynchronizationCommandHandler.execute(command);
   }
 
   @Operation(operationId = "getSynchronizeErrors")
@@ -52,7 +54,7 @@ public class SynchronizeResource {
   public List<SynchronizationErrorResponse> retrieveErrors(
       @NotNull @QueryParam("environmentId") UUID environmentId) {
     var query = CommonQuery.builder().environmentId(new EnvironmentId(environmentId)).build();
-    var synchronizationErrors = synchronizationFacade.listErrors(query);
+    var synchronizationErrors = listAllSynchronizationErrorsQueryHandler.execute(query);
     return SynchronizationErrorResponse.fromDomain(synchronizationErrors);
   }
 }

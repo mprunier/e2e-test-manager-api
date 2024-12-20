@@ -1,6 +1,7 @@
 package fr.plum.e2e.manager.core.infrastructure.primary.rest;
 
-import fr.plum.e2e.manager.core.application.TestResultFacade;
+import fr.plum.e2e.manager.core.application.query.testresult.DownloadScreenshotQueryHandler;
+import fr.plum.e2e.manager.core.application.query.testresult.DownloadVideoQueryHandler;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.vo.TestResultScreenshotId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.vo.TestResultVideoId;
 import fr.plum.e2e.manager.core.domain.model.query.DownloadScreenshotQuery;
@@ -20,20 +21,21 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class MediaResource {
 
-  private final TestResultFacade testResultFacade;
+  private final DownloadScreenshotQueryHandler downloadScreenshotQueryHandler;
+  private final DownloadVideoQueryHandler downloadVideoQueryHandler;
 
   @GET
   @Path("/videos/{id}")
   @Produces("video/mp4")
   public byte[] downloadVideo(@PathParam("id") UUID id) {
-    return testResultFacade.downloadVideo(new DownloadVideoQuery(new TestResultVideoId(id)));
+    return downloadVideoQueryHandler.execute(new DownloadVideoQuery(new TestResultVideoId(id)));
   }
 
   @GET
   @Path("/screenshots/{id}")
   @Produces("image/png")
   public byte[] downloadScreenshot(@PathParam("id") UUID id) {
-    return testResultFacade.downloadScreenshot(
+    return downloadScreenshotQueryHandler.execute(
         new DownloadScreenshotQuery(new TestResultScreenshotId(id)));
   }
 }
