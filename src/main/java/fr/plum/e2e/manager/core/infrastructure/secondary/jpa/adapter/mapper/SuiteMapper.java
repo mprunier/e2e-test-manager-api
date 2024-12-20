@@ -1,8 +1,8 @@
 package fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter.mapper;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.ConfigurationStatus;
-import fr.plum.e2e.manager.core.domain.model.projection.ConfigurationSuiteProjection;
-import fr.plum.e2e.manager.core.domain.model.projection.ConfigurationTestProjection;
+import fr.plum.e2e.manager.core.domain.model.view.ConfigurationSuiteView;
+import fr.plum.e2e.manager.core.domain.model.view.ConfigurationTestView;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.testconfiguration.JpaSuiteConfigurationEntity;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.testconfiguration.JpaTestConfigurationEntity;
 import lombok.AccessLevel;
@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SuiteMapper {
 
-  public static ConfigurationSuiteProjection toSuiteResponse(JpaSuiteConfigurationEntity entity) {
-    return ConfigurationSuiteProjection.builder()
+  public static ConfigurationSuiteView toSuiteResponse(JpaSuiteConfigurationEntity entity) {
+    return ConfigurationSuiteView.builder()
         .id(entity.getId())
         .title(entity.getTitle())
         .file(entity.getFileConfiguration().getFileName())
@@ -28,8 +28,8 @@ public final class SuiteMapper {
         .build();
   }
 
-  private static ConfigurationTestProjection toTestResponse(JpaTestConfigurationEntity test) {
-    return ConfigurationTestProjection.builder()
+  private static ConfigurationTestView toTestResponse(JpaTestConfigurationEntity test) {
+    return ConfigurationTestView.builder()
         .id(test.getId())
         .title(test.getTitle())
         .status(test.getStatus())

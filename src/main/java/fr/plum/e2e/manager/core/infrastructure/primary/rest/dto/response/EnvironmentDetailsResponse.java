@@ -1,6 +1,6 @@
 package fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response;
 
-import fr.plum.e2e.manager.core.domain.model.projection.EnvironmentDetailsProjection;
+import fr.plum.e2e.manager.core.domain.model.view.EnvironmentDetailsView;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
@@ -22,7 +22,7 @@ public record EnvironmentDetailsResponse(
     ZonedDateTime createdAt,
     ZonedDateTime updatedAt) {
 
-  public static EnvironmentDetailsResponse from(EnvironmentDetailsProjection environment) {
+  public static EnvironmentDetailsResponse from(EnvironmentDetailsView environment) {
     return new EnvironmentDetailsResponse(
         environment.id(),
         environment.description(),

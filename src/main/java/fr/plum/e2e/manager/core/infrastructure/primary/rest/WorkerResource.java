@@ -2,9 +2,7 @@ package fr.plum.e2e.manager.core.infrastructure.primary.rest;
 
 import static fr.plum.e2e.manager.core.infrastructure.primary.rest.utils.RestUtils.extractUsername;
 
-import fr.plum.e2e.manager.core.application.command.worker.CancelWorkerCommandHandler;
-import fr.plum.e2e.manager.core.application.command.worker.RunWorkerCommandHandler;
-import fr.plum.e2e.manager.core.application.query.worker.GetTypeAllWorkerQueryHandler;
+import fr.plum.e2e.manager.core.application.WorkerFacade;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerId;
 import fr.plum.e2e.manager.core.domain.model.command.CancelWorkerCommand;
@@ -38,9 +36,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 @RequiredArgsConstructor
 public class WorkerResource {
 
-  private final RunWorkerCommandHandler runWorkerCommandHandler;
-  private final CancelWorkerCommandHandler cancelWorkerCommandHandler;
-  private final GetTypeAllWorkerQueryHandler getTypeAllWorkerQueryHandler;
+  private final WorkerFacade workerFacade;
 
   private final SecurityIdentity identity;
 
@@ -52,13 +48,13 @@ public class WorkerResource {
     var username = extractUsername(identity);
     log.info("[{}] ran worker on Environment id [{}].", username, environmentId);
     if (request == null) {
-      runWorkerCommandHandler.execute(
+      workerFacade.run(
           RunWorkerCommand.builder()
               .environmentId(new EnvironmentId(environmentId))
               .username(new ActionUsername(username))
               .build());
     } else {
-      runWorkerCommandHandler.execute(request.toCommand(environmentId, username));
+      workerFacade.run(request.toCommand(environmentId, username));
     }
   }
 
@@ -68,7 +64,7 @@ public class WorkerResource {
   public void cancel(@PathParam("worker_id") UUID workerId) {
     var username = extractUsername(identity);
     log.info("[{}] cancel worker.", username);
-    cancelWorkerCommandHandler.execute(
+    workerFacade.cancel(
         new CancelWorkerCommand(new ActionUsername(username), new WorkerId(workerId)));
   }
 
@@ -77,8 +73,7 @@ public class WorkerResource {
   @Path("/units/type-all")
   public List<WorkerUnitResponse> getTypeAllWorkerUnits(
       @NotNull @QueryParam("environmentId") UUID environmentId) {
-    var optionalWorker =
-        getTypeAllWorkerQueryHandler.execute(new CommonQuery(new EnvironmentId(environmentId)));
+    var optionalWorker = workerFacade.get(new CommonQuery(new EnvironmentId(environmentId)));
     if (optionalWorker.isPresent()) {
       return WorkerUnitResponse.fromWorkers(optionalWorker.get().getWorkerUnits());
     }

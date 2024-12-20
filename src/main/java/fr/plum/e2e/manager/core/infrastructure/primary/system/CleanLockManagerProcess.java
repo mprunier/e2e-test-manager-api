@@ -1,6 +1,6 @@
 package fr.plum.e2e.manager.core.infrastructure.primary.system;
 
-import fr.plum.e2e.manager.core.application.command.locker.CleanLockManagerCommandHandler;
+import fr.plum.e2e.manager.core.application.LockManagerFacade;
 import io.quarkus.runtime.StartupEvent;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
@@ -10,9 +10,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CleanLockManagerProcess {
 
-  private final CleanLockManagerCommandHandler cleanLockManagerCommandHandler;
+  private final LockManagerFacade lockManagerFacade;
 
   void onStart(@Observes StartupEvent e) {
-    cleanLockManagerCommandHandler.execute();
+    lockManagerFacade.cleanAll();
   }
 }

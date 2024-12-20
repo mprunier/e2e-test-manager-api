@@ -3,7 +3,7 @@ package fr.plum.e2e.manager.core.domain.port.out.repository;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.Environment;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentDescription;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
-import fr.plum.e2e.manager.core.domain.model.projection.EnvironmentDetailsProjection;
+import fr.plum.e2e.manager.core.domain.model.view.EnvironmentDetailsView;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,5 +18,5 @@ public interface EnvironmentRepositoryPort {
 
   boolean exist(EnvironmentDescription description);
 
-  EnvironmentDetailsProjection findDetails(EnvironmentId environmentId);
+  EnvironmentDetailsView findDetails(EnvironmentId environmentId);
 }

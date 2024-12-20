@@ -4,10 +4,7 @@ import static fr.plum.e2e.manager.core.infrastructure.primary.rest.utils.RestUti
 import static fr.plum.e2e.manager.sharedkernel.infrastructure.cache.CacheNamesConstant.CACHE_HTTP_GET_ENVIRONMENT_DETAILS;
 import static fr.plum.e2e.manager.sharedkernel.infrastructure.cache.CacheNamesConstant.CACHE_HTTP_LIST_ALL_ENVIRONMENTS;
 
-import fr.plum.e2e.manager.core.application.command.environment.CreateEnvironmentCommandHandler;
-import fr.plum.e2e.manager.core.application.command.environment.UpdateEnvironmentCommandHandler;
-import fr.plum.e2e.manager.core.application.query.environment.GetEnvironmentDetailsQueryHandler;
-import fr.plum.e2e.manager.core.application.query.environment.ListAllEnvironmentsQueryHandler;
+import fr.plum.e2e.manager.core.application.EnvironmentFacade;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.query.CommonQuery;
 import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.request.CreateUpdateEnvironmentRequest;
@@ -38,11 +35,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 @RequiredArgsConstructor
 public class EnvironmentResource {
 
-  private final CreateEnvironmentCommandHandler createEnvironmentCommandHandler;
-  private final UpdateEnvironmentCommandHandler updateEnvironmentCommandHandler;
-
-  private final GetEnvironmentDetailsQueryHandler getEnvironmentDetailsQueryHandler;
-  private final ListAllEnvironmentsQueryHandler listAllEnvironmentsQueryHandler;
+  private final EnvironmentFacade environmentFacade;
 
   private final SecurityIdentity identity;
 
@@ -50,7 +43,7 @@ public class EnvironmentResource {
   @CacheResult(cacheName = CACHE_HTTP_LIST_ALL_ENVIRONMENTS)
   @GET
   public List<EnvironmentResponse> listAll() {
-    return EnvironmentResponse.from(listAllEnvironmentsQueryHandler.execute());
+    return EnvironmentResponse.from(environmentFacade.listAllEnvironments());
   }
 
   @Operation(operationId = "getEnvironment")
@@ -59,7 +52,7 @@ public class EnvironmentResource {
   @Path("/{id}")
   public EnvironmentDetailsResponse get(@CacheKey @PathParam("id") UUID id) {
     var query = CommonQuery.builder().environmentId(new EnvironmentId(id)).build();
-    var environment = getEnvironmentDetailsQueryHandler.execute(query);
+    var environment = environmentFacade.getEnvironmentDetails(query);
     return EnvironmentDetailsResponse.from(environment);
   }
 
@@ -69,7 +62,7 @@ public class EnvironmentResource {
     var username = extractUsername(identity);
     log.info("[{}] created a new environment [{}].", username, request.description());
     var command = request.toCommand(username);
-    createEnvironmentCommandHandler.execute(command);
+    environmentFacade.createEnvironment(command);
   }
 
   @Operation(operationId = "updateEnvironment")
@@ -81,6 +74,6 @@ public class EnvironmentResource {
     var username = extractUsername(identity);
     log.info("[{}] updated environment id [{}].", username, environmentId);
     var command = request.toCommand(environmentId, username);
-    updateEnvironmentCommandHandler.execute(command);
+    environmentFacade.updateEnvironment(command);
   }
 }

@@ -1,7 +1,7 @@
 package fr.plum.e2e.manager.core.infrastructure.primary.webhook;
 
-import fr.plum.e2e.manager.core.application.command.synchronization.StartSynchronizationCommandHandler;
-import fr.plum.e2e.manager.core.application.command.worker.ReportWorkerCommandHandler;
+import fr.plum.e2e.manager.core.application.SynchronizationFacade;
+import fr.plum.e2e.manager.core.application.WorkerFacade;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerUnitId;
 import fr.plum.e2e.manager.core.domain.model.command.CommonCommand;
 import fr.plum.e2e.manager.core.domain.model.command.ReportWorkerCommand;
@@ -25,9 +25,8 @@ public class GitlabWebHookHandler {
   private final ConcurrentMap<String, Boolean> locks = new ConcurrentHashMap<>();
 
   private final EnvironmentRepositoryPort environmentRepositoryPort;
-  private final ReportWorkerCommandHandler reportWorkerCommandHandler;
-
-  private final StartSynchronizationCommandHandler startSynchronizationCommandHandler;
+  private final SynchronizationFacade synchronizationFacade;
+  private final WorkerFacade workerFacade;
 
   public void gitlabCallback(String gitlabEvent, GitlabWebHookRequest request) {
     var event = GitLabWebhookEvent.fromHeaderValue(gitlabEvent);
@@ -60,7 +59,7 @@ public class GitlabWebHookHandler {
 
     var reportWorkerCommand =
         ReportWorkerCommand.builder().workerUnitId(new WorkerUnitId(pipelineId)).build();
-    reportWorkerCommandHandler.execute(reportWorkerCommand);
+    workerFacade.report(reportWorkerCommand);
   }
 
   private void pushHook(GitlabWebHookRequest request) {
@@ -87,7 +86,7 @@ public class GitlabWebHookHandler {
       environments.forEach(
           environment -> {
             try {
-              startSynchronizationCommandHandler.execute(
+              synchronizationFacade.startSynchronization(
                   CommonCommand.builder()
                       .environmentId(environment.getId())
                       .username(new ActionUsername("Gitlab Webhook"))

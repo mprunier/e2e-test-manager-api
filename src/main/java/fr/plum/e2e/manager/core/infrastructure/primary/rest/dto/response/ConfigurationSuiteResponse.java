@@ -1,7 +1,7 @@
 package fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.ConfigurationStatus;
-import fr.plum.e2e.manager.core.domain.model.projection.ConfigurationSuiteProjection;
+import fr.plum.e2e.manager.core.domain.model.view.ConfigurationSuiteView;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -21,7 +21,7 @@ public record ConfigurationSuiteResponse(
     @NotNull Boolean hasNewTest,
     String group) {
 
-  public static ConfigurationSuiteResponse fromDomain(ConfigurationSuiteProjection domain) {
+  public static ConfigurationSuiteResponse fromDomain(ConfigurationSuiteView domain) {
     return new ConfigurationSuiteResponse(
         domain.id(),
         domain.title(),

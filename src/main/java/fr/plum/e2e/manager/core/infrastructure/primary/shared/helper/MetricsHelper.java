@@ -1,6 +1,6 @@
 package fr.plum.e2e.manager.core.infrastructure.primary.shared.helper;
 
-import fr.plum.e2e.manager.core.application.query.metrics.GetLastMetricsQueryHandler;
+import fr.plum.e2e.manager.core.application.MetricsFacade;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.MetricsType;
 import fr.plum.e2e.manager.core.domain.model.exception.MetricsNotFoundException;
@@ -14,11 +14,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class MetricsHelper {
 
-  private final GetLastMetricsQueryHandler getLastMetricsQueryHandler;
+  private final MetricsFacade metricsFacade;
 
   public MetricsResponse getLastMetrics(UUID environmentId) {
     var query = GetMetricsQuery.builder().environmentId(new EnvironmentId(environmentId)).build();
-    var response = MetricsResponse.fromDomain(getLastMetricsQueryHandler.execute(query));
+    var response = MetricsResponse.fromDomain(metricsFacade.getLastMetrics(query));
     if (!MetricsType.ALL.equals(response.getType())) {
       var secondQuery =
           GetMetricsQuery.builder()
@@ -27,7 +27,7 @@ public class MetricsHelper {
               .build();
       try {
         var lastAllTestsRunAt =
-            getLastMetricsQueryHandler.execute(secondQuery).getAuditInfo().getCreatedAt();
+            metricsFacade.getLastMetrics(secondQuery).getAuditInfo().getCreatedAt();
         response.addLastAllTestsRunAt(lastAllTestsRunAt);
       } catch (MetricsNotFoundException e) {
         // do nothing

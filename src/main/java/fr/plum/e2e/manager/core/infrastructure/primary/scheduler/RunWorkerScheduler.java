@@ -1,6 +1,6 @@
 package fr.plum.e2e.manager.core.infrastructure.primary.scheduler;
 
-import fr.plum.e2e.manager.core.application.command.worker.RunWorkerCommandHandler;
+import fr.plum.e2e.manager.core.application.WorkerFacade;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.schedulerconfiguration.SchedulerConfiguration;
 import fr.plum.e2e.manager.core.domain.model.command.RunWorkerCommand;
@@ -31,22 +31,22 @@ public class RunWorkerScheduler {
   @ConfigProperty(name = "scheduler.enabled", defaultValue = "true")
   boolean enabled;
 
-  private final RunWorkerCommandHandler runWorkerCommandHandler;
+  private final WorkerFacade workerFacade;
   private final SchedulerConfigurationRepositoryPort schedulerConfigurationRepositoryPort;
   private final Map<EnvironmentId, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
   private final ScheduledExecutorService schedulerExecutor = Executors.newScheduledThreadPool(1);
 
   public RunWorkerScheduler(
-      RunWorkerCommandHandler runWorkerCommandHandler,
+      WorkerFacade workerFacade,
       SchedulerConfigurationRepositoryPort schedulerConfigurationRepositoryPort) {
-    this.runWorkerCommandHandler = runWorkerCommandHandler;
+    this.workerFacade = workerFacade;
     this.schedulerConfigurationRepositoryPort = schedulerConfigurationRepositoryPort;
   }
 
   @PostConstruct
   public void init() {
     if (!enabled) {
-      log.info("RunWorkerScheduler is disabled.");
+      log.info("RunWorkerScheduler is disabled by configuration.");
       return;
     }
     log.info("Initializing RunWorkerScheduler...");
@@ -154,7 +154,7 @@ public class RunWorkerScheduler {
             .username(new ActionUsername("Scheduler"))
             .build();
 
-    runWorkerCommandHandler.execute(command);
+    workerFacade.run(command);
   }
 
   @PreDestroy

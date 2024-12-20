@@ -1,7 +1,7 @@
 package fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.ConfigurationStatus;
-import fr.plum.e2e.manager.core.domain.model.projection.ConfigurationTestWithWorkerProjection;
+import fr.plum.e2e.manager.core.domain.model.view.ConfigurationTestWithWorkerView;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
@@ -18,7 +18,7 @@ public record ConfigurationTestWithWorkerResponse(
     List<WorkerResponse> workers) {
 
   public static ConfigurationTestWithWorkerResponse fromDomain(
-      ConfigurationTestWithWorkerProjection domain) {
+      ConfigurationTestWithWorkerView domain) {
     return new ConfigurationTestWithWorkerResponse(
         domain.id(),
         domain.title(),
@@ -30,7 +30,7 @@ public record ConfigurationTestWithWorkerResponse(
   }
 
   public static List<ConfigurationTestWithWorkerResponse> fromDomain(
-      List<ConfigurationTestWithWorkerProjection> domains) {
+      List<ConfigurationTestWithWorkerView> domains) {
     return domains.stream().map(ConfigurationTestWithWorkerResponse::fromDomain).toList();
   }
 }

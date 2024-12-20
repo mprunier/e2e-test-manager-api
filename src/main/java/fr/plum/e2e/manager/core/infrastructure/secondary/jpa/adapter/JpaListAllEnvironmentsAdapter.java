@@ -1,7 +1,7 @@
 package fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter;
 
-import fr.plum.e2e.manager.core.domain.model.projection.EnvironmentProjection;
-import fr.plum.e2e.manager.core.domain.port.out.view.ListAllEnvironmentsPort;
+import fr.plum.e2e.manager.core.domain.model.view.EnvironmentView;
+import fr.plum.e2e.manager.core.domain.port.out.query.ListAllEnvironmentsPort;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.environment.JpaEnvironmentEntity;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -14,9 +14,9 @@ import lombok.RequiredArgsConstructor;
 public class JpaListAllEnvironmentsAdapter implements ListAllEnvironmentsPort {
 
   @Override
-  public List<EnvironmentProjection> listAll() {
+  public List<EnvironmentView> listAll() {
     return JpaEnvironmentEntity.<JpaEnvironmentEntity>findAll().stream()
-        .map(entity -> new EnvironmentProjection(entity.getId(), entity.getDescription()))
+        .map(entity -> new EnvironmentView(entity.getId(), entity.getDescription()))
         .toList();
   }
 }

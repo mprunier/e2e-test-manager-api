@@ -1,13 +1,13 @@
 package fr.plum.e2e.manager.core.infrastructure.primary.shared.helper;
 
-import fr.plum.e2e.manager.core.application.query.suite.SearchSuiteQueryHandler;
-import fr.plum.e2e.manager.core.application.query.worker.GetTypeAllWorkerQueryHandler;
+import fr.plum.e2e.manager.core.application.SuiteFacade;
+import fr.plum.e2e.manager.core.application.WorkerFacade;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.Worker;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.WorkerType;
-import fr.plum.e2e.manager.core.domain.model.projection.ConfigurationSuiteWithWorkerProjection;
 import fr.plum.e2e.manager.core.domain.model.query.CommonQuery;
 import fr.plum.e2e.manager.core.domain.model.query.SearchSuiteConfigurationQuery;
+import fr.plum.e2e.manager.core.domain.model.view.ConfigurationSuiteWithWorkerView;
 import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response.ConfigurationSuiteWithWorkerResponse;
 import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response.WorkerUnitResponse;
 import fr.plum.e2e.manager.core.infrastructure.secondary.websocket.adapter.EnvironmentNotifier;
@@ -23,14 +23,14 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class WorkerNotificationHelper {
 
-  private final GetTypeAllWorkerQueryHandler getTypeAllWorkerQueryHandler;
-  private final SearchSuiteQueryHandler searchSuiteQueryHandler;
+  private final WorkerFacade workerFacade;
+  private final SuiteFacade suiteFacade;
 
   private final EnvironmentNotifier environmentNotifier;
 
   public void sendWorkerUnitUpdatedNotification(EnvironmentId environmentId, Worker worker) {
     if (WorkerType.ALL.equals(worker.getType())) {
-      var optionalWorker = getTypeAllWorkerQueryHandler.execute(new CommonQuery(environmentId));
+      var optionalWorker = workerFacade.get(new CommonQuery(environmentId));
       if (optionalWorker.isPresent()) {
         var workerUnitUpdatedNotificationEvent =
             TypeAllWorkerUnitsUpdatedNotificationEvent.builder()
@@ -44,7 +44,7 @@ public class WorkerNotificationHelper {
 
   public void sendWorkerUpdatedNotification(
       EnvironmentId environmentId, Worker worker, WorkerNotificationStatus status) {
-    var configurationSuiteWithWorkerProjection = getConfigurationSuiteWithWorkerView(worker);
+    var configurationSuiteWithWorkerView = getConfigurationSuiteWithWorkerView(worker);
 
     var workerUpdatedNotificationEvent =
         WorkerUpdatedNotificationEvent.builder()
@@ -52,17 +52,16 @@ public class WorkerNotificationHelper {
             .workerType(worker.getType())
             .status(status)
             .configurationSuiteWithWorker(
-                configurationSuiteWithWorkerProjection != null
+                configurationSuiteWithWorkerView != null
                     ? ConfigurationSuiteWithWorkerResponse.fromDomain(
-                        configurationSuiteWithWorkerProjection)
+                        configurationSuiteWithWorkerView)
                     : null)
             .build();
     environmentNotifier.notifySubscribers(workerUpdatedNotificationEvent);
   }
 
-  private ConfigurationSuiteWithWorkerProjection getConfigurationSuiteWithWorkerView(
-      Worker worker) {
-    ConfigurationSuiteWithWorkerProjection suiteWithWorker = null;
+  private ConfigurationSuiteWithWorkerView getConfigurationSuiteWithWorkerView(Worker worker) {
+    ConfigurationSuiteWithWorkerView suiteWithWorker = null;
     if (WorkerType.SUITE.equals(worker.getType()) || WorkerType.TEST.equals(worker.getType())) {
       var searchSuiteQuery =
           SearchSuiteConfigurationQuery.builder()
@@ -90,7 +89,7 @@ public class WorkerNotificationHelper {
                           .testConfigurationId()
                       : null)
               .build();
-      var suitesPaginated = searchSuiteQueryHandler.execute(searchSuiteQuery);
+      var suitesPaginated = suiteFacade.searchSuites(searchSuiteQuery);
       if (suitesPaginated != null && !suitesPaginated.getContent().isEmpty()) {
         suiteWithWorker = suitesPaginated.getContent().getFirst();
       }
