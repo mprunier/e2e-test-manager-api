@@ -8,6 +8,7 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.vo.PassCount;
 import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.vo.SkippedCount;
 import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.vo.SuiteCount;
 import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.vo.TestCount;
+import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.ConfigurationStatus;
 import fr.plum.e2e.manager.core.domain.port.repository.MetricsRepositoryPort;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter.mapper.MetricsMapper;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.metrics.JpaMetricsEntity;
@@ -87,10 +88,11 @@ public class JpaMetricsRepositoryAdapter implements MetricsRepositoryPort {
                    JOIN t.suiteConfiguration s
                    JOIN s.fileConfiguration f
                    WHERE f.environmentId = :envId
-                   AND t.status = 'PASSED'
+                   AND t.status = :status
                    """,
                 Long.class)
             .setParameter("envId", environmentId.value())
+            .setParameter("status", ConfigurationStatus.SUCCESS)
             .getSingleResult();
     return new PassCount(result.intValue());
   }
@@ -106,10 +108,15 @@ public class JpaMetricsRepositoryAdapter implements MetricsRepositoryPort {
                    JOIN t.suiteConfiguration s
                    JOIN s.fileConfiguration f
                    WHERE f.environmentId = :envId
-                   AND t.status = 'FAILED'
+                   AND (t.status = :status OR t.status = :systemErrorStatus OR t.status = :noCorrespondTestStatus OR t.status = :noReportErrorStatus OR t.status = :unknownStatus)
                    """,
                 Long.class)
             .setParameter("envId", environmentId.value())
+            .setParameter("status", ConfigurationStatus.FAILED)
+            .setParameter("systemErrorStatus", ConfigurationStatus.SYSTEM_ERROR)
+            .setParameter("noCorrespondTestStatus", ConfigurationStatus.NO_CORRESPONDING_TEST)
+            .setParameter("noReportErrorStatus", ConfigurationStatus.NO_REPORT_ERROR)
+            .setParameter("unknownStatus", ConfigurationStatus.UNKNOWN)
             .getSingleResult();
     return new FailureCount(result.intValue());
   }
@@ -125,10 +132,13 @@ public class JpaMetricsRepositoryAdapter implements MetricsRepositoryPort {
                    JOIN t.suiteConfiguration s
                    JOIN s.fileConfiguration f
                    WHERE f.environmentId = :envId
-                   AND t.status = 'SKIPPED'
+                   AND (t.status = :status OR t.status = :partialStatus OR t.status = :cancelStatus)
                    """,
                 Long.class)
             .setParameter("envId", environmentId.value())
+            .setParameter("status", ConfigurationStatus.SKIPPED)
+            .setParameter("partialStatus", ConfigurationStatus.PARTIAL_SKIPPED)
+            .setParameter("cancelStatus", ConfigurationStatus.CANCELED)
             .getSingleResult();
     return new SkippedCount(result.intValue());
   }

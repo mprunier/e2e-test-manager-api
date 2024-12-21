@@ -2,7 +2,6 @@ package fr.plum.e2e.manager.core.application.command.worker;
 
 import fr.plum.e2e.manager.core.application.command.worker.dto.WorkerFiles;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.Environment;
-import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.SourceCodeInformation;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.FileName;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.GroupName;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.Worker;
@@ -113,7 +112,7 @@ public class RunWorkerCommandHandler implements CommandHandler<RunWorkerCommand>
         .forEach(
             workerFilter ->
                 runWorker(
-                    environment.getSourceCodeInformation(),
+                    environment,
                     workerFilter,
                     command.variables(),
                     new WorkerIsRecordVideo(false),
@@ -121,14 +120,13 @@ public class RunWorkerCommandHandler implements CommandHandler<RunWorkerCommand>
   }
 
   private void runWorker(
-      SourceCodeInformation sourceCodeInformation,
+      Environment environment,
       WorkerUnitFilter workerUnitFilter,
       List<WorkerVariable> variables,
       WorkerIsRecordVideo workerIsRecordVideo,
       Worker worker) {
     var workerId =
-        workerUnitPort.runWorker(
-            sourceCodeInformation, workerUnitFilter, variables, workerIsRecordVideo);
+        workerUnitPort.runWorker(environment, workerUnitFilter, variables, workerIsRecordVideo);
     var workerUnit = WorkerUnit.builder().id(workerId).filter(workerUnitFilter).build();
     worker.addWorkerUnit(workerUnit);
   }
@@ -164,12 +162,7 @@ public class RunWorkerCommandHandler implements CommandHandler<RunWorkerCommand>
     var workerFilter =
         new WorkerUnitFilter(fileNamesFilter, command.tag(), suiteFilter, testFilter);
     var workerIsRecordVideo = getWorkerIsRecordVideo(workerFilter);
-    runWorker(
-        environment.getSourceCodeInformation(),
-        workerFilter,
-        command.variables(),
-        workerIsRecordVideo,
-        worker);
+    runWorker(environment, workerFilter, command.variables(), workerIsRecordVideo, worker);
   }
 
   private void filterByAll(Environment environment, ArrayList<FileName> fileNamesFilter) {

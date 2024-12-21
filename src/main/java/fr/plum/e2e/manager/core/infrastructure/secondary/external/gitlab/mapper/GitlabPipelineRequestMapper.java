@@ -3,7 +3,7 @@ package fr.plum.e2e.manager.core.infrastructure.secondary.external.gitlab.mapper
 import static fr.plum.e2e.manager.core.domain.constant.BusinessConstant.DISABLE_TAG;
 import static fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.CypressConstant.START_PATH;
 
-import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.SourceCodeInformation;
+import fr.plum.e2e.manager.core.domain.model.aggregate.environment.Environment;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.Tag;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerIsRecordVideo;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerUnitFilter;
@@ -21,14 +21,14 @@ import lombok.extern.slf4j.Slf4j;
 public final class GitlabPipelineRequestMapper {
 
   public static PipelineRequest buildPipelineRequest(
-      SourceCodeInformation sourceCodeInformation,
+      Environment environment,
       WorkerUnitFilter workerUnitFilter,
       List<WorkerVariable> workerVariables,
       WorkerIsRecordVideo workerIsRecordVideo) {
     var pipelineRequestBuilder =
         PipelineRequest.builder()
             .variable(buildCypressTestEnabledVariable())
-            .ref(sourceCodeInformation.branch());
+            .ref(environment.getSourceCodeInformation().branch());
 
     if (!workerUnitFilter.fileNames().isEmpty()) {
       pipelineRequestBuilder.variable(
@@ -46,16 +46,36 @@ public final class GitlabPipelineRequestMapper {
     var grepTags = buildGrepTags(workerUnitFilter.tag());
     pipelineRequestBuilder.variable(buildCypressTestGrepTagsVariable(grepTags));
 
-    if (!workerVariables.isEmpty()) {
-      var variables =
-          workerVariables.stream()
-              .map(variable -> variable.name() + "=" + variable.value())
-              .collect(Collectors.joining(","));
-      pipelineRequestBuilder.variable(buildCypressVariablesVariable(variables));
+    var cypressVariables = buildCypressVariable(environment, workerVariables);
+    if (cypressVariables != null) {
+      pipelineRequestBuilder.variable(buildCypressVariablesVariable(cypressVariables));
     }
 
     pipelineRequestBuilder.variable(buildCypressVideoVariable(workerIsRecordVideo.value()));
     return pipelineRequestBuilder.build();
+  }
+
+  private static String buildCypressVariable(
+      Environment environment, List<WorkerVariable> workerVariables) {
+    String cypressVariables = null;
+    if (!workerVariables.isEmpty()) {
+      cypressVariables =
+          workerVariables.stream()
+              .map(variable -> variable.name() + "=" + variable.value())
+              .collect(Collectors.joining(","));
+    }
+    if (!environment.getVariables().isEmpty()) {
+      if (cypressVariables != null) {
+        cypressVariables += ",";
+      } else {
+        cypressVariables = "";
+      }
+      cypressVariables +=
+          environment.getVariables().stream()
+              .map(variable -> variable.getId().name() + "=" + variable.getValue().value())
+              .collect(Collectors.joining(","));
+    }
+    return cypressVariables;
   }
 
   private static String buildGrep(WorkerUnitFilter workerUnitFilter) {

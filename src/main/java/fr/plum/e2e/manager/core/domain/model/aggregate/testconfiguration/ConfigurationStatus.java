@@ -9,14 +9,13 @@ public enum ConfigurationStatus {
 
   SKIPPED,
   PARTIAL_SKIPPED, // Only one testFilter of a configuration can be skipped
+  CANCELED,
 
   FAILED,
   SYSTEM_ERROR,
   NO_CORRESPONDING_TEST,
   NO_REPORT_ERROR,
-  UNKNOWN,
-
-  CANCELED;
+  UNKNOWN;
 
   public static ConfigurationStatus defaultStatus() {
     return NEW;

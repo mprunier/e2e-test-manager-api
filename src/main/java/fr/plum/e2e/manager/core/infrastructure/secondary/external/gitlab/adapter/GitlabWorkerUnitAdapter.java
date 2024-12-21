@@ -2,6 +2,7 @@ package fr.plum.e2e.manager.core.infrastructure.secondary.external.gitlab.adapte
 
 import static fr.plum.e2e.manager.core.infrastructure.secondary.external.gitlab.mapper.GitlabPipelineRequestMapper.buildPipelineRequest;
 
+import fr.plum.e2e.manager.core.domain.model.aggregate.environment.Environment;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.SourceCodeInformation;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.WorkerUnitStatus;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerIsRecordVideo;
@@ -27,18 +28,19 @@ public class GitlabWorkerUnitAdapter implements WorkerUnitPort {
 
   @Override
   public WorkerUnitId runWorker(
-      SourceCodeInformation sourceCodeInformation,
+      Environment environment,
       WorkerUnitFilter workerUnitFilter,
       List<WorkerVariable> workerVariables,
       WorkerIsRecordVideo workerIsRecordVideo) {
 
     var pipelineRequest =
-        buildPipelineRequest(
-            sourceCodeInformation, workerUnitFilter, workerVariables, workerIsRecordVideo);
+        buildPipelineRequest(environment, workerUnitFilter, workerVariables, workerIsRecordVideo);
 
     var gitlabResponse =
         gitlabClient.runPipeline(
-            sourceCodeInformation.token(), sourceCodeInformation.projectId(), pipelineRequest);
+            environment.getSourceCodeInformation().token(),
+            environment.getSourceCodeInformation().projectId(),
+            pipelineRequest);
     return new WorkerUnitId(gitlabResponse.getId());
   }
 

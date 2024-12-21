@@ -1,5 +1,6 @@
 package fr.plum.e2e.manager.core.domain.port;
 
+import fr.plum.e2e.manager.core.domain.model.aggregate.environment.Environment;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.SourceCodeInformation;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.WorkerUnitStatus;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerIsRecordVideo;
@@ -11,7 +12,7 @@ import java.util.List;
 public interface WorkerUnitPort {
 
   WorkerUnitId runWorker(
-      SourceCodeInformation sourceCodeInformation,
+      Environment environment,
       WorkerUnitFilter workerUnitFilter,
       List<WorkerVariable> workerVariables,
       WorkerIsRecordVideo workerIsRecordVideo);

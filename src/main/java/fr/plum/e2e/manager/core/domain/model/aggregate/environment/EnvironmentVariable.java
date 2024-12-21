@@ -14,7 +14,7 @@ import lombok.experimental.SuperBuilder;
 public class EnvironmentVariable extends Entity<EnvironmentVariableId> {
 
   private VariableValue value;
-  private VariableDescription description;
+  private VariableDescription description; // Not the name which is the id
   private VariableIsHidden isHidden;
 
   public boolean isValueMasked() {
