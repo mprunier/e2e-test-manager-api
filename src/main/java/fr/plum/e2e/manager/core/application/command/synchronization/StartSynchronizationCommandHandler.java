@@ -2,10 +2,10 @@ package fr.plum.e2e.manager.core.application.command.synchronization;
 
 import fr.plum.e2e.manager.core.domain.model.command.CommonCommand;
 import fr.plum.e2e.manager.core.domain.model.event.EnvironmentIsSynchronizingEvent;
-import fr.plum.e2e.manager.core.domain.port.out.EventPublisherPort;
-import fr.plum.e2e.manager.core.domain.port.out.repository.SynchronizationRepositoryPort;
+import fr.plum.e2e.manager.core.domain.port.EventPublisherPort;
+import fr.plum.e2e.manager.core.domain.port.repository.SynchronizationRepositoryPort;
 import fr.plum.e2e.manager.core.domain.service.SynchronizationService;
-import fr.plum.e2e.manager.sharedkernel.domain.port.in.CommandHandler;
+import fr.plum.e2e.manager.sharedkernel.application.command.CommandHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped

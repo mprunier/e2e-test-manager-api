@@ -1,7 +1,7 @@
 package fr.plum.e2e.manager.core.application.command.locker;
 
-import fr.plum.e2e.manager.core.domain.port.out.LockManagerPort;
-import fr.plum.e2e.manager.sharedkernel.domain.port.in.NoParamCommandHandler;
+import fr.plum.e2e.manager.core.domain.port.LockManagerPort;
+import fr.plum.e2e.manager.sharedkernel.application.command.NoParamCommandHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped

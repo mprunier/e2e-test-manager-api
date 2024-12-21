@@ -1,8 +1,8 @@
 package fr.plum.e2e.manager.core.domain.service;
 
 import fr.plum.e2e.manager.core.domain.model.exception.ConcurrentWorkersReachedException;
-import fr.plum.e2e.manager.core.domain.port.out.ConfigurationPort;
-import fr.plum.e2e.manager.core.domain.port.out.repository.WorkerRepositoryPort;
+import fr.plum.e2e.manager.core.domain.port.ConfigurationPort;
+import fr.plum.e2e.manager.core.domain.port.repository.WorkerRepositoryPort;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor

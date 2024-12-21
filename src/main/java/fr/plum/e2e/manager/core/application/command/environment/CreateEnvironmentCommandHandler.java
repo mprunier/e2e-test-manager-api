@@ -6,14 +6,14 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.schedulerconfiguration.Sc
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.Synchronization;
 import fr.plum.e2e.manager.core.domain.model.command.CreateEnvironmentCommand;
 import fr.plum.e2e.manager.core.domain.model.event.EnvironmentCreatedEvent;
-import fr.plum.e2e.manager.core.domain.port.out.EventPublisherPort;
-import fr.plum.e2e.manager.core.domain.port.out.repository.EnvironmentRepositoryPort;
-import fr.plum.e2e.manager.core.domain.port.out.repository.SchedulerConfigurationRepositoryPort;
-import fr.plum.e2e.manager.core.domain.port.out.repository.SynchronizationRepositoryPort;
+import fr.plum.e2e.manager.core.domain.port.EventPublisherPort;
+import fr.plum.e2e.manager.core.domain.port.repository.EnvironmentRepositoryPort;
+import fr.plum.e2e.manager.core.domain.port.repository.SchedulerConfigurationRepositoryPort;
+import fr.plum.e2e.manager.core.domain.port.repository.SynchronizationRepositoryPort;
 import fr.plum.e2e.manager.core.domain.service.EnvironmentService;
-import fr.plum.e2e.manager.sharedkernel.domain.port.in.CommandHandler;
-import fr.plum.e2e.manager.sharedkernel.domain.port.out.ClockPort;
-import fr.plum.e2e.manager.sharedkernel.domain.port.out.TransactionManagerPort;
+import fr.plum.e2e.manager.sharedkernel.application.command.CommandHandler;
+import fr.plum.e2e.manager.sharedkernel.domain.port.ClockPort;
+import fr.plum.e2e.manager.sharedkernel.domain.port.TransactionManagerPort;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.concurrent.atomic.AtomicReference;
 

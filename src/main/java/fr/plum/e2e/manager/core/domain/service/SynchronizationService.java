@@ -3,7 +3,7 @@ package fr.plum.e2e.manager.core.domain.service;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.Synchronization;
 import fr.plum.e2e.manager.core.domain.model.exception.SynchronizationNotFoundException;
-import fr.plum.e2e.manager.core.domain.port.out.repository.SynchronizationRepositoryPort;
+import fr.plum.e2e.manager.core.domain.port.repository.SynchronizationRepositoryPort;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor

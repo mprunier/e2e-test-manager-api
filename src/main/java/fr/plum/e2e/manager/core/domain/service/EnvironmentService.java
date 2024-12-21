@@ -5,7 +5,7 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.Environmen
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.exception.DuplicateEnvironmentException;
 import fr.plum.e2e.manager.core.domain.model.exception.EnvironmentNotFoundException;
-import fr.plum.e2e.manager.core.domain.port.out.repository.EnvironmentRepositoryPort;
+import fr.plum.e2e.manager.core.domain.port.repository.EnvironmentRepositoryPort;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor

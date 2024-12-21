@@ -1,4 +1,4 @@
-package fr.plum.e2e.manager.core.domain.port.out.repository;
+package fr.plum.e2e.manager.core.domain.port.repository;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.Environment;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentDescription;

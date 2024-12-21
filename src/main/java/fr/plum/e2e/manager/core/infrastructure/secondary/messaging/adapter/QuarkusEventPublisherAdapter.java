@@ -1,7 +1,7 @@
 package fr.plum.e2e.manager.core.infrastructure.secondary.messaging.adapter;
 
 import fr.plum.e2e.manager.core.domain.model.event.DomainEvent;
-import fr.plum.e2e.manager.core.domain.port.out.EventPublisherPort;
+import fr.plum.e2e.manager.core.domain.port.EventPublisherPort;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;

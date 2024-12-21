@@ -3,7 +3,7 @@ package fr.plum.e2e.manager.core.domain.service;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.schedulerconfiguration.SchedulerConfiguration;
 import fr.plum.e2e.manager.core.domain.model.exception.SchedulerNotFoundException;
-import fr.plum.e2e.manager.core.domain.port.out.repository.SchedulerConfigurationRepositoryPort;
+import fr.plum.e2e.manager.core.domain.port.repository.SchedulerConfigurationRepositoryPort;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor

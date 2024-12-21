@@ -1,6 +1,6 @@
 package fr.plum.e2e.manager.core.application.locker;
 
-import fr.plum.e2e.manager.core.domain.port.out.LockManagerPort;
+import fr.plum.e2e.manager.core.domain.port.LockManagerPort;
 import jakarta.annotation.Priority;
 import jakarta.interceptor.AroundInvoke;
 import jakarta.interceptor.Interceptor;

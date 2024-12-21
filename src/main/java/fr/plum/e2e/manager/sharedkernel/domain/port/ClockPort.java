@@ -1,4 +1,4 @@
-package fr.plum.e2e.manager.sharedkernel.domain.port.out;
+package fr.plum.e2e.manager.sharedkernel.domain.port;
 
 import java.time.ZonedDateTime;
 

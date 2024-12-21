@@ -2,7 +2,7 @@ package fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.schedulerconfiguration.SchedulerConfiguration;
-import fr.plum.e2e.manager.core.domain.port.out.repository.SchedulerConfigurationRepositoryPort;
+import fr.plum.e2e.manager.core.domain.port.repository.SchedulerConfigurationRepositoryPort;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter.mapper.SchedulerConfigurationMapper;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.repository.JpaSchedulerConfigurationRepository;
 import io.quarkus.cache.CacheKey;

@@ -1,6 +1,6 @@
 package fr.plum.e2e.manager.core.infrastructure.secondary.clock.adapter;
 
-import fr.plum.e2e.manager.sharedkernel.domain.port.out.ClockPort;
+import fr.plum.e2e.manager.sharedkernel.domain.port.ClockPort;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.time.ZonedDateTime;
 

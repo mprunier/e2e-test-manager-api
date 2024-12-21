@@ -2,9 +2,9 @@ package fr.plum.e2e.manager.core.application.command.metrics;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.Metrics;
 import fr.plum.e2e.manager.core.domain.model.command.AddMetricsCommand;
-import fr.plum.e2e.manager.core.domain.port.out.repository.MetricsRepositoryPort;
-import fr.plum.e2e.manager.sharedkernel.domain.port.in.CommandHandler;
-import fr.plum.e2e.manager.sharedkernel.domain.port.out.ClockPort;
+import fr.plum.e2e.manager.core.domain.port.repository.MetricsRepositoryPort;
+import fr.plum.e2e.manager.sharedkernel.application.command.CommandHandler;
+import fr.plum.e2e.manager.sharedkernel.domain.port.ClockPort;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 

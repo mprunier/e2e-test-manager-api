@@ -1,8 +1,8 @@
 package fr.plum.e2e.manager.core.application.command.synchronization;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.Synchronization;
-import fr.plum.e2e.manager.core.domain.port.out.repository.SynchronizationRepositoryPort;
-import fr.plum.e2e.manager.sharedkernel.domain.port.in.NoParamCommandHandler;
+import fr.plum.e2e.manager.core.domain.port.repository.SynchronizationRepositoryPort;
+import fr.plum.e2e.manager.sharedkernel.application.command.NoParamCommandHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped

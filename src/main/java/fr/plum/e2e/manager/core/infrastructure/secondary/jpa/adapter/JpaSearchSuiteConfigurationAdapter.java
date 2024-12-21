@@ -7,16 +7,16 @@ import fr.plum.e2e.manager.core.domain.model.projection.CriteriaOptionProjection
 import fr.plum.e2e.manager.core.domain.model.projection.PaginatedProjection;
 import fr.plum.e2e.manager.core.domain.model.projection.SearchCriteriaProjection;
 import fr.plum.e2e.manager.core.domain.model.query.SearchSuiteConfigurationQuery;
-import fr.plum.e2e.manager.core.domain.port.out.view.SearchSuiteConfigurationPort;
+import fr.plum.e2e.manager.core.domain.port.view.SearchSuiteConfigurationPort;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter.mapper.SuiteMapper;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.testconfiguration.JpaSuiteConfigurationEntity;
-import io.quarkus.hibernate.orm.panache.PanacheQuery;
-import io.quarkus.panache.common.Page;
-import io.quarkus.panache.common.Parameters;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 
@@ -36,41 +36,39 @@ public class JpaSearchSuiteConfigurationAdapter implements SearchSuiteConfigurat
             "SELECT DISTINCT s FROM JpaSuiteConfigurationEntity s "
                 + "WHERE s.fileConfiguration.environmentId = :environmentId");
 
-    Parameters params = new Parameters();
-    params.and("environmentId", query.environmentId().value());
+    Map<String, Object> params = new HashMap<>();
+    params.put("environmentId", query.environmentId().value());
 
     if (query.suiteConfigurationId() != null) {
       queryStr.append(" AND s.id = :suiteId");
-      params.and("suiteId", query.suiteConfigurationId().value());
+      params.put("suiteId", query.suiteConfigurationId().value());
     }
 
     if (query.testConfigurationId() != null) {
       queryStr.append(" AND EXISTS (SELECT 1 FROM s.testConfigurations t WHERE t.id = :testId)");
-      params.and("testId", query.testConfigurationId().value());
+      params.put("testId", query.testConfigurationId().value());
     }
 
     if (query.tag() != null) {
       queryStr.append(
           " AND (:tag MEMBER OF s.tags OR EXISTS (SELECT 1 FROM s.testConfigurations t WHERE :tag MEMBER OF t.tags))");
-      params.and("tag", query.tag().value());
+      params.put("tag", query.tag().value());
     }
 
     if (query.fileName() != null) {
       queryStr.append(" AND s.fileConfiguration.value = :value");
-      params.and("value", query.fileName().value());
+      params.put("value", query.fileName().value());
     }
 
     if (query.status() != null) {
       queryStr.append(" AND s.status = :status");
-      params.and("status", query.status());
+      params.put("status", query.status());
     }
 
     if (Boolean.TRUE.equals(query.allNotSuccess())) {
       queryStr.append(" AND s.status != :successStatus");
-      params.and("successStatus", ConfigurationStatus.SUCCESS);
+      params.put("successStatus", ConfigurationStatus.SUCCESS);
     }
-
-    queryStr.append(" ORDER BY ");
 
     String orderByClause =
         switch (query.sortField()) {
@@ -82,37 +80,66 @@ public class JpaSearchSuiteConfigurationAdapter implements SearchSuiteConfigurat
         };
 
     queryStr
+        .append(" ORDER BY ")
         .append(orderByClause)
         .append(" ")
         .append("asc".equalsIgnoreCase(query.sortOrder()) ? "ASC" : "DESC");
 
-    PanacheQuery<JpaSuiteConfigurationEntity> panacheQuery =
-        JpaSuiteConfigurationEntity.find(queryStr.toString(), params.map());
+    TypedQuery<JpaSuiteConfigurationEntity> queryTyped =
+        entityManager.createQuery(queryStr.toString(), JpaSuiteConfigurationEntity.class);
 
-    panacheQuery.page(Page.of(query.page(), query.size()));
+    params.forEach(queryTyped::setParameter);
 
-    List<JpaSuiteConfigurationEntity> results = panacheQuery.list();
+    int pageSize = query.size();
+    int pageNumber = query.page();
 
-    if (!results.isEmpty()) {
-      entityManager
-          .createQuery(
-              """
-                SELECT DISTINCT s
-                FROM JpaSuiteConfigurationEntity s
-                LEFT JOIN FETCH s.testConfigurations
-                LEFT JOIN FETCH s.fileConfiguration
-                WHERE s IN :suites
-                """,
-              JpaSuiteConfigurationEntity.class)
-          .setParameter("suites", results)
-          .getResultList();
-    }
+    queryTyped.setFirstResult(pageNumber * pageSize);
+    queryTyped.setMaxResults(pageSize);
+
+    List<JpaSuiteConfigurationEntity> results = queryTyped.getResultList();
+
+    // TODO WTF POURQUOI JAVAIS FAIT CETTE DAUBE ?
+    //    if (!results.isEmpty()) {
+    //      List<JpaSuiteConfigurationEntity> orderedResults = new ArrayList<>(results);
+    //
+    //      results =
+    //          entityManager
+    //              .createQuery(
+    //                  """
+    //                            SELECT DISTINCT s
+    //                            FROM JpaSuiteConfigurationEntity s
+    //                            LEFT JOIN FETCH s.testConfigurations
+    //                            LEFT JOIN FETCH s.fileConfiguration
+    //                            WHERE s IN :suites
+    //                            """,
+    //                  JpaSuiteConfigurationEntity.class)
+    //              .setParameter("suites", results)
+    //              .getResultList();
+    //
+    //      results.sort(Comparator.comparingInt(orderedResults::indexOf));
+    //    }
 
     List<ConfigurationSuiteProjection> content =
         results.stream().map(SuiteMapper::toSuiteResponse).toList();
 
+    long totalItems =
+        entityManager
+            .createQuery(
+                """
+                      SELECT COUNT(DISTINCT s.id)
+                      FROM JpaSuiteConfigurationEntity s
+                      WHERE s.fileConfiguration.environmentId = :environmentId
+                      """,
+                Long.class)
+            .setParameter("environmentId", query.environmentId().value())
+            .getSingleResult();
+
     return new PaginatedProjection<>(
-        content, query.page(), panacheQuery.pageCount(), query.size(), panacheQuery.count());
+        content,
+        query.page(),
+        (int) Math.ceil((double) totalItems / query.size()),
+        query.size(),
+        totalItems);
   }
 
   @Override

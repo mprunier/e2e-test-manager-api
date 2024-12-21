@@ -4,7 +4,7 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.Environmen
 import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.Metrics;
 import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.MetricsType;
 import fr.plum.e2e.manager.core.domain.model.exception.MetricsNotFoundException;
-import fr.plum.e2e.manager.core.domain.port.out.repository.MetricsRepositoryPort;
+import fr.plum.e2e.manager.core.domain.port.repository.MetricsRepositoryPort;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor

@@ -4,7 +4,7 @@ import fr.plum.e2e.manager.core.application.command.worker.RunWorkerCommandHandl
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.schedulerconfiguration.SchedulerConfiguration;
 import fr.plum.e2e.manager.core.domain.model.command.RunWorkerCommand;
-import fr.plum.e2e.manager.core.domain.port.out.repository.SchedulerConfigurationRepositoryPort;
+import fr.plum.e2e.manager.core.domain.port.repository.SchedulerConfigurationRepositoryPort;
 import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.ActionUsername;
 import io.quarkus.runtime.Startup;
 import jakarta.annotation.PostConstruct;

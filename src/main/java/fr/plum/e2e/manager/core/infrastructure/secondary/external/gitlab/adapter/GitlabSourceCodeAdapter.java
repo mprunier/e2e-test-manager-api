@@ -3,7 +3,7 @@ package fr.plum.e2e.manager.core.infrastructure.secondary.external.gitlab.adapte
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.SourceCodeInformation;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SourceCodeProject;
 import fr.plum.e2e.manager.core.domain.model.exception.SourceCodeCloneException;
-import fr.plum.e2e.manager.core.domain.port.out.SourceCodePort;
+import fr.plum.e2e.manager.core.domain.port.SourceCodePort;
 import fr.plum.e2e.manager.core.infrastructure.secondary.external.gitlab.client.GitlabClient;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.io.File;

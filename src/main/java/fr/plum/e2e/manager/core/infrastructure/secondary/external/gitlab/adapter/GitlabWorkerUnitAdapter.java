@@ -8,7 +8,7 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerIsRecordV
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerUnitFilter;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerUnitId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerVariable;
-import fr.plum.e2e.manager.core.domain.port.out.WorkerUnitPort;
+import fr.plum.e2e.manager.core.domain.port.WorkerUnitPort;
 import fr.plum.e2e.manager.core.infrastructure.secondary.external.gitlab.client.GitlabClient;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.List;

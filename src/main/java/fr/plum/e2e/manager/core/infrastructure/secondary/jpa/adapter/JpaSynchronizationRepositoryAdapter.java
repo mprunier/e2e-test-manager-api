@@ -2,7 +2,7 @@ package fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.Synchronization;
-import fr.plum.e2e.manager.core.domain.port.out.repository.SynchronizationRepositoryPort;
+import fr.plum.e2e.manager.core.domain.port.repository.SynchronizationRepositoryPort;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter.mapper.SynchronizationMapper;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.repository.JpaSynchronizationRepository;
 import jakarta.enterprise.context.ApplicationScoped;

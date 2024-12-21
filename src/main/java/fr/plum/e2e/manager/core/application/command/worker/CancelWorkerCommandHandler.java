@@ -3,12 +3,12 @@ package fr.plum.e2e.manager.core.application.command.worker;
 import fr.plum.e2e.manager.core.application.locker.CommandLock;
 import fr.plum.e2e.manager.core.domain.model.command.CancelWorkerCommand;
 import fr.plum.e2e.manager.core.domain.model.event.WorkerCanceledEvent;
-import fr.plum.e2e.manager.core.domain.port.out.EventPublisherPort;
-import fr.plum.e2e.manager.core.domain.port.out.WorkerUnitPort;
-import fr.plum.e2e.manager.core.domain.port.out.repository.EnvironmentRepositoryPort;
-import fr.plum.e2e.manager.core.domain.port.out.repository.WorkerRepositoryPort;
+import fr.plum.e2e.manager.core.domain.port.EventPublisherPort;
+import fr.plum.e2e.manager.core.domain.port.WorkerUnitPort;
+import fr.plum.e2e.manager.core.domain.port.repository.EnvironmentRepositoryPort;
+import fr.plum.e2e.manager.core.domain.port.repository.WorkerRepositoryPort;
 import fr.plum.e2e.manager.core.domain.service.EnvironmentService;
-import fr.plum.e2e.manager.sharedkernel.domain.port.in.CommandHandler;
+import fr.plum.e2e.manager.sharedkernel.application.command.CommandHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped

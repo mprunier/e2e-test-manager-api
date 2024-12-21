@@ -2,7 +2,7 @@ package fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter;
 
 import static jakarta.transaction.Transactional.TxType.REQUIRES_NEW;
 
-import fr.plum.e2e.manager.core.domain.port.out.LockManagerPort;
+import fr.plum.e2e.manager.core.domain.port.LockManagerPort;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.locker.JpaLockManagerEntity;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.LockModeType;

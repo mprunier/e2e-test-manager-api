@@ -1,4 +1,4 @@
-package fr.plum.e2e.manager.sharedkernel.domain.port.in;
+package fr.plum.e2e.manager.sharedkernel.application.command;
 
 @FunctionalInterface
 public interface CommandHandler<T> {

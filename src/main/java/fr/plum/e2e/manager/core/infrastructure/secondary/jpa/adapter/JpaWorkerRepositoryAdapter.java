@@ -5,7 +5,7 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.worker.Worker;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.WorkerType;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerUnitId;
-import fr.plum.e2e.manager.core.domain.port.out.repository.WorkerRepositoryPort;
+import fr.plum.e2e.manager.core.domain.port.repository.WorkerRepositoryPort;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter.mapper.WorkerMapper;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.repository.JpaWorkerRepository;
 import jakarta.enterprise.context.ApplicationScoped;

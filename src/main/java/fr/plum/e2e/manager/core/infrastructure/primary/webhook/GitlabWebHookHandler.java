@@ -6,7 +6,7 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerUnitId;
 import fr.plum.e2e.manager.core.domain.model.command.CommonCommand;
 import fr.plum.e2e.manager.core.domain.model.command.ReportWorkerCommand;
 import fr.plum.e2e.manager.core.domain.model.exception.SynchronizationAlreadyInProgressException;
-import fr.plum.e2e.manager.core.domain.port.out.repository.EnvironmentRepositoryPort;
+import fr.plum.e2e.manager.core.domain.port.repository.EnvironmentRepositoryPort;
 import fr.plum.e2e.manager.core.infrastructure.primary.webhook.dto.GitLabWebhookEvent;
 import fr.plum.e2e.manager.core.infrastructure.primary.webhook.dto.GitlabJobStatus;
 import fr.plum.e2e.manager.core.infrastructure.primary.webhook.dto.request.GitlabWebHookRequest;

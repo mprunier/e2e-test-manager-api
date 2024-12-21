@@ -1,6 +1,6 @@
 package fr.plum.e2e.manager.core.infrastructure.secondary.configuration.adapter;
 
-import fr.plum.e2e.manager.core.domain.port.out.ConfigurationPort;
+import fr.plum.e2e.manager.core.domain.port.ConfigurationPort;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 

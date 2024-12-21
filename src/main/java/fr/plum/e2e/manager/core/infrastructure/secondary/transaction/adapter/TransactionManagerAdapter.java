@@ -2,7 +2,7 @@ package fr.plum.e2e.manager.core.infrastructure.secondary.transaction.adapter;
 
 import fr.plum.e2e.manager.core.domain.model.exception.TransactionException;
 import fr.plum.e2e.manager.sharedkernel.domain.model.transaction.TransactionalOperation;
-import fr.plum.e2e.manager.sharedkernel.domain.port.out.TransactionManagerPort;
+import fr.plum.e2e.manager.sharedkernel.domain.port.TransactionManagerPort;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Status;

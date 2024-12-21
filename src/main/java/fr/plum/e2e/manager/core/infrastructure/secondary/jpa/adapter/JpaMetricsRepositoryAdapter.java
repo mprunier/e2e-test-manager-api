@@ -8,7 +8,7 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.vo.PassCount;
 import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.vo.SkippedCount;
 import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.vo.SuiteCount;
 import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.vo.TestCount;
-import fr.plum.e2e.manager.core.domain.port.out.repository.MetricsRepositoryPort;
+import fr.plum.e2e.manager.core.domain.port.repository.MetricsRepositoryPort;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter.mapper.MetricsMapper;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.metrics.JpaMetricsEntity;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.repository.JpaMetricsRepository;

@@ -9,7 +9,7 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.Synchr
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationFileName;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.FileConfiguration;
 import fr.plum.e2e.manager.core.domain.model.exception.SynchronizationCommonException;
-import fr.plum.e2e.manager.core.domain.port.out.FileSynchronizationPort;
+import fr.plum.e2e.manager.core.domain.port.FileSynchronizationPort;
 import fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.mapper.CypressFileConfigurationMapper;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.io.IOException;

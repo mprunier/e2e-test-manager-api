@@ -8,7 +8,7 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.Environmen
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.projection.EnvironmentDetailsProjection;
 import fr.plum.e2e.manager.core.domain.model.projection.EnvironmentDetailsVariableProjection;
-import fr.plum.e2e.manager.core.domain.port.out.repository.EnvironmentRepositoryPort;
+import fr.plum.e2e.manager.core.domain.port.repository.EnvironmentRepositoryPort;
 import fr.plum.e2e.manager.core.infrastructure.secondary.cache.QuarkusCacheManager;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter.mapper.EnvironmentMapper;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.environment.JpaEnvironmentEntity;

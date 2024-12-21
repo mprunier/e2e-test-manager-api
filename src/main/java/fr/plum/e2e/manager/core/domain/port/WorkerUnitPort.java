@@ -1,4 +1,4 @@
-package fr.plum.e2e.manager.core.domain.port.out;
+package fr.plum.e2e.manager.core.domain.port;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.SourceCodeInformation;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.WorkerUnitStatus;

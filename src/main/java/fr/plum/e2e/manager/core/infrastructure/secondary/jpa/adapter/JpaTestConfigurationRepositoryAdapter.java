@@ -6,7 +6,7 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.Suit
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.SuiteTitle;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.TestConfigurationId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.TestTitle;
-import fr.plum.e2e.manager.core.domain.port.out.repository.TestConfigurationRepositoryPort;
+import fr.plum.e2e.manager.core.domain.port.repository.TestConfigurationRepositoryPort;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;

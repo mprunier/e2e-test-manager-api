@@ -2,7 +2,7 @@ package fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.TestResult;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerId;
-import fr.plum.e2e.manager.core.domain.port.out.repository.TestResultRepositoryPort;
+import fr.plum.e2e.manager.core.domain.port.repository.TestResultRepositoryPort;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter.mapper.TestResultMapper;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.testresult.JpaTestResultEntity;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.testresult.JpaTestScreenshotEntity;

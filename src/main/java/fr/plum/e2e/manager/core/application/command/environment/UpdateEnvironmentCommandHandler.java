@@ -2,11 +2,11 @@ package fr.plum.e2e.manager.core.application.command.environment;
 
 import fr.plum.e2e.manager.core.domain.model.command.UpdateEnvironmentCommand;
 import fr.plum.e2e.manager.core.domain.model.event.EnvironmentUpdatedEvent;
-import fr.plum.e2e.manager.core.domain.port.out.EventPublisherPort;
-import fr.plum.e2e.manager.core.domain.port.out.repository.EnvironmentRepositoryPort;
+import fr.plum.e2e.manager.core.domain.port.EventPublisherPort;
+import fr.plum.e2e.manager.core.domain.port.repository.EnvironmentRepositoryPort;
 import fr.plum.e2e.manager.core.domain.service.EnvironmentService;
-import fr.plum.e2e.manager.sharedkernel.domain.port.in.CommandHandler;
-import fr.plum.e2e.manager.sharedkernel.domain.port.out.ClockPort;
+import fr.plum.e2e.manager.sharedkernel.application.command.CommandHandler;
+import fr.plum.e2e.manager.sharedkernel.domain.port.ClockPort;
 import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped

@@ -7,10 +7,10 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.Synchr
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationFileContent;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationFileName;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.FileConfiguration;
-import fr.plum.e2e.manager.core.domain.port.out.FileSynchronizationPort;
-import fr.plum.e2e.manager.core.domain.port.out.repository.FileConfigurationRepositoryPort;
+import fr.plum.e2e.manager.core.domain.port.FileSynchronizationPort;
+import fr.plum.e2e.manager.core.domain.port.repository.FileConfigurationRepositoryPort;
 import fr.plum.e2e.manager.sharedkernel.domain.exception.CustomException;
-import fr.plum.e2e.manager.sharedkernel.domain.port.out.ClockPort;
+import fr.plum.e2e.manager.sharedkernel.domain.port.ClockPort;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

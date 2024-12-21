@@ -11,10 +11,10 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.Source
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationError;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationFileContent;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationFileName;
-import fr.plum.e2e.manager.core.domain.port.out.FileSynchronizationPort;
-import fr.plum.e2e.manager.core.domain.port.out.JavascriptConverterPort;
-import fr.plum.e2e.manager.core.domain.port.out.SourceCodePort;
-import fr.plum.e2e.manager.sharedkernel.domain.port.out.ClockPort;
+import fr.plum.e2e.manager.core.domain.port.FileSynchronizationPort;
+import fr.plum.e2e.manager.core.domain.port.JavascriptConverterPort;
+import fr.plum.e2e.manager.core.domain.port.SourceCodePort;
+import fr.plum.e2e.manager.sharedkernel.domain.port.ClockPort;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;

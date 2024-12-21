@@ -6,7 +6,7 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.File
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.GroupName;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.SuiteConfigurationId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.TestConfigurationId;
-import fr.plum.e2e.manager.core.domain.port.out.repository.FileConfigurationRepositoryPort;
+import fr.plum.e2e.manager.core.domain.port.repository.FileConfigurationRepositoryPort;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter.mapper.FileConfigurationMapper;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.repository.JpaFileConfigurationRepository;
 import jakarta.enterprise.context.ApplicationScoped;

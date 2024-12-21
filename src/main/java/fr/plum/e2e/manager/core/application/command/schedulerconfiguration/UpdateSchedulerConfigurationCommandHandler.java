@@ -2,11 +2,11 @@ package fr.plum.e2e.manager.core.application.command.schedulerconfiguration;
 
 import fr.plum.e2e.manager.core.domain.model.command.UpdateSchedulerCommand;
 import fr.plum.e2e.manager.core.domain.model.event.SchedulerUpdatedEvent;
-import fr.plum.e2e.manager.core.domain.port.out.EventPublisherPort;
-import fr.plum.e2e.manager.core.domain.port.out.repository.SchedulerConfigurationRepositoryPort;
+import fr.plum.e2e.manager.core.domain.port.EventPublisherPort;
+import fr.plum.e2e.manager.core.domain.port.repository.SchedulerConfigurationRepositoryPort;
 import fr.plum.e2e.manager.core.domain.service.SchedulerConfigurationService;
-import fr.plum.e2e.manager.sharedkernel.domain.port.in.CommandHandler;
-import fr.plum.e2e.manager.sharedkernel.domain.port.out.ClockPort;
+import fr.plum.e2e.manager.sharedkernel.application.command.CommandHandler;
+import fr.plum.e2e.manager.sharedkernel.domain.port.ClockPort;
 import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped

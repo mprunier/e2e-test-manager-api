@@ -2,7 +2,7 @@ package fr.plum.e2e.manager.core.infrastructure.secondary.external.converter.ada
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationFileContent;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationFileName;
-import fr.plum.e2e.manager.core.domain.port.out.JavascriptConverterPort;
+import fr.plum.e2e.manager.core.domain.port.JavascriptConverterPort;
 import fr.plum.e2e.manager.core.infrastructure.secondary.external.converter.client.ConverterClient;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;

@@ -5,7 +5,7 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.FileCon
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.SuiteConfigurationId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.TestConfigurationId;
 import fr.plum.e2e.manager.core.domain.model.exception.FileNotFoundException;
-import fr.plum.e2e.manager.core.domain.port.out.repository.FileConfigurationRepositoryPort;
+import fr.plum.e2e.manager.core.domain.port.repository.FileConfigurationRepositoryPort;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor

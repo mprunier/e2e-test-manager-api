@@ -1,8 +1,8 @@
 package fr.plum.e2e.manager.core.application.query.testresult;
 
 import fr.plum.e2e.manager.core.domain.model.query.DownloadVideoQuery;
-import fr.plum.e2e.manager.core.domain.port.out.view.GetTestResultPort;
-import fr.plum.e2e.manager.sharedkernel.domain.port.in.QueryHandler;
+import fr.plum.e2e.manager.core.domain.port.view.GetTestResultPort;
+import fr.plum.e2e.manager.sharedkernel.application.query.QueryHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped

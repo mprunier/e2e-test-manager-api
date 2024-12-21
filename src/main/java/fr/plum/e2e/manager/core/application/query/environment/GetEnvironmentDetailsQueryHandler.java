@@ -3,8 +3,8 @@ package fr.plum.e2e.manager.core.application.query.environment;
 import fr.plum.e2e.manager.core.domain.model.exception.EnvironmentNotFoundException;
 import fr.plum.e2e.manager.core.domain.model.projection.EnvironmentDetailsProjection;
 import fr.plum.e2e.manager.core.domain.model.query.CommonQuery;
-import fr.plum.e2e.manager.core.domain.port.out.repository.EnvironmentRepositoryPort;
-import fr.plum.e2e.manager.sharedkernel.domain.port.in.QueryHandler;
+import fr.plum.e2e.manager.core.domain.port.repository.EnvironmentRepositoryPort;
+import fr.plum.e2e.manager.sharedkernel.application.query.QueryHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped

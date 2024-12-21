@@ -8,7 +8,7 @@ import fr.plum.e2e.manager.core.domain.model.projection.TestResultErrorDetailsPr
 import fr.plum.e2e.manager.core.domain.model.projection.TestResultProjection;
 import fr.plum.e2e.manager.core.domain.model.projection.TestResultScreenshotProjection;
 import fr.plum.e2e.manager.core.domain.model.projection.TestResultVariableProjection;
-import fr.plum.e2e.manager.core.domain.port.out.view.GetTestResultPort;
+import fr.plum.e2e.manager.core.domain.port.view.GetTestResultPort;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.testresult.JpaTestResultEntity;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
