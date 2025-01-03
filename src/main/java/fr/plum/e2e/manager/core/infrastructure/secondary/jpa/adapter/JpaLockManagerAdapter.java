@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Transactional
 public class JpaLockManagerAdapter implements LockManagerPort {
+
   @Transactional(REQUIRES_NEW)
   @Override
   public boolean acquireLock(String resourceType, String resourceId) {

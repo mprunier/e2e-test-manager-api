@@ -1,6 +1,6 @@
-package fr.plum.e2e.manager.core.infrastructure.secondary.external.converter.client;
+package fr.plum.e2e.manager.core.infrastructure.secondary.external.javascript.converter.client;
 
-import fr.plum.e2e.manager.core.infrastructure.secondary.external.converter.exception.ConverterExceptionMapper;
+import fr.plum.e2e.manager.core.infrastructure.secondary.external.javascript.converter.exception.ConverterExceptionMapper;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;

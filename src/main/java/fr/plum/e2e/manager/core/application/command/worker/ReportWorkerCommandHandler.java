@@ -1,6 +1,6 @@
 package fr.plum.e2e.manager.core.application.command.worker;
 
-import fr.plum.e2e.manager.core.application.locker.CommandLock;
+import fr.plum.e2e.manager.core.application.shared.locker.CommandLock;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.Environment;
 import fr.plum.e2e.manager.core.domain.model.aggregate.report.Report;
 import fr.plum.e2e.manager.core.domain.model.aggregate.report.ReportTest;

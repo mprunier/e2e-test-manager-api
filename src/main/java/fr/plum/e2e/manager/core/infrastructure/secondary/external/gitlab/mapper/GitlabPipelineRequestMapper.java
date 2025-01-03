@@ -1,7 +1,7 @@
 package fr.plum.e2e.manager.core.infrastructure.secondary.external.gitlab.mapper;
 
 import static fr.plum.e2e.manager.core.domain.constant.BusinessConstant.DISABLE_TAG;
-import static fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.CypressConstant.START_PATH;
+import static fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.constant.CypressConstant.START_PATH;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.Environment;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.Tag;

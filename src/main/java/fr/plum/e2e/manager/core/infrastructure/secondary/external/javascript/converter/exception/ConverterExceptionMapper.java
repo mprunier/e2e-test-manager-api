@@ -1,4 +1,4 @@
-package fr.plum.e2e.manager.core.infrastructure.secondary.external.converter.exception;
+package fr.plum.e2e.manager.core.infrastructure.secondary.external.javascript.converter.exception;
 
 import fr.plum.e2e.manager.sharedkernel.domain.exception.CustomException;
 import jakarta.ws.rs.core.Response;

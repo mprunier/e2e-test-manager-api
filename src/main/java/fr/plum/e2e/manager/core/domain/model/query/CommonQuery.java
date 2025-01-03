@@ -8,6 +8,6 @@ import lombok.Builder;
 public record CommonQuery(EnvironmentId environmentId) {
 
   public static CommonQuery fromEnvironmentUUID(UUID environmentUUID) {
-    return new CommonQuery(EnvironmentId.fromUUID(environmentUUID));
+    return new CommonQuery(new EnvironmentId(environmentUUID));
   }
 }

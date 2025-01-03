@@ -5,6 +5,7 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.VariableDe
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.VariableIsHidden;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.VariableValue;
 import fr.plum.e2e.manager.core.domain.model.exception.HiddenVariableException;
+import fr.plum.e2e.manager.sharedkernel.domain.assertion.Assert;
 import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.Entity;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
@@ -16,6 +17,20 @@ public class EnvironmentVariable extends Entity<EnvironmentVariableId> {
   private VariableValue value;
   private VariableDescription description; // Not the name which is the id
   private VariableIsHidden isHidden;
+
+  EnvironmentVariable(
+      EnvironmentVariableId environmentVariableId,
+      VariableValue value,
+      VariableDescription description,
+      VariableIsHidden isHidden) {
+    super(environmentVariableId);
+    Assert.notNull("VariableValue", value);
+    Assert.notNull("VariableDescription", description);
+    Assert.notNull("VariableIsHidden", isHidden);
+    this.value = value;
+    this.description = description;
+    this.isHidden = isHidden;
+  }
 
   public boolean isValueMasked() {
     return value.value().contains("**********");

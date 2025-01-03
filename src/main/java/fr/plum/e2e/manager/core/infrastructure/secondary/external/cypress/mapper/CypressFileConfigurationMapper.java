@@ -2,10 +2,10 @@ package fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.mappe
 
 import static fr.plum.e2e.manager.core.domain.constant.BusinessConstant.GROUP_FOR_PARALLELIZATION;
 import static fr.plum.e2e.manager.core.domain.constant.BusinessConstant.NO_SUITE;
-import static fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.CypressConstant.CYPRESS_SUITE_FUNCTION_NAME;
-import static fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.CypressConstant.CYPRESS_TAGS_PARAM_NAME;
-import static fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.CypressConstant.CYPRESS_TEST_FUNCTION_NAME;
-import static fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.CypressConstant.CYPRESS_VARIABLES_PARAM_NAME;
+import static fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.constant.CypressConstant.CYPRESS_SUITE_FUNCTION_NAME;
+import static fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.constant.CypressConstant.CYPRESS_TAGS_PARAM_NAME;
+import static fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.constant.CypressConstant.CYPRESS_TEST_FUNCTION_NAME;
+import static fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.constant.CypressConstant.CYPRESS_VARIABLES_PARAM_NAME;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.FileConfiguration;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.SuiteConfiguration;

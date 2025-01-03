@@ -17,6 +17,7 @@ import jakarta.transaction.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 
@@ -49,11 +50,13 @@ public class JpaSearchSuiteConfigurationAdapter implements SearchSuiteConfigurat
       params.put("testId", query.testConfigurationId().value());
     }
 
-    if (query.tag() != null) {
-      queryStr.append(
-          " AND (:tag MEMBER OF s.tags OR EXISTS (SELECT 1 FROM s.testConfigurations t WHERE :tag MEMBER OF t.tags))");
-      params.put("tag", query.tag().value());
-    }
+    //    if (query.tag() != null) { TODO
+    //      var tagIds = findIdsWithTag(query.tag().value());
+    //      if (tagIds != null && !tagIds.isEmpty()) {
+    //        queryStr.append(" AND s.id IN :tagIds");
+    //        params.put("tagIds", tagIds);
+    //      }
+    //    }
 
     if (query.fileName() != null) {
       queryStr.append(" AND s.fileConfiguration.value = :value");
@@ -98,27 +101,6 @@ public class JpaSearchSuiteConfigurationAdapter implements SearchSuiteConfigurat
 
     List<JpaSuiteConfigurationEntity> results = queryTyped.getResultList();
 
-    // TODO WTF POURQUOI JAVAIS FAIT CETTE DAUBE ?
-    //    if (!results.isEmpty()) {
-    //      List<JpaSuiteConfigurationEntity> orderedResults = new ArrayList<>(results);
-    //
-    //      results =
-    //          entityManager
-    //              .createQuery(
-    //                  """
-    //                            SELECT DISTINCT s
-    //                            FROM JpaSuiteConfigurationEntity s
-    //                            LEFT JOIN FETCH s.testConfigurations
-    //                            LEFT JOIN FETCH s.fileConfiguration
-    //                            WHERE s IN :suites
-    //                            """,
-    //                  JpaSuiteConfigurationEntity.class)
-    //              .setParameter("suites", results)
-    //              .getResultList();
-    //
-    //      results.sort(Comparator.comparingInt(orderedResults::indexOf));
-    //    }
-
     List<ConfigurationSuiteProjection> content =
         results.stream().map(SuiteMapper::toSuiteResponse).toList();
 
@@ -140,6 +122,22 @@ public class JpaSearchSuiteConfigurationAdapter implements SearchSuiteConfigurat
         (int) Math.ceil((double) totalItems / query.size()),
         query.size(),
         totalItems);
+  }
+
+  @SuppressWarnings("unchecked")
+  public List<UUID> findIdsWithTag(String tag, String environmentId) {
+    return entityManager
+        .createNativeQuery(
+            """
+       SELECT DISTINCT sc.id
+       FROM suite_configuration sc
+       FULL OUTER JOIN test_configuration tc ON tc.suite_id = sc.id
+       WHERE :tag = ANY(tc.tags)
+       OR :tag = ANY(sc.tags)
+       """,
+            UUID.class)
+        .setParameter("tag", tag)
+        .getResultList();
   }
 
   @Override

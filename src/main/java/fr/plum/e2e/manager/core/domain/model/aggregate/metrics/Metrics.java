@@ -17,6 +17,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @Getter
 public class Metrics extends AggregateRoot<MetricsId> {
+
   private EnvironmentId environmentId;
   private MetricsType type;
   private TestCount testCount;

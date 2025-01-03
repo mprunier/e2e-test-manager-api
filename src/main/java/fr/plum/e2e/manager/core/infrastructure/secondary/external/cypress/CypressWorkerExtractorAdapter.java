@@ -5,7 +5,7 @@ import static fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress
 import fr.plum.e2e.manager.core.domain.model.aggregate.report.Report;
 import fr.plum.e2e.manager.core.domain.model.exception.ArtifactReportException;
 import fr.plum.e2e.manager.core.domain.port.WorkerExtractorPort;
-import fr.plum.e2e.manager.core.infrastructure.secondary.external.gitlab.mapper.WorkerReportMapper;
+import fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.mapper.WorkerReportMapper;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

@@ -1,10 +1,10 @@
-package fr.plum.e2e.manager.core.infrastructure.secondary.external.gitlab.mapper;
+package fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.mapper;
 
-import static fr.plum.e2e.manager.core.domain.constant.BusinessConstant.END_TEST_JS_PATH;
-import static fr.plum.e2e.manager.core.domain.constant.BusinessConstant.END_TEST_TS_PATH;
-import static fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.CypressConstant.SCREENSHOT_EXTENSION;
-import static fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.CypressConstant.SCREENSHOT_PATH;
-import static fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.CypressConstant.START_PATH;
+import static fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.constant.CypressConstant.END_TEST_JS_PATH;
+import static fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.constant.CypressConstant.END_TEST_TS_PATH;
+import static fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.constant.CypressConstant.SCREENSHOT_EXTENSION;
+import static fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.constant.CypressConstant.SCREENSHOT_PATH;
+import static fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.constant.CypressConstant.START_PATH;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import fr.plum.e2e.manager.core.domain.model.aggregate.report.Report;

@@ -6,8 +6,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class BusinessConstant {
 
-  public static final String END_TEST_JS_PATH = ".cy.js";
-  public static final String END_TEST_TS_PATH = ".cy.ts";
   public static final String NO_SUITE = "No Suite";
   public static final String GLOBAL_ENVIRONMENT_ERROR = "Global error on this environment";
   public static final String DISABLE_TAG = "disable-on-e2e-testing-manager";

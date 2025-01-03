@@ -1,4 +1,4 @@
-package fr.plum.e2e.manager.core.application.locker;
+package fr.plum.e2e.manager.core.application.shared.locker;
 
 import fr.plum.e2e.manager.core.domain.port.LockManagerPort;
 import jakarta.annotation.Priority;

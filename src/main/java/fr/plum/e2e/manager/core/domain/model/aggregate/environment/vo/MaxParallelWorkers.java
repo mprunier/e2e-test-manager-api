@@ -1,10 +1,10 @@
 package fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo;
 
+import fr.plum.e2e.manager.sharedkernel.domain.assertion.Assert;
+
 public record MaxParallelWorkers(int value) {
   public MaxParallelWorkers {
-    if (value < 1) {
-      throw new IllegalArgumentException("Maximum parallel workers must be at least 1");
-    }
+    Assert.field("MaxParallelWorkers", value).positive();
   }
 
   public static MaxParallelWorkers defaultValue() {

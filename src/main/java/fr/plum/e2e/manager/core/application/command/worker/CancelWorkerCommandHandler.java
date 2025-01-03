@@ -1,6 +1,6 @@
 package fr.plum.e2e.manager.core.application.command.worker;
 
-import fr.plum.e2e.manager.core.application.locker.CommandLock;
+import fr.plum.e2e.manager.core.application.shared.locker.CommandLock;
 import fr.plum.e2e.manager.core.domain.model.command.CancelWorkerCommand;
 import fr.plum.e2e.manager.core.domain.model.event.WorkerCanceledEvent;
 import fr.plum.e2e.manager.core.domain.port.EventPublisherPort;

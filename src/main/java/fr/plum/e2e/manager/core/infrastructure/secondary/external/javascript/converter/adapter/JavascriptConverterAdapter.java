@@ -1,9 +1,9 @@
-package fr.plum.e2e.manager.core.infrastructure.secondary.external.converter.adapter;
+package fr.plum.e2e.manager.core.infrastructure.secondary.external.javascript.converter.adapter;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationFileContent;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationFileName;
 import fr.plum.e2e.manager.core.domain.port.JavascriptConverterPort;
-import fr.plum.e2e.manager.core.infrastructure.secondary.external.converter.client.ConverterClient;
+import fr.plum.e2e.manager.core.infrastructure.secondary.external.javascript.converter.client.ConverterClient;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

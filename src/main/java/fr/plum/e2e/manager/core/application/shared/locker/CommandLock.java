@@ -1,4 +1,4 @@
-package fr.plum.e2e.manager.core.application.locker;
+package fr.plum.e2e.manager.core.application.shared.locker;
 
 import jakarta.interceptor.InterceptorBinding;
 import java.lang.annotation.ElementType;
