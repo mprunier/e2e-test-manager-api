@@ -3,7 +3,7 @@ package fr.plum.e2e.manager.core.application.query.environment;
 import fr.plum.e2e.manager.core.domain.model.exception.EnvironmentNotFoundException;
 import fr.plum.e2e.manager.core.domain.model.projection.EnvironmentDetailsProjection;
 import fr.plum.e2e.manager.core.domain.model.query.CommonQuery;
-import fr.plum.e2e.manager.core.domain.port.repository.EnvironmentRepositoryPort;
+import fr.plum.e2e.manager.core.domain.port.view.GetEnvironmentDetailsPort;
 import fr.plum.e2e.manager.sharedkernel.application.query.QueryHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -11,15 +11,15 @@ import jakarta.enterprise.context.ApplicationScoped;
 public class GetEnvironmentDetailsQueryHandler
     implements QueryHandler<CommonQuery, EnvironmentDetailsProjection> {
 
-  private final EnvironmentRepositoryPort environmentRepositoryPort;
+  private final GetEnvironmentDetailsPort getEnvironmentDetailsPort;
 
-  public GetEnvironmentDetailsQueryHandler(EnvironmentRepositoryPort environmentRepositoryPort) {
-    this.environmentRepositoryPort = environmentRepositoryPort;
+  public GetEnvironmentDetailsQueryHandler(GetEnvironmentDetailsPort getEnvironmentDetailsPort) {
+    this.getEnvironmentDetailsPort = getEnvironmentDetailsPort;
   }
 
   @Override
   public EnvironmentDetailsProjection execute(CommonQuery query) {
-    var environmentDetails = environmentRepositoryPort.findDetails(query.environmentId());
+    var environmentDetails = getEnvironmentDetailsPort.find(query.environmentId());
     if (environmentDetails == null) {
       throw new EnvironmentNotFoundException(query.environmentId());
     }

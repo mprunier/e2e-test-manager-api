@@ -88,14 +88,15 @@ public class SourceCodeSynchronizer {
     }
   }
 
-  public void cleanup(
-      EnvironmentId envId, SourceCodeProject project, List<SynchronizationError> errors) {
+  public void cleanup(EnvironmentId envId, SourceCodeProject project) {
     if (project != null) {
       try {
         FileUtils.deleteDirectory(project.project());
       } catch (IOException e) {
-        log.error("Error during synchronization for Environment id [{}].", envId.value(), e);
-        errors.add(SynchronizationErrorFactory.createGlobalError(e.getMessage(), clockPort.now()));
+        log.error(
+            "Error during cleanup after synchronization for Environment id [{}].",
+            envId.value(),
+            e);
       }
     }
   }

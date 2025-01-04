@@ -97,7 +97,7 @@ public class ProcessSynchronizationCommandHandler implements CommandHandler<Comm
       errors.add(
           SynchronizationErrorFactory.createGlobalError(exception.getMessage(), clockPort.now()));
     } finally {
-      sourceCodeSynchronizer.cleanup(command.environmentId(), sourceCodeProject, errors);
+      sourceCodeSynchronizer.cleanup(command.environmentId(), sourceCodeProject);
     }
 
     finishSynchronization(command.environmentId(), errors, command.username());
