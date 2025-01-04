@@ -5,6 +5,7 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.worker.WorkerUnit;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.WorkerUnitStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.Builder;
 
@@ -23,7 +24,7 @@ public record WorkerUnitResponse(
         .fileNames(
             workerUnit.getFilter() != null && workerUnit.getFilter().fileNames() != null
                 ? workerUnit.getFilter().fileNames().stream().map(FileName::value).toList()
-                : List.of())
+                : new ArrayList<>())
         .build();
   }
 

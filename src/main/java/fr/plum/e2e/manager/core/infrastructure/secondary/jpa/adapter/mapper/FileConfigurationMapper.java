@@ -28,7 +28,7 @@ public final class FileConfigurationMapper {
 
   public static FileConfiguration toDomain(JpaFileConfigurationEntity entity) {
     return FileConfiguration.builder()
-        .id(new FileName(entity.getFileName()))
+        .fileName(new FileName(entity.getFileName()))
         .environmentId(new EnvironmentId(entity.getEnvironmentId()))
         .group(new GroupName(entity.getGroupName()))
         .suites(
@@ -61,7 +61,7 @@ public final class FileConfigurationMapper {
 
   public static SuiteConfiguration toSuiteDomain(JpaSuiteConfigurationEntity entity) {
     return SuiteConfiguration.builder()
-        .id(new SuiteConfigurationId(entity.getId()))
+        .suiteConfigurationId(new SuiteConfigurationId(entity.getId()))
         .title(new SuiteTitle(entity.getTitle()))
         .status(entity.getStatus())
         .lastPlayedAt(entity.getLastPlayedAt())
@@ -98,7 +98,7 @@ public final class FileConfigurationMapper {
 
   private static TestConfiguration toTestDomain(JpaTestConfigurationEntity entity) {
     return TestConfiguration.builder()
-        .id(new TestConfigurationId(entity.getId()))
+        .testConfigurationId(new TestConfigurationId(entity.getId()))
         .title(new TestTitle(entity.getTitle()))
         .status(entity.getStatus())
         .position(new Position(entity.getPosition()))

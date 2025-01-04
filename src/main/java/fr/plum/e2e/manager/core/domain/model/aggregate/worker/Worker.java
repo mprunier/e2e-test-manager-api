@@ -5,26 +5,54 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerUnitId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerVariable;
 import fr.plum.e2e.manager.core.domain.model.exception.DomainAssertException;
+import fr.plum.e2e.manager.sharedkernel.domain.assertion.Assert;
 import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AggregateRoot;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AuditInfo;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.experimental.SuperBuilder;
 
-@SuperBuilder
 @Getter
 public class Worker extends AggregateRoot<WorkerId> {
 
   private EnvironmentId environmentId;
   private WorkerType type;
+  private List<WorkerVariable> variables;
+  private List<WorkerUnit> workerUnits;
 
-  @Builder.Default private List<WorkerVariable> variables = new ArrayList<>();
+  @Builder
+  public Worker(
+      WorkerId workerId,
+      AuditInfo auditInfo,
+      EnvironmentId environmentId,
+      WorkerType type,
+      List<WorkerVariable> variables,
+      List<WorkerUnit> workerUnits) {
+    super(workerId, auditInfo);
+    Assert.notNull("environmentId", environmentId);
+    Assert.notNull("type", type);
+    Assert.notNull("variables", variables);
+    Assert.notNull("workerUnits", workerUnits);
+    this.environmentId = environmentId;
+    this.type = type;
+    this.variables = variables;
+    this.workerUnits = workerUnits;
+  }
 
-  @Builder.Default private List<WorkerUnit> workerUnits = new ArrayList<>();
-
-  public static Worker initialize(EnvironmentId environmentId, WorkerType type) {
-    return builder().id(WorkerId.generate()).environmentId(environmentId).type(type).build();
+  public static Worker create(
+      EnvironmentId environmentId,
+      AuditInfo auditInfo,
+      WorkerType type,
+      List<WorkerVariable> variables) {
+    return builder()
+        .workerId(WorkerId.generate())
+        .environmentId(environmentId)
+        .auditInfo(auditInfo)
+        .type(type)
+        .variables(variables)
+        .workerUnits(new ArrayList<>())
+        .build();
   }
 
   public void addWorkerUnit(WorkerUnit workerUnit) {
@@ -47,10 +75,6 @@ public class Worker extends AggregateRoot<WorkerId> {
             "Worker filter must contain suiteFilter configuration for worker type SUITE");
       }
     }
-  }
-
-  public void addVariables(List<WorkerVariable> newVariables) {
-    variables.addAll(newVariables);
   }
 
   public boolean isCompleted() {

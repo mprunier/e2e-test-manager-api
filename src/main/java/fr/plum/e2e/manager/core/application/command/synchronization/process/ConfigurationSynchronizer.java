@@ -111,16 +111,15 @@ public class ConfigurationSynchronizer {
       SynchronizationFileContent content,
       FileConfiguration oldConfig) {
 
-    var newConfig = fileSynchronizationPort.buildFileConfiguration(fileName, content);
+    var newConfig =
+        fileSynchronizationPort.buildFileConfiguration(environmentId, fileName, content);
     newConfig.validateUniqueTitles();
     newConfig.removeDisabledConfigurations();
 
     if (oldConfig != null) {
-      oldConfig.updateFrom(newConfig);
+      oldConfig.update(newConfig);
       return oldConfig;
     } else {
-      newConfig.setEnvironmentId(environmentId);
-      newConfig.initializeSuitesAndTestsIds();
       return newConfig;
     }
   }

@@ -7,6 +7,8 @@ import static org.mockito.Mockito.*;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.Environment;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentDescription;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
+import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentIsEnabled;
+import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.MaxParallelWorkers;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.SourceCodeInformation;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.Synchronization;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SourceCodeProject;
@@ -28,6 +30,7 @@ import fr.plum.e2e.manager.sharedkernel.domain.port.ClockPort;
 import fr.plum.e2e.manager.sharedkernel.domain.port.TransactionManagerPort;
 import java.io.File;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -170,18 +173,22 @@ class ProcessSynchronizationCommandHandlerTest {
             .build();
 
     return Environment.builder()
-        .id(ENV_ID)
+        .environmentId(ENV_ID)
         .environmentDescription(new EnvironmentDescription("Test Environment"))
         .sourceCodeInformation(sourceCodeInfo)
         .auditInfo(AuditInfo.create(USERNAME, NOW))
+        .maxParallelWorkers(new MaxParallelWorkers(1))
+        .isEnabled(new EnvironmentIsEnabled(true))
+        .variables(new ArrayList<>())
         .build();
   }
 
   private Synchronization createTestSynchronization() {
     return Synchronization.builder()
-        .id(ENV_ID)
+        .environmentId(ENV_ID)
         .synchronizationIsInProgress(new SynchronizationIsInProgress(false))
         .auditInfo(AuditInfo.create(USERNAME, NOW))
+        .errors(new ArrayList<>())
         .build();
   }
 

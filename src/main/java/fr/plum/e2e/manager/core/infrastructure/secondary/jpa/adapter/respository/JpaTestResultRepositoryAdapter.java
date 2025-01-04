@@ -1,4 +1,4 @@
-package fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter;
+package fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter.respository;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.TestResult;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerId;

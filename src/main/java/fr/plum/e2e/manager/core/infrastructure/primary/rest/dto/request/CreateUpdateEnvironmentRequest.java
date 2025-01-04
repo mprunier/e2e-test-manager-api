@@ -37,7 +37,9 @@ public record CreateUpdateEnvironmentRequest(
         new EnvironmentDescription(description),
         sourceCodeInformation,
         new MaxParallelWorkers(maxParallelWorkers),
-        variables.stream().map(CreateUpdateEnvironmentVariableRequest::toCommand).toList(),
+        variables != null
+            ? variables.stream().map(CreateUpdateEnvironmentVariableRequest::toCommand).toList()
+            : new ArrayList<>(),
         new ActionUsername(username));
   }
 
@@ -48,7 +50,9 @@ public record CreateUpdateEnvironmentRequest(
         new EnvironmentDescription(description),
         sourceCodeInformation,
         new MaxParallelWorkers(maxParallelWorkers),
-        variables.stream().map(CreateUpdateEnvironmentVariableRequest::toCommand).toList(),
+        variables != null
+            ? variables.stream().map(CreateUpdateEnvironmentVariableRequest::toCommand).toList()
+            : new ArrayList<>(),
         new ActionUsername(username));
   }
 }

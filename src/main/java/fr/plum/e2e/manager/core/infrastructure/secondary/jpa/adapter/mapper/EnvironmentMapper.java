@@ -29,7 +29,7 @@ public final class EnvironmentMapper {
             .build();
     var environment =
         Environment.builder()
-            .id(new EnvironmentId(entity.getId()))
+            .environmentId(new EnvironmentId(entity.getId()))
             .environmentDescription(new EnvironmentDescription(entity.getDescription()))
             .sourceCodeInformation(sourceCodeInformation)
             .isEnabled(new EnvironmentIsEnabled(entity.isEnabled()))
@@ -50,7 +50,7 @@ public final class EnvironmentMapper {
             varEntity ->
                 variables.add(
                     EnvironmentVariable.builder()
-                        .id(new EnvironmentVariableId(varEntity.getName()))
+                        .environmentVariableId(new EnvironmentVariableId(varEntity.getName()))
                         .value(new VariableValue(varEntity.getDefaultValue()))
                         .description(new VariableDescription(varEntity.getDescription()))
                         .isHidden(new VariableIsHidden(varEntity.isHidden()))

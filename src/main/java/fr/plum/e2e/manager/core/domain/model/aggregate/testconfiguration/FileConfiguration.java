@@ -11,7 +11,9 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.Test
 import fr.plum.e2e.manager.core.domain.model.exception.SuiteNotFoundException;
 import fr.plum.e2e.manager.core.domain.model.exception.TestNotFoundException;
 import fr.plum.e2e.manager.core.domain.model.exception.TitleDuplicationException;
+import fr.plum.e2e.manager.sharedkernel.domain.assertion.Assert;
 import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AggregateRoot;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AuditInfo;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -19,22 +21,46 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.SuperBuilder;
 
-@SuperBuilder
 @Getter
 public class FileConfiguration extends AggregateRoot<FileName> {
 
-  @Setter private EnvironmentId environmentId;
+  private EnvironmentId environmentId;
   private GroupName group;
-  @Builder.Default private List<SuiteConfiguration> suites = new ArrayList<>();
+  private List<SuiteConfiguration> suites;
 
-  public void initializeSuitesAndTestsIds() {
-    suites.forEach(SuiteConfiguration::initializeId);
+  @Builder
+  public FileConfiguration(
+      FileName fileName,
+      AuditInfo auditInfo,
+      EnvironmentId environmentId,
+      GroupName group,
+      List<SuiteConfiguration> suites) {
+    super(fileName, auditInfo);
+    Assert.notNull("environmentId", environmentId);
+    Assert.notNull("group", group);
+    Assert.notNull("suites", suites);
+    this.environmentId = environmentId;
+    this.group = group;
+    this.suites = suites;
   }
 
-  public void updateFrom(FileConfiguration newConfig) {
+  public static FileConfiguration create(
+      FileName fileName,
+      AuditInfo auditInfo,
+      EnvironmentId environmentId,
+      GroupName group,
+      List<SuiteConfiguration> suites) {
+    return builder()
+        .fileName(fileName)
+        .auditInfo(auditInfo)
+        .environmentId(environmentId)
+        .group(group)
+        .suites(suites)
+        .build();
+  }
+
+  public void update(FileConfiguration newConfig) {
     this.group = newConfig.getGroup();
     updateSuites(newConfig.getSuites());
   }
@@ -66,12 +92,10 @@ public class FileConfiguration extends AggregateRoot<FileName> {
       var existingSuite = existingSuitesMap.get(title);
 
       if (existingSuite != null) {
-        existingSuite.updateFrom(newSuite);
+        existingSuite.update(newSuite);
         updateTests(existingSuite.getTests(), newSuite.getTests());
         updatedSuites.add(existingSuite);
       } else {
-        newSuite.initializeId();
-        newSuite.getTests().forEach(TestConfiguration::initializeId);
         updatedSuites.add(newSuite);
       }
     }
@@ -92,10 +116,9 @@ public class FileConfiguration extends AggregateRoot<FileName> {
       var existingTest = existingTestsMap.get(title);
 
       if (existingTest != null) {
-        existingTest.updateFrom(newTest);
+        existingTest.update(newTest);
         updatedTests.add(existingTest);
       } else {
-        newTest.initializeId();
         updatedTests.add(newTest);
       }
     }
@@ -127,15 +150,15 @@ public class FileConfiguration extends AggregateRoot<FileName> {
     return suite.getTags().stream().map(Tag::value).anyMatch(DISABLE_TAG::equals);
   }
 
-  public boolean hasChanged(FileConfiguration other) {
-    if (group == null && other.group != null) {
+  public boolean hasChanged(FileConfiguration newFileConfiguration) {
+    if (group == null && newFileConfiguration.group != null) {
       return true;
     }
-    if (group != null && !group.equals(other.group)) {
+    if (group != null && !group.equals(newFileConfiguration.group)) {
       return true;
     }
 
-    if (suites.size() != other.suites.size()) {
+    if (suites.size() != newFileConfiguration.suites.size()) {
       return true;
     }
 
@@ -143,7 +166,7 @@ public class FileConfiguration extends AggregateRoot<FileName> {
         suites.stream()
             .collect(Collectors.toMap(suite -> suite.getTitle().value(), Function.identity()));
 
-    return other.suites.stream()
+    return newFileConfiguration.suites.stream()
         .anyMatch(
             otherSuite -> {
               SuiteConfiguration thisSuite = thisSuites.get(otherSuite.getTitle().value());

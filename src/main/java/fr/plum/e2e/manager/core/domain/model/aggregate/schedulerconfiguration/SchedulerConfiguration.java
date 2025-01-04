@@ -5,30 +5,62 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.schedulerconfiguration.vo
 import fr.plum.e2e.manager.core.domain.model.aggregate.schedulerconfiguration.vo.SchedulerHour;
 import fr.plum.e2e.manager.core.domain.model.aggregate.schedulerconfiguration.vo.SchedulerIsEnabled;
 import fr.plum.e2e.manager.core.domain.model.aggregate.schedulerconfiguration.vo.SchedulerMinute;
-import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.ActionUsername;
+import fr.plum.e2e.manager.sharedkernel.domain.assertion.Assert;
 import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AggregateRoot;
 import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AuditInfo;
-import java.time.ZonedDateTime;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.SuperBuilder;
 
-@Setter
-@SuperBuilder
 @Getter
 public class SchedulerConfiguration extends AggregateRoot<EnvironmentId> {
 
-  @Builder.Default private SchedulerIsEnabled isEnabled = SchedulerIsEnabled.defaultStatus();
+  private SchedulerIsEnabled isEnabled;
+  private SchedulerDaysOfWeek daysOfWeek;
+  private SchedulerHour hour;
+  private SchedulerMinute minute;
 
-  @Builder.Default private SchedulerDaysOfWeek daysOfWeek = SchedulerDaysOfWeek.defaultDaysOfWeek();
+  @Builder
+  public SchedulerConfiguration(
+      EnvironmentId environmentId,
+      AuditInfo auditInfo,
+      SchedulerIsEnabled isEnabled,
+      SchedulerDaysOfWeek daysOfWeek,
+      SchedulerHour hour,
+      SchedulerMinute minute) {
+    super(environmentId, auditInfo);
+    Assert.notNull("isEnabled", isEnabled);
+    Assert.notNull("daysOfWeek", daysOfWeek);
+    Assert.notNull("hour", hour);
+    Assert.notNull("minute", minute);
+    this.isEnabled = isEnabled;
+    this.daysOfWeek = daysOfWeek;
+    this.hour = hour;
+    this.minute = minute;
+  }
 
-  @Builder.Default private SchedulerHour hour = SchedulerHour.defaultHour();
+  public static SchedulerConfiguration create(EnvironmentId environmentId, AuditInfo auditInfo) {
+    return builder()
+        .environmentId(environmentId)
+        .auditInfo(auditInfo)
+        .isEnabled(SchedulerIsEnabled.defaultStatus())
+        .daysOfWeek(SchedulerDaysOfWeek.defaultDaysOfWeek())
+        .hour(SchedulerHour.defaultHour())
+        .minute(SchedulerMinute.defaultMinute())
+        .build();
+  }
 
-  @Builder.Default private SchedulerMinute minute = SchedulerMinute.defaultMinute();
-
-  public static SchedulerConfiguration initialize(
-      EnvironmentId environmentId, ZonedDateTime now, ActionUsername username) {
-    return builder().id(environmentId).auditInfo(AuditInfo.create(username, now)).build();
+  public void update(
+      SchedulerIsEnabled isEnabled,
+      SchedulerDaysOfWeek daysOfWeek,
+      SchedulerHour hour,
+      SchedulerMinute minute) {
+    Assert.notNull("isEnabled", isEnabled);
+    Assert.notNull("daysOfWeek", daysOfWeek);
+    Assert.notNull("hour", hour);
+    Assert.notNull("minute", minute);
+    this.isEnabled = isEnabled;
+    this.daysOfWeek = daysOfWeek;
+    this.hour = hour;
+    this.minute = minute;
   }
 }

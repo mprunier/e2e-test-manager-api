@@ -4,6 +4,6 @@ import fr.plum.e2e.manager.sharedkernel.domain.assertion.Assert;
 
 public record EnvironmentVariableId(String name) {
   public EnvironmentVariableId {
-    Assert.notBlank("EnvironmentVariableId", name);
+    Assert.notBlank("EnvironmentVariableId name", name);
   }
 }

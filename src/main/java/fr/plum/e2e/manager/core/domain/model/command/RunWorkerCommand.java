@@ -9,6 +9,7 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.Test
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.WorkerType;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerVariable;
 import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.ActionUsername;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.Builder;
 
@@ -25,7 +26,7 @@ public record RunWorkerCommand(
 
   public RunWorkerCommand {
     if (variables == null) {
-      variables = List.of();
+      variables = new ArrayList<>();
     }
   }
 

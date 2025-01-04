@@ -6,7 +6,7 @@ import java.util.UUID;
 public record EnvironmentId(UUID value) {
 
   public EnvironmentId {
-    Assert.notNull("EnvironmentId", value);
+    Assert.notNull("EnvironmentId value", value);
   }
 
   public static EnvironmentId generate() {

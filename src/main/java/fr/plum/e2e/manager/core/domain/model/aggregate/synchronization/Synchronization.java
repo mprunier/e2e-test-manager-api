@@ -4,6 +4,7 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.Environmen
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationError;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationIsInProgress;
 import fr.plum.e2e.manager.core.domain.model.exception.SynchronizationAlreadyInProgressException;
+import fr.plum.e2e.manager.sharedkernel.domain.assertion.Assert;
 import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.ActionUsername;
 import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AggregateRoot;
 import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AuditInfo;
@@ -12,21 +13,33 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.experimental.SuperBuilder;
 
-@SuperBuilder
 @Getter
 public class Synchronization extends AggregateRoot<EnvironmentId> {
 
-  @Builder.Default
-  private SynchronizationIsInProgress synchronizationIsInProgress =
-      SynchronizationIsInProgress.defaultStatus();
+  private SynchronizationIsInProgress synchronizationIsInProgress;
+  private List<SynchronizationError> errors;
 
-  @Builder.Default private List<SynchronizationError> errors = new ArrayList<>();
+  @Builder
+  public Synchronization(
+      EnvironmentId environmentId,
+      AuditInfo auditInfo,
+      SynchronizationIsInProgress synchronizationIsInProgress,
+      List<SynchronizationError> errors) {
+    super(environmentId, auditInfo);
+    Assert.notNull("synchronizationIsInProgress", synchronizationIsInProgress);
+    Assert.notNull("errors", errors);
+    this.synchronizationIsInProgress = synchronizationIsInProgress;
+    this.errors = errors;
+  }
 
-  public static Synchronization initialize(
-      EnvironmentId environmentId, ZonedDateTime now, ActionUsername username) {
-    return builder().id(environmentId).auditInfo(AuditInfo.create(username, now)).build();
+  public static Synchronization create(EnvironmentId environmentId, AuditInfo auditInfo) {
+    return builder()
+        .environmentId(environmentId)
+        .auditInfo(auditInfo)
+        .synchronizationIsInProgress(SynchronizationIsInProgress.defaultStatus())
+        .errors(new ArrayList<>())
+        .build();
   }
 
   public void start() {
@@ -51,7 +64,6 @@ public class Synchronization extends AggregateRoot<EnvironmentId> {
             .toList();
 
     synchronizationIsInProgress = synchronizationIsInProgress.finish();
-
     getAuditInfo().update(username, now);
   }
 

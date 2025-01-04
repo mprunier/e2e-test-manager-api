@@ -20,10 +20,8 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.vo.TestResultD
 import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.vo.TestResultErrorMessage;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.vo.TestResultErrorStackTrace;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.vo.TestResultReference;
-import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.vo.TestResultScreenshotId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.vo.TestResultScreenshotTitle;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.vo.TestResultUrlError;
-import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.vo.TestResultVideoId;
 import fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.extractor.dto.MochaReportResultInternal;
 import fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.extractor.dto.MochaReportSuiteInternal;
 import fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.extractor.dto.MochaReportTestInternal;
@@ -33,6 +31,7 @@ import java.util.Map;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -102,10 +101,22 @@ public final class WorkerReportMapper {
         .duration(new TestResultDuration(test.getDuration()))
         .status(test.status())
         .code(new TestResultCode(test.getCode()))
-        .errorMessage(new TestResultErrorMessage(test.getErr().getMessage()))
-        .errorStackTrace(new TestResultErrorStackTrace(test.getErr().getEstack()))
-        .reference(new TestResultReference(context.reference()))
-        .urlError(new TestResultUrlError(context.urlError()))
+        .errorMessage(
+            StringUtils.isNotBlank(test.getErr().getMessage())
+                ? new TestResultErrorMessage(test.getErr().getMessage())
+                : null)
+        .errorStackTrace(
+            StringUtils.isNotBlank(test.getErr().getEstack())
+                ? new TestResultErrorStackTrace(test.getErr().getEstack())
+                : null)
+        .reference(
+            StringUtils.isNotBlank(context.reference())
+                ? new TestResultReference(context.reference())
+                : null)
+        .urlError(
+            StringUtils.isNotBlank(context.urlError())
+                ? new TestResultUrlError(context.urlError())
+                : null)
         .screenshots(mapScreenshots(context, screenshots, suitePath, test.getTitle(), specFile))
         .video(mapVideo(videos, specFile))
         .build();
@@ -125,11 +136,8 @@ public final class WorkerReportMapper {
             if (removeScreenshotPrefixAndExtension(context.screenshotError())
                 .contains(removeScreenshotPrefixAndExtension(name))) {
               testScreenshots.add(
-                  TestResultScreenshot.builder()
-                      .id(TestResultScreenshotId.generate())
-                      .title(new TestResultScreenshotTitle(ERROR_SCREENSHOT_KEY))
-                      .screenshot(data)
-                      .build());
+                  TestResultScreenshot.create(
+                      new TestResultScreenshotTitle(ERROR_SCREENSHOT_KEY), data));
             }
           });
     } else {
@@ -140,11 +148,7 @@ public final class WorkerReportMapper {
               var screenshotName =
                   name.substring(name.lastIndexOf(DELIMITER) + DELIMITER.length()).trim();
               testScreenshots.add(
-                  TestResultScreenshot.builder()
-                      .id(TestResultScreenshotId.generate())
-                      .title(new TestResultScreenshotTitle(screenshotName))
-                      .screenshot(data)
-                      .build());
+                  TestResultScreenshot.create(new TestResultScreenshotTitle(screenshotName), data));
             }
           });
     }
@@ -166,7 +170,7 @@ public final class WorkerReportMapper {
             .orElse(null);
 
     if (video != null) {
-      return TestResultVideo.builder().id(TestResultVideoId.generate()).video(video).build();
+      return TestResultVideo.create(video);
     }
     return null;
   }

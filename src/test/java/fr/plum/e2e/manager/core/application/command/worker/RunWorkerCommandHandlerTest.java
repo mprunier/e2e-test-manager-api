@@ -9,13 +9,18 @@ import static org.mockito.Mockito.when;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.Environment;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentDescription;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
+import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentIsEnabled;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.MaxParallelWorkers;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.SourceCodeInformation;
+import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.ConfigurationStatus;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.FileConfiguration;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.SuiteConfiguration;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.TestConfiguration;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.FileName;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.GroupName;
+import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.Position;
+import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.SuiteConfigurationId;
+import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.SuiteTitle;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.TestConfigurationId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.TestTitle;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.Worker;
@@ -34,6 +39,7 @@ import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.ActionUsername;
 import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AuditInfo;
 import fr.plum.e2e.manager.sharedkernel.domain.port.ClockPort;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -136,7 +142,12 @@ class RunWorkerCommandHandlerTest {
     RunWorkerCommand command =
         RunWorkerCommand.builder().environmentId(ENV_ID).username(USERNAME).build();
 
-    Worker existingWorker = Worker.initialize(ENV_ID, WorkerType.ALL);
+    Worker existingWorker =
+        Worker.create(
+            ENV_ID,
+            AuditInfo.create(new ActionUsername("username"), ZonedDateTime.now()),
+            WorkerType.ALL,
+            new ArrayList<>());
     when(workerRepository.assertNotWorkerInProgressByType(ENV_ID, WorkerType.ALL))
         .thenReturn(Optional.of(existingWorker));
 
@@ -167,12 +178,30 @@ class RunWorkerCommandHandlerTest {
     when(configurationPort.getMaxJobInParallel()).thenReturn(5);
 
     var testConfiguration =
-        TestConfiguration.builder().id(testId).title(new TestTitle("title 1")).build();
-    var suiteConfiguration = SuiteConfiguration.builder().tests(List.of(testConfiguration)).build();
+        TestConfiguration.builder()
+            .testConfigurationId(testId)
+            .title(new TestTitle("title 1"))
+            .position(new Position(1))
+            .status(ConfigurationStatus.IN_PROGRESS)
+            .variables(new ArrayList<>())
+            .tags(new ArrayList<>())
+            .build();
+    var suiteConfiguration =
+        SuiteConfiguration.builder()
+            .suiteConfigurationId(SuiteConfigurationId.generate())
+            .title(new SuiteTitle("suite 1"))
+            .tests(List.of(testConfiguration))
+            .status(ConfigurationStatus.IN_PROGRESS)
+            .tags(new ArrayList<>())
+            .variables(new ArrayList<>())
+            .build();
     FileConfiguration fileConfiguration =
         FileConfiguration.builder()
-            .id(new FileName("test.spec.js"))
+            .fileName(new FileName("test.spec.js"))
             .suites(List.of(suiteConfiguration))
+            .environmentId(ENV_ID)
+            .auditInfo(AuditInfo.create(USERNAME, NOW))
+            .group(new GroupName("group1"))
             .build();
     when(fileConfigurationRepository.find(ENV_ID, testId))
         .thenReturn(Optional.of(fileConfiguration));
@@ -198,11 +227,13 @@ class RunWorkerCommandHandlerTest {
             .build();
 
     return Environment.builder()
-        .id(ENV_ID)
+        .environmentId(ENV_ID)
         .environmentDescription(new EnvironmentDescription("Test Environment"))
         .sourceCodeInformation(sourceCodeInfo)
         .maxParallelWorkers(new MaxParallelWorkers(maxParallelWorkers))
         .auditInfo(AuditInfo.create(USERNAME, NOW))
+        .isEnabled(new EnvironmentIsEnabled(true))
+        .variables(new ArrayList<>())
         .build();
   }
 }

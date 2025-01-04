@@ -4,7 +4,7 @@ import fr.plum.e2e.manager.sharedkernel.domain.assertion.Assert;
 
 public record MaxParallelWorkers(int value) {
   public MaxParallelWorkers {
-    Assert.field("MaxParallelWorkers", value).positive();
+    Assert.field("MaxParallelWorkers value", value).positive();
   }
 
   public static MaxParallelWorkers defaultValue() {

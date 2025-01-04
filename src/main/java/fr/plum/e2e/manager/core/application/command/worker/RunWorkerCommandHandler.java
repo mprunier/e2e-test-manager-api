@@ -25,6 +25,7 @@ import fr.plum.e2e.manager.core.domain.service.EnvironmentService;
 import fr.plum.e2e.manager.core.domain.service.FileConfigurationService;
 import fr.plum.e2e.manager.core.domain.service.WorkerService;
 import fr.plum.e2e.manager.sharedkernel.application.command.CommandHandler;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AuditInfo;
 import fr.plum.e2e.manager.sharedkernel.domain.port.ClockPort;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.ArrayList;
@@ -71,9 +72,12 @@ public class RunWorkerCommandHandler implements CommandHandler<RunWorkerCommand>
 
     var environment = environmentService.getEnvironment(command.environmentId());
 
-    var worker = Worker.initialize(command.environmentId(), command.getWorkerType());
-    worker.createAuditInfo(command.username(), clockPort.now());
-    worker.addVariables(command.variables());
+    var worker =
+        Worker.create(
+            command.environmentId(),
+            AuditInfo.create(command.username(), clockPort.now()),
+            command.getWorkerType(),
+            command.variables());
 
     if (command.getWorkerType() == WorkerType.ALL
         && environment.getMaxParallelWorkers().value() > 1) {
@@ -125,9 +129,9 @@ public class RunWorkerCommandHandler implements CommandHandler<RunWorkerCommand>
       List<WorkerVariable> variables,
       WorkerIsRecordVideo workerIsRecordVideo,
       Worker worker) {
-    var workerId =
+    var workerUnitId =
         workerUnitPort.runWorker(environment, workerUnitFilter, variables, workerIsRecordVideo);
-    var workerUnit = WorkerUnit.builder().id(workerId).filter(workerUnitFilter).build();
+    var workerUnit = WorkerUnit.create(workerUnitId, null, workerUnitFilter);
     worker.addWorkerUnit(workerUnit);
   }
 

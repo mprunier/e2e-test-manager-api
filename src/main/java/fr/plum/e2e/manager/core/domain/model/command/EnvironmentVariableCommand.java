@@ -14,7 +14,7 @@ public record EnvironmentVariableCommand(
 
   public static EnvironmentVariable toDomain(EnvironmentVariableCommand command) {
     return EnvironmentVariable.builder()
-        .id(command.name())
+        .environmentVariableId(command.name())
         .value(command.value())
         .description(command.description())
         .isHidden(command.isHidden())

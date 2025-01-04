@@ -20,7 +20,7 @@ public final class SynchronizationMapper {
     var errors = toErrorDomain(entity);
 
     return Synchronization.builder()
-        .id(new EnvironmentId(entity.getEnvironmentId()))
+        .environmentId(new EnvironmentId(entity.getEnvironmentId()))
         .synchronizationIsInProgress(new SynchronizationIsInProgress(entity.isInProgress()))
         .errors(errors)
         .auditInfo(AuditInfoMapper.toDomain(entity))

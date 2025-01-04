@@ -54,6 +54,6 @@ public class CustomException extends RuntimeException {
   public String toString() {
     return StringUtils.isNotBlank(details)
         ? String.format("%s (%s) %s : %s", getStatus(), getTitle(), getDetails(), getDescription())
-        : String.format("%s (%s) %s", getStatus(), getTitle(), getDetails());
+        : String.format("%s (%s) %s", getStatus(), getTitle(), getDescription());
   }
 }

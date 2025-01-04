@@ -1,4 +1,4 @@
-package fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter;
+package fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter.respository;
 
 import static jakarta.transaction.Transactional.TxType.REQUIRES_NEW;
 

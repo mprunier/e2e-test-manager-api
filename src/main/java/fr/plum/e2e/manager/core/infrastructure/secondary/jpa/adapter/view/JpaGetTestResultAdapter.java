@@ -1,4 +1,4 @@
-package fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter;
+package fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter.view;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.TestConfigurationId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.vo.TestResultId;
@@ -80,7 +80,7 @@ public class JpaGetTestResultAdapter implements GetTestResultPort {
                     entity.getErrorUrl(),
                     entity.getDuration(),
                     entity.getCreatedBy(),
-                    screenshotsPerTest.getOrDefault(entity.getId(), List.of()),
+                    screenshotsPerTest.getOrDefault(entity.getId(), new ArrayList<>()),
                     videoPerTest.get(entity.getId()),
                     entity.getVariables() != null
                         ? entity.getVariables().entrySet().stream()
@@ -89,7 +89,7 @@ public class JpaGetTestResultAdapter implements GetTestResultPort {
                                     new TestResultVariableProjection(
                                         entry.getKey(), entry.getValue()))
                             .toList()
-                        : List.of()))
+                        : new ArrayList<>()))
         .toList();
   }
 

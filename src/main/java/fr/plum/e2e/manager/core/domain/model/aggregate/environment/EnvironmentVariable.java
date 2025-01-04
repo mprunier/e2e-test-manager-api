@@ -7,10 +7,9 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.VariableVa
 import fr.plum.e2e.manager.core.domain.model.exception.HiddenVariableException;
 import fr.plum.e2e.manager.sharedkernel.domain.assertion.Assert;
 import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.Entity;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.experimental.SuperBuilder;
 
-@SuperBuilder
 @Getter
 public class EnvironmentVariable extends Entity<EnvironmentVariableId> {
 
@@ -18,36 +17,50 @@ public class EnvironmentVariable extends Entity<EnvironmentVariableId> {
   private VariableDescription description; // Not the name which is the id
   private VariableIsHidden isHidden;
 
-  EnvironmentVariable(
+  @Builder
+  public EnvironmentVariable(
       EnvironmentVariableId environmentVariableId,
       VariableValue value,
       VariableDescription description,
       VariableIsHidden isHidden) {
     super(environmentVariableId);
-    Assert.notNull("VariableValue", value);
-    Assert.notNull("VariableDescription", description);
-    Assert.notNull("VariableIsHidden", isHidden);
+    Assert.notNull("value", value);
+    Assert.notNull("description", description);
+    Assert.notNull("isHidden", isHidden);
     this.value = value;
     this.description = description;
     this.isHidden = isHidden;
+  }
+
+  public static EnvironmentVariable create(
+      EnvironmentVariableId name,
+      VariableValue value,
+      VariableDescription description,
+      VariableIsHidden isHidden) {
+    return builder()
+        .environmentVariableId(name)
+        .value(value)
+        .description(description)
+        .isHidden(isHidden)
+        .build();
   }
 
   public boolean isValueMasked() {
     return value.value().contains("**********");
   }
 
-  public EnvironmentVariable updateFrom(EnvironmentVariable other) {
-    if (isHidden.value() && other.isValueMasked()) {
-      if (!other.isHidden.value()) {
+  public EnvironmentVariable update(EnvironmentVariable newVariable) {
+    if (isHidden.value() && newVariable.isValueMasked()) {
+      if (!newVariable.isHidden.value()) {
         throw new HiddenVariableException();
       }
       return builder()
-          .id(other.getId())
+          .environmentVariableId(id)
           .value(value)
-          .description(other.description)
-          .isHidden(other.isHidden)
+          .description(newVariable.description)
+          .isHidden(newVariable.isHidden)
           .build();
     }
-    return other;
+    return newVariable;
   }
 }

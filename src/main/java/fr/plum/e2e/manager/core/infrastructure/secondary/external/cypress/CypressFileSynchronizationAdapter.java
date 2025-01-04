@@ -4,6 +4,7 @@ import static fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress
 import static fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.constant.CypressConstant.END_TEST_TS_PATH;
 import static fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.constant.CypressConstant.START_PATH;
 
+import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SourceCodeProject;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationFileContent;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationFileName;
@@ -11,6 +12,7 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.FileCon
 import fr.plum.e2e.manager.core.domain.model.exception.SynchronizationCommonException;
 import fr.plum.e2e.manager.core.domain.port.FileSynchronizationPort;
 import fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.mapper.CypressFileConfigurationMapper;
+import fr.plum.e2e.manager.sharedkernel.domain.port.ClockPort;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -26,6 +28,8 @@ import lombok.extern.slf4j.Slf4j;
 @ApplicationScoped
 @RequiredArgsConstructor
 public class CypressFileSynchronizationAdapter implements FileSynchronizationPort {
+
+  private final ClockPort clockPort;
 
   @Override
   public Map<SynchronizationFileName, SynchronizationFileContent> listFiles(
@@ -62,7 +66,9 @@ public class CypressFileSynchronizationAdapter implements FileSynchronizationPor
 
   @Override
   public FileConfiguration buildFileConfiguration(
-      SynchronizationFileName fileName, SynchronizationFileContent content) {
-    return CypressFileConfigurationMapper.build(fileName.value(), content.value());
+      EnvironmentId environmentId,
+      SynchronizationFileName fileName,
+      SynchronizationFileContent content) {
+    return CypressFileConfigurationMapper.build(environmentId, fileName, content, clockPort.now());
   }
 }

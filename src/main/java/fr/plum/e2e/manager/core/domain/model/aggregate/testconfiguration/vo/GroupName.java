@@ -1,3 +1,9 @@
 package fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo;
 
-public record GroupName(String value) {}
+import fr.plum.e2e.manager.sharedkernel.domain.assertion.Assert;
+
+public record GroupName(String value) {
+  public GroupName {
+    Assert.notBlank("GroupName value", value);
+  }
+}

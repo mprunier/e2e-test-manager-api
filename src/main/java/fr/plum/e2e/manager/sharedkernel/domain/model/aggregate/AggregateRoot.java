@@ -1,22 +1,17 @@
 package fr.plum.e2e.manager.sharedkernel.domain.model.aggregate;
 
+import fr.plum.e2e.manager.sharedkernel.domain.assertion.Assert;
 import java.time.ZonedDateTime;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 @Getter
-@SuperBuilder
-@NoArgsConstructor
 public abstract class AggregateRoot<ID> extends Entity<ID> {
   protected AuditInfo auditInfo;
 
-  public void createAuditInfo(ActionUsername username, ZonedDateTime now) {
-    auditInfo = AuditInfo.create(username, now);
-  }
-
-  public void createAuditInfo(ZonedDateTime now) {
-    auditInfo = AuditInfo.create(now);
+  protected AggregateRoot(ID id, AuditInfo auditInfo) {
+    super(id);
+    Assert.notNull("AuditInfo must not be null for class " + getClass().getSimpleName(), auditInfo);
+    this.auditInfo = auditInfo;
   }
 
   public void updateAuditInfo(ActionUsername username, ZonedDateTime now) {

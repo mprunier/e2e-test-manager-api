@@ -34,10 +34,11 @@ public class UpdateSchedulerConfigurationCommandHandler
   public void execute(UpdateSchedulerCommand schedulerCommand) {
     var scheduler = schedulerConfigurationService.getScheduler(schedulerCommand.environmentId());
 
-    scheduler.setIsEnabled(schedulerCommand.isEnabled());
-    scheduler.setDaysOfWeek(schedulerCommand.daysOfWeek());
-    scheduler.setHour(schedulerCommand.schedulerHour());
-    scheduler.setMinute(schedulerCommand.schedulerMinute());
+    scheduler.update(
+        schedulerCommand.isEnabled(),
+        schedulerCommand.daysOfWeek(),
+        schedulerCommand.schedulerHour(),
+        schedulerCommand.schedulerMinute());
 
     scheduler.getAuditInfo().update(schedulerCommand.actionUsername(), clockPort.now());
 

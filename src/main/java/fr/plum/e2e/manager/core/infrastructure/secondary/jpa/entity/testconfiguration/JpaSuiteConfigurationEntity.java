@@ -41,7 +41,9 @@ public class JpaSuiteConfigurationEntity extends PanacheEntityBase {
   @Enumerated(EnumType.STRING)
   @Column(name = "status", nullable = false)
   private ConfigurationStatus status =
-      ConfigurationStatus.NEW; // Status update in SQL view after test result creation
+      ConfigurationStatus
+          .NEW; // Status update in SQL script after test result creation
+                // (JpaTestResultRepositoryAdapter)
 
   @ManyToOne
   @JoinColumns({
@@ -62,5 +64,7 @@ public class JpaSuiteConfigurationEntity extends PanacheEntityBase {
   private List<String> variables;
 
   @Column(name = "last_played_at")
-  private ZonedDateTime lastPlayedAt;
+  private ZonedDateTime
+      lastPlayedAt; // Last Played At update in SQL script after test result creation
+                    // (JpaTestResultRepositoryAdapter)
 }

@@ -23,6 +23,7 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.QueryParam;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -82,6 +83,6 @@ public class WorkerResource {
     if (optionalWorker.isPresent()) {
       return WorkerUnitResponse.fromWorkers(optionalWorker.get().getWorkerUnits());
     }
-    return List.of();
+    return new ArrayList<>();
   }
 }

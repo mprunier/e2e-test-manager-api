@@ -7,7 +7,7 @@ import lombok.Builder;
 public record SourceCodeInformation(String projectId, String token, String branch) {
 
   public SourceCodeInformation {
-    Assert.notBlank("source code project id", projectId);
+    Assert.notBlank("source code projectId", projectId);
     Assert.notBlank("source code token", token);
     Assert.notBlank("source code branch", branch);
   }

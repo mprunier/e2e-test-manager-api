@@ -7,6 +7,7 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.VariableVa
 import fr.plum.e2e.manager.core.domain.model.command.EnvironmentVariableCommand;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.apache.commons.lang3.StringUtils;
 
 public record CreateUpdateEnvironmentVariableRequest(
     @NotBlank String name, @NotBlank String value, String description, @NotNull Boolean isHidden) {
@@ -14,7 +15,7 @@ public record CreateUpdateEnvironmentVariableRequest(
     return new EnvironmentVariableCommand(
         new EnvironmentVariableId(name),
         new VariableValue(value),
-        new VariableDescription(description),
+        StringUtils.isNotBlank(description) ? new VariableDescription(description) : null,
         new VariableIsHidden(isHidden));
   }
 }

@@ -3,9 +3,14 @@ package fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.mappe
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
+import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationFileContent;
+import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationFileName;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.FileConfiguration;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.SuiteConfiguration;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.TestConfiguration;
+import java.time.ZonedDateTime;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 class CypressFileConfigurationMapperTest {
@@ -23,7 +28,12 @@ class CypressFileConfigurationMapperTest {
             """;
 
     // When
-    FileConfiguration result = CypressFileConfigurationMapper.build("testFile.js", content);
+    FileConfiguration result =
+        CypressFileConfigurationMapper.build(
+            new EnvironmentId(UUID.randomUUID()),
+            new SynchronizationFileName("testFile.js"),
+            new SynchronizationFileContent(content),
+            ZonedDateTime.now());
 
     // Then
     assertEquals("1", result.getGroup().value());
@@ -69,7 +79,12 @@ class CypressFileConfigurationMapperTest {
             """;
 
     // When
-    FileConfiguration result = CypressFileConfigurationMapper.build("testFile.js", content);
+    FileConfiguration result =
+        CypressFileConfigurationMapper.build(
+            new EnvironmentId(UUID.randomUUID()),
+            new SynchronizationFileName("testFile.js"),
+            new SynchronizationFileContent(content),
+            ZonedDateTime.now());
 
     // Then
     assertEquals("0040", result.getGroup().value());

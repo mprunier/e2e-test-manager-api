@@ -3,7 +3,6 @@ package fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter.mapper;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.TestResult;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.vo.TestResultVariable;
 import fr.plum.e2e.manager.core.infrastructure.secondary.jpa.entity.testresult.JpaTestResultEntity;
-import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -34,9 +33,5 @@ public final class TestResultMapper {
             .build();
     testResult.setAuditFields(domain.getAuditInfo());
     return testResult;
-  }
-
-  public static List<JpaTestResultEntity> toEntities(List<TestResult> domains) {
-    return domains.stream().map(TestResultMapper::toEntity).toList();
   }
 }

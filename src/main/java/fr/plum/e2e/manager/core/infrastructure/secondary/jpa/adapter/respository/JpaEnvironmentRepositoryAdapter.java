@@ -1,4 +1,4 @@
-package fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter;
+package fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter.respository;
 
 import static fr.plum.e2e.manager.sharedkernel.infrastructure.cache.CacheNamesConstant.CACHE_JPA_ENVIRONMENTS_BY_PROJECT_BRANCH;
 import static fr.plum.e2e.manager.sharedkernel.infrastructure.cache.CacheNamesConstant.CACHE_JPA_ENVIRONMENT_BY_ID;

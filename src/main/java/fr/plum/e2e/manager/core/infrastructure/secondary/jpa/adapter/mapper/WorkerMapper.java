@@ -27,7 +27,7 @@ public final class WorkerMapper {
 
   public static Worker toDomain(JpaWorkerEntity entity) {
     return Worker.builder()
-        .id(new WorkerId(entity.getId()))
+        .workerId(new WorkerId(entity.getId()))
         .environmentId(new EnvironmentId(entity.getEnvironmentId()))
         .type(entity.getType())
         .variables(
@@ -57,11 +57,10 @@ public final class WorkerMapper {
   }
 
   private static WorkerUnit toWorkerUnit(JpaWorkerUnitEntity entity) {
-    return WorkerUnit.builder()
-        .id(new WorkerUnitId(entity.getId()))
-        .status(entity.getStatus())
-        .filter(toWorkerUnitFilter(entity.getFilter()))
-        .build();
+    return WorkerUnit.create(
+        new WorkerUnitId(entity.getId()),
+        entity.getStatus(),
+        toWorkerUnitFilter(entity.getFilter()));
   }
 
   private static JpaWorkerUnitEntity toWorkerUnitEntity(WorkerUnit domain, JpaWorkerEntity worker) {

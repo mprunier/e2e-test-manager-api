@@ -6,13 +6,13 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-@Builder
 public class AuditInfo {
   private ActionUsername createdBy;
   private ZonedDateTime createdAt;
   private ActionUsername updatedBy;
   private ZonedDateTime updatedAt;
 
+  @Builder
   public AuditInfo(
       ActionUsername createdBy,
       ZonedDateTime createdAt,

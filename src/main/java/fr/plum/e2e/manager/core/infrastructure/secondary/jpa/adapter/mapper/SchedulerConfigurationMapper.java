@@ -29,7 +29,7 @@ public final class SchedulerConfigurationMapper {
 
   public static SchedulerConfiguration toDomain(JpaSchedulerConfigurationEntity entity) {
     return SchedulerConfiguration.builder()
-        .id(new EnvironmentId(entity.getEnvironmentId()))
+        .environmentId(new EnvironmentId(entity.getEnvironmentId()))
         .isEnabled(new SchedulerIsEnabled(entity.isEnabled()))
         .hour(new SchedulerHour(entity.getHour()))
         .minute(new SchedulerMinute(entity.getMinute()))

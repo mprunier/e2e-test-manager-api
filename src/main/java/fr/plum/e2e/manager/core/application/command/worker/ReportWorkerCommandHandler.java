@@ -24,6 +24,7 @@ import fr.plum.e2e.manager.core.domain.port.repository.TestResultRepositoryPort;
 import fr.plum.e2e.manager.core.domain.port.repository.WorkerRepositoryPort;
 import fr.plum.e2e.manager.core.domain.service.EnvironmentService;
 import fr.plum.e2e.manager.sharedkernel.application.command.CommandHandler;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AuditInfo;
 import fr.plum.e2e.manager.sharedkernel.domain.port.ClockPort;
 import fr.plum.e2e.manager.sharedkernel.domain.port.TransactionManagerPort;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -94,7 +95,7 @@ public class ReportWorkerCommandHandler implements CommandHandler<ReportWorkerCo
     handleMissingTests(testConfigurationsToRun, testResults, worker);
 
     var workerUnit = worker.findWorkerUnit(command.workerUnitId());
-    workerUnit.setStatus(workerUnitStatus);
+    workerUnit.updateStatus(workerUnitStatus);
 
     transactionManagerPort.executeInTransaction(
         () -> {
@@ -251,16 +252,20 @@ public class ReportWorkerCommandHandler implements CommandHandler<ReportWorkerCo
 
   private TestResult createTestResult(
       Worker worker, TestConfigurationId id, ReportTest reportTest) {
-    var result = TestResult.create(worker, id, reportTest);
-    result.createAuditInfo(worker.getAuditInfo().getCreatedBy(), clockPort.now());
-    return result;
+    return TestResult.create(
+        worker,
+        id,
+        reportTest,
+        AuditInfo.create(worker.getAuditInfo().getCreatedBy(), clockPort.now()));
   }
 
   private TestResult createTestResultWithoutReport(
       Worker worker, TestConfigurationId id, TestResultStatus status) {
-    var result = TestResult.createWithoutInformation(worker, id, status);
-    result.createAuditInfo(worker.getAuditInfo().getCreatedBy(), clockPort.now());
-    return result;
+    return TestResult.createWithoutInformation(
+        worker,
+        id,
+        status,
+        AuditInfo.create(worker.getAuditInfo().getCreatedBy(), clockPort.now()));
   }
 
   private void handleMissingTests(

@@ -1,6 +1,7 @@
 package fr.plum.e2e.manager.core.application.command.environment;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.Environment;
+import fr.plum.e2e.manager.core.domain.model.aggregate.environment.EnvironmentVariable;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.schedulerconfiguration.SchedulerConfiguration;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.Synchronization;
@@ -12,6 +13,7 @@ import fr.plum.e2e.manager.core.domain.port.repository.SchedulerConfigurationRep
 import fr.plum.e2e.manager.core.domain.port.repository.SynchronizationRepositoryPort;
 import fr.plum.e2e.manager.core.domain.service.EnvironmentService;
 import fr.plum.e2e.manager.sharedkernel.application.command.CommandHandler;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AuditInfo;
 import fr.plum.e2e.manager.sharedkernel.domain.port.ClockPort;
 import fr.plum.e2e.manager.sharedkernel.domain.port.TransactionManagerPort;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -66,21 +68,36 @@ public class CreateEnvironmentCommandHandler implements CommandHandler<CreateEnv
   private void createScheduler(
       CreateEnvironmentCommand environmentCommand, Environment environment) {
     var scheduler =
-        SchedulerConfiguration.initialize(
-            environment.getId(), clockPort.now(), environmentCommand.actionUsername());
+        SchedulerConfiguration.create(
+            environment.getId(),
+            AuditInfo.create(environmentCommand.actionUsername(), clockPort.now()));
     schedulerConfigurationRepositoryPort.save(scheduler);
   }
 
   private void createSynchronization(
       CreateEnvironmentCommand environmentCommand, Environment environment) {
     var synchronization =
-        Synchronization.initialize(
-            environment.getId(), clockPort.now(), environmentCommand.actionUsername());
+        Synchronization.create(
+            environment.getId(),
+            AuditInfo.create(environmentCommand.actionUsername(), clockPort.now()));
     synchronizationRepositoryPort.save(synchronization);
   }
 
   private Environment createEnvironment(CreateEnvironmentCommand environmentCommand) {
-    var environment = environmentCommand.toDomain(clockPort);
+    var environment =
+        Environment.create(
+            environmentCommand.description(),
+            environmentCommand.sourceCodeInformation(),
+            environmentCommand.variables().stream()
+                .map(
+                    commandVariable ->
+                        EnvironmentVariable.create(
+                            commandVariable.name(),
+                            commandVariable.value(),
+                            commandVariable.description(),
+                            commandVariable.isHidden()))
+                .toList(),
+            AuditInfo.create(environmentCommand.actionUsername(), clockPort.now()));
     environmentRepositoryPort.save(environment);
     return environment;
   }

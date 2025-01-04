@@ -7,6 +7,9 @@ import static fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress
 import static fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.constant.CypressConstant.CYPRESS_TEST_FUNCTION_NAME;
 import static fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.constant.CypressConstant.CYPRESS_VARIABLES_PARAM_NAME;
 
+import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
+import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationFileContent;
+import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationFileName;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.FileConfiguration;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.SuiteConfiguration;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.TestConfiguration;
@@ -22,6 +25,8 @@ import fr.plum.e2e.manager.core.domain.model.exception.SuiteNoTitleException;
 import fr.plum.e2e.manager.core.domain.model.exception.TitleEmptyException;
 import fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.exception.BuildFileConfigurationException;
 import fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.exception.SuiteShouldBeNotContainsSubSuiteException;
+import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AuditInfo;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -51,7 +56,11 @@ import org.mozilla.javascript.ast.StringLiteral;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class CypressFileConfigurationMapper {
 
-  public static FileConfiguration build(String fileName, String content) {
+  public static FileConfiguration build(
+      EnvironmentId environmentId,
+      SynchronizationFileName fileName,
+      SynchronizationFileContent content,
+      ZonedDateTime now) {
     try {
       var env = new CompilerEnvirons();
       env.setRecordingComments(true);
@@ -59,24 +68,26 @@ public final class CypressFileConfigurationMapper {
       env.setLanguageVersion(Context.VERSION_ES6);
 
       var parser = new Parser(env);
-      var astRoot = parser.parse(content, null, 0);
+      var astRoot = parser.parse(content.value(), null, 0);
 
       var rootTests = new ArrayList<TestConfiguration>();
       var suites = new ArrayList<SuiteConfiguration>();
 
-      processNode(astRoot, rootTests, suites, fileName);
+      processNode(astRoot, rootTests, suites, fileName.value());
 
       if (!rootTests.isEmpty()) {
         var rootTestSuite =
-            SuiteConfiguration.builder().title(new SuiteTitle(NO_SUITE)).tests(rootTests).build();
+            SuiteConfiguration.create(
+                SuiteTitle.noSuite(), new ArrayList<>(), new ArrayList<>(), rootTests);
         suites.add(rootTestSuite);
       }
 
-      return FileConfiguration.builder()
-          .id(new FileName(fileName))
-          .group(getGroupName(astRoot))
-          .suites(suites)
-          .build();
+      return FileConfiguration.create(
+          new FileName(fileName.value()),
+          AuditInfo.create(now),
+          environmentId,
+          getGroupName(astRoot),
+          suites);
 
     } catch (EvaluatorException e) {
       throw new BuildFileConfigurationException(e.details(), e.lineSource());
@@ -153,12 +164,7 @@ public final class CypressFileConfigurationMapper {
     validateSuiteTitle(titleNode);
 
     var suite =
-        SuiteConfiguration.builder()
-            .title(new SuiteTitle(titleNode.getValue()))
-            .tags(tags)
-            .variables(variables)
-            .tests(tests)
-            .build();
+        SuiteConfiguration.create(new SuiteTitle(titleNode.getValue()), tags, variables, tests);
 
     parentSuites.add(suite);
   }
@@ -223,12 +229,11 @@ public final class CypressFileConfigurationMapper {
     extractMetadata(node, tags, variables);
 
     var test =
-        TestConfiguration.builder()
-            .title(new TestTitle(titleNode.getValue()))
-            .position(new Position(node.getAbsolutePosition()))
-            .tags(tags)
-            .variables(variables)
-            .build();
+        TestConfiguration.create(
+            new TestTitle(titleNode.getValue()),
+            new Position(node.getAbsolutePosition()),
+            tags,
+            variables);
 
     parentTests.add(test);
   }

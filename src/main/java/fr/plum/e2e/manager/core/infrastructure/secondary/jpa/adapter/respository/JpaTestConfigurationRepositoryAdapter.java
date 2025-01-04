@@ -1,4 +1,4 @@
-package fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter;
+package fr.plum.e2e.manager.core.infrastructure.secondary.jpa.adapter.respository;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.FileName;
