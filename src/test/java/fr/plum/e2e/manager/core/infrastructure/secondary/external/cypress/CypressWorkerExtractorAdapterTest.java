@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.report.Report;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.TestResultStatus;
+import fr.plum.e2e.manager.core.infrastructure.secondary.external.webclient.cypress.CypressWorkerExtractorAdapter;
 import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;

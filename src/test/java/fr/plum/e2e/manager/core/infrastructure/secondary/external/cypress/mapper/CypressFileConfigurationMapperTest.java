@@ -9,6 +9,7 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.Synchr
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.FileConfiguration;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.SuiteConfiguration;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.TestConfiguration;
+import fr.plum.e2e.manager.core.infrastructure.secondary.external.webclient.cypress.mapper.CypressFileConfigurationMapper;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;

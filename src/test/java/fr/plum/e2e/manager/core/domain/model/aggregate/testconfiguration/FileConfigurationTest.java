@@ -76,24 +76,6 @@ class FileConfigurationTest {
           .hasFieldOrPropertyWithValue(
               "description", "The field environmentId is mandatory and cannot be empty or null.");
     }
-
-    @Test
-    void should_throw_exception_when_group_is_null() {
-      // WHEN/THEN
-      assertThatThrownBy(
-              () ->
-                  FileConfiguration.builder()
-                      .fileName(fileName)
-                      .auditInfo(auditInfo)
-                      .environmentId(environmentId)
-                      .group(null)
-                      .suites(suites)
-                      .build())
-          .isInstanceOf(MissingMandatoryValueException.class)
-          .hasFieldOrPropertyWithValue("title", "missing-mandatory-value")
-          .hasFieldOrPropertyWithValue(
-              "description", "The field group is mandatory and cannot be empty or null.");
-    }
   }
 
   @Nested

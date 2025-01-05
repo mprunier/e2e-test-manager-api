@@ -2,7 +2,7 @@ package fr.plum.e2e.manager.core.application.command.synchronization;
 
 import static fr.plum.e2e.manager.core.domain.constant.BusinessConstant.ERROR_ES6_TRANSPILATION;
 import static fr.plum.e2e.manager.core.domain.constant.BusinessConstant.ERROR_TYPESCRIPT_TRANSPILATION;
-import static fr.plum.e2e.manager.core.infrastructure.secondary.external.inmemory.adapter.InMemoryJavascriptConverterAdapter.ERROR_ES_6;
+import static fr.plum.e2e.manager.core.infrastructure.secondary.external.inmemory.adapter.InMemoryJavascriptConverterAdapter.ERROR_ES6;
 import static fr.plum.e2e.manager.core.infrastructure.secondary.external.inmemory.adapter.InMemoryJavascriptConverterAdapter.ERROR_TS;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -173,7 +173,7 @@ class ProcessSynchronizationCommandHandlerTest {
     // Given
     var project = sourceCodeAdapter.cloneRepository(SOURCE_CODE_INFO);
     var fileName = new SynchronizationFileName("test.js");
-    var fileContent = new SynchronizationFileContent("..." + ERROR_ES_6);
+    var fileContent = new SynchronizationFileContent("..." + ERROR_ES6);
     fileSynchronizationAdapter.addFile(project, fileName, fileContent);
 
     var command = new CommonCommand(ENVIRONMENT_ID, ACTION_USERNAME);
