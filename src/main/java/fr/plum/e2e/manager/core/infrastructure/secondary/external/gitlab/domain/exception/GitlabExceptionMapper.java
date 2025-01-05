@@ -16,7 +16,7 @@ public class GitlabExceptionMapper implements ResponseExceptionMapper<CustomExce
     } catch (ProcessingException e) {
       return new CustomException(
           Response.Status.INTERNAL_SERVER_ERROR,
-          "publisher-client-error",
+          "gitlab-client-error",
           "An error has occurred, please try again later or contact our customer service.");
     }
     return new CustomException(

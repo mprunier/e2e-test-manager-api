@@ -26,7 +26,7 @@ public final class SynchronizationErrorFactory {
   public static SynchronizationError createGlobalError(String message, ZonedDateTime at) {
     return new SynchronizationError(
         new SynchronizationFileName(GLOBAL_ENVIRONMENT_ERROR),
-        new SynchronizationErrorValue(message),
+        new SynchronizationErrorValue(StringUtils.isNotBlank(message) ? message : "No message"),
         at);
   }
 }

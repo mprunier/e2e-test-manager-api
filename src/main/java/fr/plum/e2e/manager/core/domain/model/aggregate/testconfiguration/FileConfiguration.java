@@ -38,7 +38,6 @@ public class FileConfiguration extends AggregateRoot<FileName> {
       List<SuiteConfiguration> suites) {
     super(fileName, auditInfo);
     Assert.notNull("environmentId", environmentId);
-    Assert.notNull("group", group);
     Assert.notNull("suites", suites);
     this.environmentId = environmentId;
     this.group = group;

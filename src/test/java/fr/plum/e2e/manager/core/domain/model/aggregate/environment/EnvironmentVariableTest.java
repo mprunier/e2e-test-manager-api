@@ -62,23 +62,6 @@ class EnvironmentVariableTest {
     }
 
     @Test
-    void should_throw_exception_when_description_is_null() {
-      // WHEN / THEN
-      assertThatThrownBy(
-              () ->
-                  EnvironmentVariable.builder()
-                      .environmentVariableId(id)
-                      .value(value)
-                      .description(null)
-                      .isHidden(isHidden)
-                      .build())
-          .isInstanceOf(MissingMandatoryValueException.class)
-          .hasFieldOrPropertyWithValue("title", "missing-mandatory-value")
-          .hasFieldOrPropertyWithValue(
-              "description", "The field description is mandatory and cannot be empty or null.");
-    }
-
-    @Test
     void should_throw_exception_when_isHidden_is_null() {
       // WHEN / THEN
       assertThatThrownBy(

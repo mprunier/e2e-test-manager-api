@@ -13,7 +13,6 @@ import fr.plum.e2e.manager.core.infrastructure.secondary.persistence.jpa.reposit
 import io.quarkus.cache.CacheKey;
 import io.quarkus.cache.CacheResult;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
@@ -25,7 +24,6 @@ import lombok.RequiredArgsConstructor;
 public class JpaEnvironmentRepositoryAdapter implements EnvironmentRepositoryPort {
 
   private final JpaEnvironmentRepository repository;
-  private final EntityManager entityManager;
   private final QuarkusCacheManager cacheManager;
 
   @CacheResult(cacheName = CACHE_JPA_ENVIRONMENT_BY_ID)

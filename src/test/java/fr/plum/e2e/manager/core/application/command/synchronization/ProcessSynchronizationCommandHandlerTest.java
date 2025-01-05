@@ -1,8 +1,10 @@
 package fr.plum.e2e.manager.core.application.command.synchronization;
 
+import static fr.plum.e2e.manager.core.domain.constant.BusinessConstant.ERROR_ES6_TRANSPILATION;
+import static fr.plum.e2e.manager.core.domain.constant.BusinessConstant.ERROR_TYPESCRIPT_TRANSPILATION;
+import static fr.plum.e2e.manager.core.infrastructure.secondary.external.inmemory.adapter.InMemoryJavascriptConverterAdapter.ERROR_ES_6;
+import static fr.plum.e2e.manager.core.infrastructure.secondary.external.inmemory.adapter.InMemoryJavascriptConverterAdapter.ERROR_TS;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.Environment;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentDescription;
@@ -11,209 +13,222 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.Environmen
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.MaxParallelWorkers;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.SourceCodeInformation;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.Synchronization;
-import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SourceCodeProject;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationFileContent;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationFileName;
-import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationIsInProgress;
 import fr.plum.e2e.manager.core.domain.model.command.CommonCommand;
 import fr.plum.e2e.manager.core.domain.model.event.EnvironmentSynchronizedEvent;
-import fr.plum.e2e.manager.core.domain.port.EventPublisherPort;
-import fr.plum.e2e.manager.core.domain.port.FileSynchronizationPort;
-import fr.plum.e2e.manager.core.domain.port.JavascriptConverterPort;
-import fr.plum.e2e.manager.core.domain.port.SourceCodePort;
-import fr.plum.e2e.manager.core.domain.port.repository.EnvironmentRepositoryPort;
-import fr.plum.e2e.manager.core.domain.port.repository.FileConfigurationRepositoryPort;
-import fr.plum.e2e.manager.core.domain.port.repository.SynchronizationRepositoryPort;
+import fr.plum.e2e.manager.core.domain.model.exception.EnvironmentNotFoundException;
+import fr.plum.e2e.manager.core.domain.model.exception.SynchronizationNotFoundException;
+import fr.plum.e2e.manager.core.infrastructure.secondary.clock.inmemory.adapter.InMemoryClockAdapter;
+import fr.plum.e2e.manager.core.infrastructure.secondary.external.inmemory.adapter.InMemoryFileSynchronizationAdapter;
+import fr.plum.e2e.manager.core.infrastructure.secondary.external.inmemory.adapter.InMemoryJavascriptConverterAdapter;
+import fr.plum.e2e.manager.core.infrastructure.secondary.external.inmemory.adapter.InMemorySourceCodeAdapter;
+import fr.plum.e2e.manager.core.infrastructure.secondary.messaging.inmemory.adapter.InMemoryEventPublisherAdapter;
+import fr.plum.e2e.manager.core.infrastructure.secondary.persistence.inmemory.adapter.repository.InMemoryEnvironmentRepositoryAdapter;
+import fr.plum.e2e.manager.core.infrastructure.secondary.persistence.inmemory.adapter.repository.InMemoryFileConfigurationRepositoryAdapter;
+import fr.plum.e2e.manager.core.infrastructure.secondary.persistence.inmemory.adapter.repository.InMemorySynchronizationRepositoryAdapter;
+import fr.plum.e2e.manager.core.infrastructure.secondary.transaction.inmemory.adapter.InMemoryTransactionManagerAdapter;
 import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.ActionUsername;
 import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AuditInfo;
-import fr.plum.e2e.manager.sharedkernel.domain.port.ClockPort;
-import fr.plum.e2e.manager.sharedkernel.domain.port.TransactionManagerPort;
-import java.io.File;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-@ExtendWith(MockitoExtension.class)
 class ProcessSynchronizationCommandHandlerTest {
 
-  @Mock private ClockPort clockPort;
-  @Mock private EventPublisherPort eventPublisher;
-  @Mock private EnvironmentRepositoryPort environmentRepository;
-  @Mock private SourceCodePort sourceCodePort;
-  @Mock private FileSynchronizationPort fileSynchronizationPort;
-  @Mock private SynchronizationRepositoryPort synchronizationRepository;
-  @Mock private TransactionManagerPort transactionManager;
-  @Mock private FileConfigurationRepositoryPort fileConfigurationRepository;
-  @Mock private JavascriptConverterPort javascriptConverter;
+  private static final EnvironmentId ENVIRONMENT_ID = new EnvironmentId(UUID.randomUUID());
+  private static final ActionUsername ACTION_USERNAME = new ActionUsername("Test User");
+  private static final EnvironmentDescription ENVIRONMENT_DESCRIPTION =
+      new EnvironmentDescription("Test Environment");
+  private static final SourceCodeInformation SOURCE_CODE_INFO =
+      SourceCodeInformation.builder()
+          .projectId("project1")
+          .branch("main")
+          .token("token123")
+          .build();
 
-  private ProcessSynchronizationCommandHandler commandHandler;
-
-  private final ZonedDateTime NOW = ZonedDateTime.now();
-  private final EnvironmentId ENV_ID = EnvironmentId.generate();
-  private final ActionUsername USERNAME = new ActionUsername("testUser");
+  private ProcessSynchronizationCommandHandler handler;
+  private InMemoryEventPublisherAdapter eventPublisher;
+  private InMemoryClockAdapter clock;
+  private InMemoryEnvironmentRepositoryAdapter environmentRepository;
+  private InMemorySynchronizationRepositoryAdapter synchronizationRepository;
+  private InMemoryFileConfigurationRepositoryAdapter fileConfigurationRepository;
+  private InMemorySourceCodeAdapter sourceCodeAdapter;
+  private InMemoryFileSynchronizationAdapter fileSynchronizationAdapter;
+  private InMemoryJavascriptConverterAdapter javascriptConverterAdapter;
+  private InMemoryTransactionManagerAdapter transactionManager;
 
   @BeforeEach
   void setUp() {
-    commandHandler =
+    clock = new InMemoryClockAdapter();
+    eventPublisher = new InMemoryEventPublisherAdapter();
+    environmentRepository = new InMemoryEnvironmentRepositoryAdapter();
+    synchronizationRepository = new InMemorySynchronizationRepositoryAdapter();
+    fileConfigurationRepository = new InMemoryFileConfigurationRepositoryAdapter();
+    sourceCodeAdapter = new InMemorySourceCodeAdapter();
+    fileSynchronizationAdapter = new InMemoryFileSynchronizationAdapter();
+    javascriptConverterAdapter = new InMemoryJavascriptConverterAdapter();
+    transactionManager = new InMemoryTransactionManagerAdapter();
+
+    handler =
         new ProcessSynchronizationCommandHandler(
-            clockPort,
+            clock,
             eventPublisher,
             environmentRepository,
-            sourceCodePort,
-            fileSynchronizationPort,
+            sourceCodeAdapter,
+            fileSynchronizationAdapter,
             synchronizationRepository,
             transactionManager,
             fileConfigurationRepository,
-            javascriptConverter);
+            javascriptConverterAdapter);
 
-    when(clockPort.now()).thenReturn(NOW);
+    setupInitialData();
   }
 
   @Test
-  void execute_SuccessfulSynchronization() {
+  void should_process_synchronization_successfully() {
     // Given
-    CommonCommand command =
-        CommonCommand.builder().environmentId(ENV_ID).username(USERNAME).build();
+    var project = sourceCodeAdapter.cloneRepository(SOURCE_CODE_INFO);
+    var fileName = new SynchronizationFileName("test.js");
+    var fileContent = new SynchronizationFileContent("...");
+    fileSynchronizationAdapter.addFile(project, fileName, fileContent);
 
-    Environment environment = createTestEnvironment();
-    Synchronization synchronization = createTestSynchronization();
-    SourceCodeProject sourceProject = new SourceCodeProject(new File("/tmp/test"));
-    Map<SynchronizationFileName, SynchronizationFileContent> processedFiles = new HashMap<>();
-    processedFiles.put(
-        new SynchronizationFileName("test.spec.js"), new SynchronizationFileContent("content"));
-
-    when(environmentRepository.find(ENV_ID)).thenReturn(Optional.of(environment));
-    when(synchronizationRepository.find(ENV_ID)).thenReturn(Optional.of(synchronization));
-    when(sourceCodePort.cloneRepository(any())).thenReturn(sourceProject);
-    when(fileSynchronizationPort.listFiles(any())).thenReturn(processedFiles);
+    var command = new CommonCommand(ENVIRONMENT_ID, ACTION_USERNAME);
 
     // When
-    commandHandler.execute(command);
+    handler.execute(command);
 
     // Then
-    verify(sourceCodePort).cloneRepository(environment.getSourceCodeInformation());
-    verify(fileSynchronizationPort).listFiles(sourceProject);
-    verify(transactionManager).executeInTransaction(any());
-    verify(synchronizationRepository).update(any());
-    verify(eventPublisher).publishAsync(any(EnvironmentSynchronizedEvent.class));
+    var sync = synchronizationRepository.find(ENVIRONMENT_ID);
+    assertTrue(sync.isPresent());
+    assertFalse(sync.get().isInProgress());
+    assertTrue(sync.get().getErrors().isEmpty());
+
+    var configs = fileConfigurationRepository.findAll(ENVIRONMENT_ID);
+    assertEquals(1, configs.size());
+
+    assertEquals(1, eventPublisher.getPublishedEvents().size());
+    var event = (EnvironmentSynchronizedEvent) eventPublisher.getPublishedEvents().getFirst();
+    assertEquals(ENVIRONMENT_ID, event.environmentId());
+    assertEquals(ACTION_USERNAME, event.username());
+    assertTrue(event.synchronizationErrors().isEmpty());
   }
 
   @Test
-  void execute_HandlesSynchronizationError() {
+  void should_handle_environment_not_found() {
     // Given
-    CommonCommand command =
-        CommonCommand.builder().environmentId(ENV_ID).username(USERNAME).build();
+    var nonExistentId = new EnvironmentId(UUID.randomUUID());
+    var command = new CommonCommand(nonExistentId, ACTION_USERNAME);
 
-    Environment environment = createTestEnvironment();
-    Synchronization synchronization = createTestSynchronization();
-
-    when(environmentRepository.find(ENV_ID)).thenReturn(Optional.of(environment));
-    when(synchronizationRepository.find(ENV_ID)).thenReturn(Optional.of(synchronization));
-    when(sourceCodePort.cloneRepository(any())).thenThrow(new RuntimeException("Clone failed"));
-
-    // When
-    commandHandler.execute(command);
-
-    // Then
-    ArgumentCaptor<EnvironmentSynchronizedEvent> eventCaptor =
-        ArgumentCaptor.forClass(EnvironmentSynchronizedEvent.class);
-    verify(eventPublisher).publishAsync(eventCaptor.capture());
-
-    EnvironmentSynchronizedEvent capturedEvent = eventCaptor.getValue();
-    assertFalse(capturedEvent.synchronizationErrors().isEmpty());
-    assertEquals("Clone failed", capturedEvent.synchronizationErrors().getFirst().error().value());
+    // When/Then
+    assertThrows(EnvironmentNotFoundException.class, () -> handler.execute(command));
   }
 
   @Test
-  void execute_HandlesFileProcessingError() {
+  void should_handle_synchronization_not_found() {
     // Given
-    CommonCommand command =
-        CommonCommand.builder().environmentId(ENV_ID).username(USERNAME).build();
+    synchronizationRepository = new InMemorySynchronizationRepositoryAdapter(); // Reset repository
+    handler =
+        new ProcessSynchronizationCommandHandler(
+            clock,
+            eventPublisher,
+            environmentRepository,
+            sourceCodeAdapter,
+            fileSynchronizationAdapter,
+            synchronizationRepository,
+            transactionManager,
+            fileConfigurationRepository,
+            javascriptConverterAdapter);
 
-    Environment environment = createTestEnvironment();
-    Synchronization synchronization = createTestSynchronization();
-    SourceCodeProject sourceProject = new SourceCodeProject(new File("/tmp/test"));
+    var command = new CommonCommand(ENVIRONMENT_ID, ACTION_USERNAME);
 
-    when(environmentRepository.find(ENV_ID)).thenReturn(Optional.of(environment));
-    when(synchronizationRepository.find(ENV_ID)).thenReturn(Optional.of(synchronization));
-    when(sourceCodePort.cloneRepository(any())).thenReturn(sourceProject);
-    when(fileSynchronizationPort.listFiles(any()))
-        .thenThrow(new RuntimeException("File processing failed"));
+    // When/Then
+    assertThrows(SynchronizationNotFoundException.class, () -> handler.execute(command));
+  }
+
+  @Test
+  void should_handle_typescript_transpilation_error() {
+    // Given
+    var project = sourceCodeAdapter.cloneRepository(SOURCE_CODE_INFO);
+    var fileName = new SynchronizationFileName("test.ts");
+    var fileContent = new SynchronizationFileContent("..." + ERROR_TS);
+    fileSynchronizationAdapter.addFile(project, fileName, fileContent);
+
+    var command = new CommonCommand(ENVIRONMENT_ID, ACTION_USERNAME);
 
     // When
-    commandHandler.execute(command);
+    handler.execute(command);
 
     // Then
-    ArgumentCaptor<EnvironmentSynchronizedEvent> eventCaptor =
-        ArgumentCaptor.forClass(EnvironmentSynchronizedEvent.class);
-    verify(eventPublisher).publishAsync(eventCaptor.capture());
-    verify(synchronizationRepository).update(any());
-
-    EnvironmentSynchronizedEvent capturedEvent = eventCaptor.getValue();
-    assertFalse(capturedEvent.synchronizationErrors().isEmpty());
+    var sync = synchronizationRepository.find(ENVIRONMENT_ID);
+    assertTrue(sync.isPresent());
+    assertEquals(1, sync.get().getErrors().size());
     assertTrue(
-        capturedEvent.synchronizationErrors().stream()
-            .anyMatch(error -> error.error().value().contains("File processing failed")));
+        sync.get().getErrors().getFirst().error().value().contains(ERROR_TYPESCRIPT_TRANSPILATION));
   }
 
-  private Environment createTestEnvironment() {
-    SourceCodeInformation sourceCodeInfo =
-        SourceCodeInformation.builder()
-            .projectId("testProject")
-            .token("testToken")
-            .branch("main")
+  @Test
+  void should_handle_es6_transpilation_error() {
+    // Given
+    var project = sourceCodeAdapter.cloneRepository(SOURCE_CODE_INFO);
+    var fileName = new SynchronizationFileName("test.js");
+    var fileContent = new SynchronizationFileContent("..." + ERROR_ES_6);
+    fileSynchronizationAdapter.addFile(project, fileName, fileContent);
+
+    var command = new CommonCommand(ENVIRONMENT_ID, ACTION_USERNAME);
+
+    // When
+    handler.execute(command);
+
+    // Then
+    var sync = synchronizationRepository.find(ENVIRONMENT_ID);
+    assertTrue(sync.isPresent());
+    assertEquals(1, sync.get().getErrors().size());
+    assertTrue(sync.get().getErrors().getFirst().error().value().contains(ERROR_ES6_TRANSPILATION));
+  }
+
+  @Test
+  void should_process_multiple_files() {
+    // Given
+    var project = sourceCodeAdapter.cloneRepository(SOURCE_CODE_INFO);
+    var jsFile = new SynchronizationFileName("test1.js");
+    var jsContent = new SynchronizationFileContent("...");
+    var tsFile = new SynchronizationFileName("test2.ts");
+    var tsContent = new SynchronizationFileContent("...");
+
+    fileSynchronizationAdapter.addFile(project, jsFile, jsContent);
+    fileSynchronizationAdapter.addFile(project, tsFile, tsContent);
+
+    var command = new CommonCommand(ENVIRONMENT_ID, ACTION_USERNAME);
+
+    // When
+    handler.execute(command);
+
+    // Then
+    var configs = fileConfigurationRepository.findAll(ENVIRONMENT_ID);
+    assertEquals(2, configs.size());
+
+    var sync = synchronizationRepository.find(ENVIRONMENT_ID);
+    assertTrue(sync.isPresent());
+    assertTrue(sync.get().getErrors().isEmpty());
+  }
+
+  private void setupInitialData() {
+    var environment =
+        Environment.builder()
+            .environmentId(ENVIRONMENT_ID)
+            .environmentDescription(ENVIRONMENT_DESCRIPTION)
+            .sourceCodeInformation(SOURCE_CODE_INFO)
+            .auditInfo(AuditInfo.create(ACTION_USERNAME, clock.now()))
+            .maxParallelWorkers(new MaxParallelWorkers(1))
+            .isEnabled(new EnvironmentIsEnabled(true))
+            .variables(new ArrayList<>())
             .build();
 
-    return Environment.builder()
-        .environmentId(ENV_ID)
-        .environmentDescription(new EnvironmentDescription("Test Environment"))
-        .sourceCodeInformation(sourceCodeInfo)
-        .auditInfo(AuditInfo.create(USERNAME, NOW))
-        .maxParallelWorkers(new MaxParallelWorkers(1))
-        .isEnabled(new EnvironmentIsEnabled(true))
-        .variables(new ArrayList<>())
-        .build();
-  }
+    environmentRepository.save(environment);
 
-  private Synchronization createTestSynchronization() {
-    return Synchronization.builder()
-        .environmentId(ENV_ID)
-        .synchronizationIsInProgress(new SynchronizationIsInProgress(false))
-        .auditInfo(AuditInfo.create(USERNAME, NOW))
-        .errors(new ArrayList<>())
-        .build();
-  }
-
-  @Test
-  void execute_CleanupIsCalledEvenOnFailure() {
-    // Given
-    CommonCommand command =
-        CommonCommand.builder().environmentId(ENV_ID).username(USERNAME).build();
-
-    Environment environment = createTestEnvironment();
-    Synchronization synchronization = createTestSynchronization();
-    SourceCodeProject sourceProject = new SourceCodeProject(new File("/tmp/test"));
-
-    when(environmentRepository.find(ENV_ID)).thenReturn(Optional.of(environment));
-    when(synchronizationRepository.find(ENV_ID)).thenReturn(Optional.of(synchronization));
-    when(sourceCodePort.cloneRepository(any())).thenReturn(sourceProject);
-    when(fileSynchronizationPort.listFiles(any())).thenThrow(new RuntimeException("Test error"));
-
-    // When
-    commandHandler.execute(command);
-
-    // Then
-    verify(synchronizationRepository).update(any());
-    verify(eventPublisher).publishAsync(any(EnvironmentSynchronizedEvent.class));
-    // Verify cleanup was called
-    verify(sourceCodePort).cloneRepository(any());
+    var sync = Synchronization.create(ENVIRONMENT_ID, AuditInfo.create(clock.now()));
+    synchronizationRepository.save(sync);
   }
 }

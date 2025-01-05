@@ -14,6 +14,7 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.VariableVa
 import fr.plum.e2e.manager.core.infrastructure.secondary.persistence.jpa.entity.environment.JpaEnvironmentEntity;
 import fr.plum.e2e.manager.core.infrastructure.secondary.persistence.jpa.entity.environment.JpaEnvironmentVariableEntity;
 import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -27,34 +28,30 @@ public final class EnvironmentMapper {
             .token(entity.getToken())
             .branch(entity.getBranch())
             .build();
-    var environment =
-        Environment.builder()
-            .environmentId(new EnvironmentId(entity.getId()))
-            .environmentDescription(new EnvironmentDescription(entity.getDescription()))
-            .sourceCodeInformation(sourceCodeInformation)
-            .isEnabled(new EnvironmentIsEnabled(entity.isEnabled()))
-            .maxParallelWorkers(new MaxParallelWorkers(entity.getMaxParallelTestNumber()))
-            .auditInfo(AuditInfoMapper.toDomain(entity))
-            .build();
 
-    var variables = toVariableDomain(entity);
-    environment.updateVariables(variables);
-    return environment;
+    return Environment.builder()
+        .environmentId(new EnvironmentId(entity.getId()))
+        .environmentDescription(new EnvironmentDescription(entity.getDescription()))
+        .sourceCodeInformation(sourceCodeInformation)
+        .isEnabled(new EnvironmentIsEnabled(entity.isEnabled()))
+        .maxParallelWorkers(new MaxParallelWorkers(entity.getMaxParallelTestNumber()))
+        .auditInfo(AuditInfoMapper.toDomain(entity))
+        .variables(toVariableDomain(entity.getVariables()))
+        .build();
   }
 
-  private static ArrayList<EnvironmentVariable> toVariableDomain(JpaEnvironmentEntity entity) {
+  private static ArrayList<EnvironmentVariable> toVariableDomain(
+      List<JpaEnvironmentVariableEntity> entities) {
     var variables = new ArrayList<EnvironmentVariable>();
-    entity
-        .getVariables()
-        .forEach(
-            varEntity ->
-                variables.add(
-                    EnvironmentVariable.builder()
-                        .environmentVariableId(new EnvironmentVariableId(varEntity.getName()))
-                        .value(new VariableValue(varEntity.getDefaultValue()))
-                        .description(new VariableDescription(varEntity.getDescription()))
-                        .isHidden(new VariableIsHidden(varEntity.isHidden()))
-                        .build()));
+    entities.forEach(
+        varEntity ->
+            variables.add(
+                EnvironmentVariable.builder()
+                    .environmentVariableId(new EnvironmentVariableId(varEntity.getName()))
+                    .value(new VariableValue(varEntity.getDefaultValue()))
+                    .description(new VariableDescription(varEntity.getDescription()))
+                    .isHidden(new VariableIsHidden(varEntity.isHidden()))
+                    .build()));
     return variables;
   }
 
@@ -85,7 +82,7 @@ public final class EnvironmentMapper {
         .name(domain.getId().name())
         .environment(environment)
         .defaultValue(domain.getValue().value())
-        .description(domain.getDescription().value())
+        .description(domain.getDescription() != null ? domain.getDescription().value() : null)
         .isHidden(domain.getIsHidden().value())
         .build();
   }

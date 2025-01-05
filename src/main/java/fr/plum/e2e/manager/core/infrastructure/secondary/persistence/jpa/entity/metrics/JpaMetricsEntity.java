@@ -1,14 +1,13 @@
 package fr.plum.e2e.manager.core.infrastructure.secondary.persistence.jpa.entity.metrics;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.MetricsType;
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import fr.plum.e2e.manager.core.infrastructure.secondary.persistence.jpa.entity.AbstractAuditableEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.time.ZonedDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,7 +20,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "metrics")
-public class JpaMetricsEntity extends PanacheEntityBase {
+public class JpaMetricsEntity extends AbstractAuditableEntity {
 
   @Id private UUID id;
 
@@ -49,7 +48,4 @@ public class JpaMetricsEntity extends PanacheEntityBase {
 
   @Column(name = "pass_percent")
   private Integer passPercent;
-
-  @Column(name = "created_at", nullable = false)
-  private ZonedDateTime createdAt;
 }

@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class InMemorySynchronizationAdapter implements SynchronizationRepositoryPort {
+public class InMemorySynchronizationRepositoryAdapter implements SynchronizationRepositoryPort {
   private final Map<EnvironmentId, Synchronization> synchronizations = new HashMap<>();
 
   @Override

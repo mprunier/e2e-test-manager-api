@@ -13,8 +13,11 @@ public final class AuditInfoMapper {
     return AuditInfo.builder()
         .createdBy(new ActionUsername(entity.getCreatedBy()))
         .createdAt(entity.getCreatedAt())
-        .updatedBy(entity.getUpdatedBy() != null ? new ActionUsername(entity.getUpdatedBy()) : null)
-        .updatedAt(entity.getUpdatedAt())
+        .updatedBy(
+            entity.getUpdatedBy() != null
+                ? new ActionUsername(entity.getUpdatedBy())
+                : new ActionUsername(entity.getCreatedBy()))
+        .updatedAt(entity.getUpdatedAt() != null ? entity.getUpdatedAt() : entity.getCreatedAt())
         .build();
   }
 }

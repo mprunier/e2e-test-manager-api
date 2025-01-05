@@ -14,7 +14,7 @@ import fr.plum.e2e.manager.core.infrastructure.secondary.clock.inmemory.adapter.
 import fr.plum.e2e.manager.core.infrastructure.secondary.messaging.inmemory.adapter.InMemoryEventPublisherAdapter;
 import fr.plum.e2e.manager.core.infrastructure.secondary.persistence.inmemory.adapter.repository.InMemoryEnvironmentRepositoryAdapter;
 import fr.plum.e2e.manager.core.infrastructure.secondary.persistence.inmemory.adapter.repository.InMemorySchedulerConfigurationRepositoryAdapter;
-import fr.plum.e2e.manager.core.infrastructure.secondary.persistence.inmemory.adapter.repository.InMemorySynchronizationAdapter;
+import fr.plum.e2e.manager.core.infrastructure.secondary.persistence.inmemory.adapter.repository.InMemorySynchronizationRepositoryAdapter;
 import fr.plum.e2e.manager.core.infrastructure.secondary.transaction.inmemory.adapter.InMemoryTransactionManagerAdapter;
 import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.ActionUsername;
 import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AuditInfo;
@@ -35,7 +35,7 @@ class CreateEnvironmentCommandHandlerTest {
   private CreateEnvironmentCommandHandler handler;
 
   private InMemoryEnvironmentRepositoryAdapter environmentRepository;
-  private InMemorySynchronizationAdapter synchronizationRepository;
+  private InMemorySynchronizationRepositoryAdapter synchronizationRepository;
   private InMemorySchedulerConfigurationRepositoryAdapter schedulerRepository;
   private InMemoryEventPublisherAdapter eventPublisher;
   private InMemoryClockAdapter clock;
@@ -43,7 +43,7 @@ class CreateEnvironmentCommandHandlerTest {
   @BeforeEach
   void setUp() {
     environmentRepository = new InMemoryEnvironmentRepositoryAdapter();
-    synchronizationRepository = new InMemorySynchronizationAdapter();
+    synchronizationRepository = new InMemorySynchronizationRepositoryAdapter();
     schedulerRepository = new InMemorySchedulerConfigurationRepositoryAdapter();
     eventPublisher = new InMemoryEventPublisherAdapter();
     clock = new InMemoryClockAdapter();

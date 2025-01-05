@@ -11,6 +11,7 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerUnitId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerVariable;
 import fr.plum.e2e.manager.core.domain.port.WorkerUnitPort;
 import fr.plum.e2e.manager.core.infrastructure.secondary.external.gitlab.client.GitlabClient;
+import fr.plum.e2e.manager.sharedkernel.domain.exception.CustomException;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -36,32 +37,58 @@ public class GitlabWorkerUnitAdapter implements WorkerUnitPort {
     var pipelineRequest =
         buildPipelineRequest(environment, workerUnitFilter, workerVariables, workerIsRecordVideo);
 
-    var gitlabResponse =
-        gitlabClient.runPipeline(
-            environment.getSourceCodeInformation().token(),
-            environment.getSourceCodeInformation().projectId(),
-            pipelineRequest);
-    return new WorkerUnitId(gitlabResponse.getId());
+    try {
+      var gitlabResponse =
+          gitlabClient.runPipeline(
+              environment.getSourceCodeInformation().token(),
+              environment.getSourceCodeInformation().projectId(),
+              pipelineRequest);
+      return new WorkerUnitId(gitlabResponse.getId());
+    } catch (CustomException e) {
+      log.error("Error during running pipeline in Gitlab.");
+      throw e;
+    }
   }
 
   @Override
   public WorkerUnitStatus getWorkerStatus(
       SourceCodeInformation sourceCodeInformation, WorkerUnitId workerUnitId) {
-    var job = gitlabJobHandler.getJobId(sourceCodeInformation, workerUnitId);
-    return job.getStatus().toWorkerStatus();
+    try {
+      var job = gitlabJobHandler.getJobId(sourceCodeInformation, workerUnitId);
+      return job.getStatus().toWorkerStatus();
+    } catch (CustomException e) {
+      log.error("Error during getting job status from Gitlab.");
+      throw e;
+    }
   }
 
   @Override
   public Object getWorkerReportArtifacts(
       SourceCodeInformation sourceCodeInformation, WorkerUnitId workerUnitId) {
-    var jobId = gitlabJobHandler.getJobId(sourceCodeInformation, workerUnitId).getId();
-    return gitlabClient.getJobArtifacts(
-        sourceCodeInformation.token(), sourceCodeInformation.projectId(), jobId);
+    String jobId;
+    try {
+      jobId = gitlabJobHandler.getJobId(sourceCodeInformation, workerUnitId).getId();
+    } catch (CustomException e) {
+      log.error("Error during getting job id from Gitlab.");
+      throw e;
+    }
+    try {
+      return gitlabClient.getJobArtifacts(
+          sourceCodeInformation.token(), sourceCodeInformation.projectId(), jobId);
+    } catch (CustomException e) {
+      log.error("Error during getting job artifacts from Gitlab.");
+      throw e;
+    }
   }
 
   @Override
   public void cancel(SourceCodeInformation sourceCodeInformation, WorkerUnitId id) {
-    gitlabClient.cancelPipeline(
-        sourceCodeInformation.token(), sourceCodeInformation.projectId(), id.value());
+    try {
+      gitlabClient.cancelPipeline(
+          sourceCodeInformation.token(), sourceCodeInformation.projectId(), id.value());
+    } catch (CustomException e) {
+      log.error("Error during canceling pipeline in Gitlab.");
+      throw e;
+    }
   }
 }

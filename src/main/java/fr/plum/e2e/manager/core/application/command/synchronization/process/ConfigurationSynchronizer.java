@@ -14,6 +14,7 @@ import fr.plum.e2e.manager.sharedkernel.domain.port.ClockPort;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,15 +59,8 @@ public class ConfigurationSynchronizer {
       List<SynchronizationError> errors) {
 
     var oldConfigurations = fileConfigurationRepositoryPort.findAll(environmentId);
-    var newFileNames =
-        processedFiles.keySet().stream()
-            .map(SynchronizationFileName::value)
-            .collect(Collectors.toSet());
-
-    var toDelete =
-        oldConfigurations.stream()
-            .filter(oldFile -> !newFileNames.contains(oldFile.getId().value()))
-            .collect(Collectors.toList());
+    var newFileNames = extractNewFileNames(processedFiles);
+    var toDelete = findConfigurationsToDelete(oldConfigurations, newFileNames, errors);
 
     var toCreate = new ArrayList<FileConfiguration>();
     var toUpdate = new ArrayList<FileConfiguration>();
@@ -103,6 +97,35 @@ public class ConfigurationSynchronizer {
     }
 
     return new ConfigurationChanges(toDelete, toCreate, toUpdate);
+  }
+
+  private Set<String> extractNewFileNames(
+      Map<SynchronizationFileName, SynchronizationFileContent> processedFiles) {
+    return processedFiles.keySet().stream()
+        .map(SynchronizationFileName::value)
+        .collect(Collectors.toSet());
+  }
+
+  private List<FileConfiguration> findConfigurationsToDelete(
+      List<FileConfiguration> oldConfigurations,
+      Set<String> newFileNames,
+      List<SynchronizationError> errors) {
+
+    return oldConfigurations.stream()
+        .filter(oldFile -> shouldDeleteConfiguration(oldFile, newFileNames, errors))
+        .toList();
+  }
+
+  private boolean shouldDeleteConfiguration(
+      FileConfiguration oldFile, Set<String> newFileNames, List<SynchronizationError> errors) {
+
+    boolean isNotInNewFiles = !newFileNames.contains(oldFile.getId().value());
+    boolean isNotInErrors =
+        errors.stream()
+            .map(error -> error.file().value())
+            .noneMatch(errorFileName -> errorFileName.equals(oldFile.getId().value()));
+
+    return isNotInNewFiles && isNotInErrors;
   }
 
   private FileConfiguration buildConfiguration(

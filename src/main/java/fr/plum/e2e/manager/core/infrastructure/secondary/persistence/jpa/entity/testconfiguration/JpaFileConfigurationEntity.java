@@ -1,6 +1,6 @@
 package fr.plum.e2e.manager.core.infrastructure.secondary.persistence.jpa.entity.testconfiguration;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import fr.plum.e2e.manager.core.infrastructure.secondary.persistence.jpa.entity.AbstractAuditableEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Table(name = "file_configuration")
 @IdClass(JpaFileConfigurationId.class)
-public class JpaFileConfigurationEntity extends PanacheEntityBase {
+public class JpaFileConfigurationEntity extends AbstractAuditableEntity {
 
   @Id
   @Column(name = "file_name")

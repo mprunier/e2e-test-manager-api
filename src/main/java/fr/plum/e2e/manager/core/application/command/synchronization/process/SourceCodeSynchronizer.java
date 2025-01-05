@@ -1,8 +1,8 @@
 package fr.plum.e2e.manager.core.application.command.synchronization.process;
 
+import static fr.plum.e2e.manager.core.domain.constant.BusinessConstant.END_TS_PATH;
 import static fr.plum.e2e.manager.core.domain.constant.BusinessConstant.ERROR_ES6_TRANSPILATION;
 import static fr.plum.e2e.manager.core.domain.constant.BusinessConstant.ERROR_TYPESCRIPT_TRANSPILATION;
-import static fr.plum.e2e.manager.core.infrastructure.secondary.external.cypress.constant.CypressConstant.END_TEST_TS_PATH;
 
 import fr.plum.e2e.manager.core.application.command.synchronization.process.factory.SynchronizationErrorFactory;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.Environment;
@@ -67,7 +67,7 @@ public class SourceCodeSynchronizer {
       SynchronizationFileContent content,
       List<SynchronizationError> errors) {
 
-    if (fileName.value().endsWith(END_TEST_TS_PATH)) {
+    if (fileName.value().endsWith(END_TS_PATH)) {
       try {
         content = javascriptConverterPort.convertTsToJs(fileName, content);
       } catch (Exception e) {

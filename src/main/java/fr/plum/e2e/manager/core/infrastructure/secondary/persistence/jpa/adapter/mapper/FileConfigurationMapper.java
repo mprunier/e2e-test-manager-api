@@ -30,11 +30,12 @@ public final class FileConfigurationMapper {
     return FileConfiguration.builder()
         .fileName(new FileName(entity.getFileName()))
         .environmentId(new EnvironmentId(entity.getEnvironmentId()))
-        .group(new GroupName(entity.getGroupName()))
+        .group(entity.getGroupName() != null ? new GroupName(entity.getGroupName()) : null)
         .suites(
             entity.getSuiteConfigurations().stream()
                 .map(FileConfigurationMapper::toSuiteDomain)
                 .toList())
+        .auditInfo(AuditInfoMapper.toDomain(entity))
         .build();
   }
 
@@ -43,7 +44,7 @@ public final class FileConfigurationMapper {
   }
 
   public static JpaFileConfigurationEntity toEntity(FileConfiguration domain) {
-    var entity =
+    var fileConfiguration =
         JpaFileConfigurationEntity.builder()
             .fileName(domain.getId().value())
             .environmentId(domain.getEnvironmentId().value())
@@ -51,12 +52,14 @@ public final class FileConfigurationMapper {
             .suiteConfigurations(new ArrayList<>())
             .build();
 
+    fileConfiguration.setAuditFields(domain.getAuditInfo());
+
     var suiteEntities =
-        domain.getSuites().stream().map(suite -> toSuiteEntity(suite, entity)).toList();
+        domain.getSuites().stream().map(suite -> toSuiteEntity(suite, fileConfiguration)).toList();
 
-    entity.getSuiteConfigurations().addAll(suiteEntities);
+    fileConfiguration.getSuiteConfigurations().addAll(suiteEntities);
 
-    return entity;
+    return fileConfiguration;
   }
 
   public static SuiteConfiguration toSuiteDomain(JpaSuiteConfigurationEntity entity) {

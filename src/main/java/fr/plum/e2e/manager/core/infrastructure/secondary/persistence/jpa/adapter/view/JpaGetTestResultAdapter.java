@@ -16,6 +16,7 @@ import jakarta.persistence.NoResultException;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -48,7 +49,7 @@ public class JpaGetTestResultAdapter implements GetTestResultPort {
 
     Map<UUID, List<TestResultScreenshotProjection>> screenshotsPerTest = new HashMap<>();
     Map<UUID, UUID> videoPerTest = new HashMap<>();
-    Map<UUID, JpaTestResultEntity> entities = new HashMap<>();
+    Map<UUID, JpaTestResultEntity> entities = new LinkedHashMap<>();
 
     for (Object[] row : query.getResultList()) {
       JpaTestResultEntity entity = (JpaTestResultEntity) row[0];

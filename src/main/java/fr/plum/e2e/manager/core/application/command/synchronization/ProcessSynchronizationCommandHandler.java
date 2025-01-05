@@ -69,9 +69,9 @@ public class ProcessSynchronizationCommandHandler implements CommandHandler<Comm
     var errors = new ArrayList<SynchronizationError>();
     SourceCodeProject sourceCodeProject = null;
 
-    try {
-      var environment = environmentService.getEnvironment(command.environmentId());
+    var environment = environmentService.getEnvironment(command.environmentId());
 
+    try {
       sourceCodeProject = sourceCodeSynchronizer.cloneRepository(environment);
       var processedFiles = sourceCodeSynchronizer.processFiles(sourceCodeProject, errors);
 

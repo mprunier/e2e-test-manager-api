@@ -39,7 +39,7 @@ public class GitlabWebHookHandler {
   }
 
   private void jobHook(GitlabWebHookRequest request) {
-    log.debug(
+    log.trace(
         "Gitlab WebHook - Job Hook received with worker [{}] and status [{}].",
         request.pipelineId(),
         request.status());

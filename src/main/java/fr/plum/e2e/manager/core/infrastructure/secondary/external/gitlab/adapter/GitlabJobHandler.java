@@ -8,13 +8,17 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerUnitId;
 import fr.plum.e2e.manager.core.infrastructure.secondary.external.gitlab.client.GitlabClient;
 import fr.plum.e2e.manager.core.infrastructure.secondary.external.gitlab.domain.response.GitlabResponse;
 import fr.plum.e2e.manager.core.infrastructure.secondary.external.gitlab.exception.MoreOneJobException;
+import fr.plum.e2e.manager.sharedkernel.domain.exception.CustomException;
 import io.quarkus.cache.Cache;
 import io.quarkus.cache.CacheName;
 import jakarta.enterprise.context.ApplicationScoped;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
+@Slf4j
 @ApplicationScoped
 public class GitlabJobHandler {
+
   @RestClient GitlabClient gitlabClient;
 
   @CacheName(CACHE_GITLAB_JOB)
@@ -41,12 +45,19 @@ public class GitlabJobHandler {
 
   private GitlabResponse fetchJobFromGitlab(
       SourceCodeInformation sourceCodeInformation, WorkerUnitId workerUnitId) {
-    var jobs =
-        gitlabClient.getJobs(
-            sourceCodeInformation.token(), sourceCodeInformation.projectId(), workerUnitId.value());
-    if (jobs.size() > 1) {
-      throw new MoreOneJobException(workerUnitId.value());
+    try {
+      var jobs =
+          gitlabClient.getJobs(
+              sourceCodeInformation.token(),
+              sourceCodeInformation.projectId(),
+              workerUnitId.value());
+      if (jobs.size() > 1) {
+        throw new MoreOneJobException(workerUnitId.value());
+      }
+      return jobs.getFirst();
+    } catch (CustomException e) {
+      log.error("Error during fetching job from Gitlab.");
+      throw e;
     }
-    return jobs.getFirst();
   }
 }

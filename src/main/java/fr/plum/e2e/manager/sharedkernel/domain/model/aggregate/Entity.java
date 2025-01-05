@@ -9,7 +9,7 @@ public abstract class Entity<ID> {
   protected ID id;
 
   protected Entity(ID id) {
-    Assert.notNull("Entity ID must not be null for class " + getClass().getSimpleName(), id);
+    Assert.notNull(String.format("Entity ID on class [%s]", getClass().getSimpleName()), id);
     this.id = id;
   }
 }

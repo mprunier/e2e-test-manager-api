@@ -17,4 +17,5 @@ public final class BusinessConstant {
   public static final String ERROR_ES6_TRANSPILATION =
       "Error during the transpilation of JavaScript code to ES6. "
           + "Please ensure that your code is correctly formatted as JavaScript or TypeScript without any errors.";
+  public static final String END_TS_PATH = ".ts";
 }

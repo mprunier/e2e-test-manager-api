@@ -10,7 +10,6 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.vo.SkippedCount;
 import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.vo.SuiteCount;
 import fr.plum.e2e.manager.core.domain.model.aggregate.metrics.vo.TestCount;
 import fr.plum.e2e.manager.core.infrastructure.secondary.persistence.jpa.entity.metrics.JpaMetricsEntity;
-import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AuditInfo;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -18,18 +17,22 @@ import lombok.NoArgsConstructor;
 public final class MetricsMapper {
 
   public static JpaMetricsEntity toEntity(Metrics domain) {
-    return JpaMetricsEntity.builder()
-        .id(domain.getId().value())
-        .environmentId(domain.getEnvironmentId().value())
-        .type(domain.getType())
-        .suites(domain.getSuiteCount().value())
-        .tests(domain.getTestCount().value())
-        .passes(domain.getPassCount().value())
-        .failures(domain.getFailureCount().value())
-        .skipped(domain.getSkippedCount().value())
-        .passPercent(domain.getPassPercentage().value())
-        .createdAt(domain.getAuditInfo().getCreatedAt())
-        .build();
+    var metrics =
+        JpaMetricsEntity.builder()
+            .id(domain.getId().value())
+            .environmentId(domain.getEnvironmentId().value())
+            .type(domain.getType())
+            .suites(domain.getSuiteCount().value())
+            .tests(domain.getTestCount().value())
+            .passes(domain.getPassCount().value())
+            .failures(domain.getFailureCount().value())
+            .skipped(domain.getSkippedCount().value())
+            .passPercent(domain.getPassPercentage().value())
+            .build();
+
+    metrics.setAuditFields(domain.getAuditInfo());
+
+    return metrics;
   }
 
   public static Metrics toDomain(JpaMetricsEntity entity) {
@@ -43,7 +46,7 @@ public final class MetricsMapper {
         .failureCount(new FailureCount(entity.getFailures()))
         .skippedCount(new SkippedCount(entity.getSkipped()))
         .passPercentage(new PassPercentage(entity.getPassPercent()))
-        .auditInfo(AuditInfo.create(entity.getCreatedAt()))
+        .auditInfo(AuditInfoMapper.toDomain(entity))
         .build();
   }
 }

@@ -25,7 +25,6 @@ public class EnvironmentVariable extends Entity<EnvironmentVariableId> {
       VariableIsHidden isHidden) {
     super(environmentVariableId);
     Assert.notNull("value", value);
-    Assert.notNull("description", description);
     Assert.notNull("isHidden", isHidden);
     this.value = value;
     this.description = description;
