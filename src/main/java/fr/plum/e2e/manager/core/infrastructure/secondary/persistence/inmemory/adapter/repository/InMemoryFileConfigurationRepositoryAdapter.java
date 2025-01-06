@@ -1,5 +1,7 @@
 package fr.plum.e2e.manager.core.infrastructure.secondary.persistence.inmemory.adapter.repository;
 
+import static fr.plum.e2e.manager.core.domain.constant.BusinessConstant.NO_GROUP_NAME;
+
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.FileConfiguration;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.FileName;
@@ -30,8 +32,13 @@ public class InMemoryFileConfigurationRepositoryAdapter implements FileConfigura
         .filter(config -> config.getEnvironmentId().equals(environmentId))
         .collect(
             Collectors.groupingBy(
-                FileConfiguration::getGroup,
-                Collectors.mapping(FileConfiguration::getId, Collectors.toList())));
+                entity ->
+                    entity.getGroup() != null
+                        ? new GroupName(entity.getGroup().value())
+                        : new GroupName(NO_GROUP_NAME),
+                Collectors.mapping(
+                    fileConfiguration -> new FileName(fileConfiguration.getId().value()),
+                    Collectors.toList())));
   }
 
   @Override

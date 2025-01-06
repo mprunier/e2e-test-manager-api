@@ -39,11 +39,12 @@ public class ReportWorkerCommandHandler implements CommandHandler<ReportWorkerCo
   private final ClockPort clockPort;
   private final EventPublisherPort eventPublisherPort;
   private final WorkerUnitPort workerUnitPort;
+  private final WorkerExtractorPort workerExtractorPort;
+  private final TransactionManagerPort transactionManagerPort;
+
   private final TestConfigurationRepositoryPort testConfigurationRepositoryPort;
   private final WorkerRepositoryPort workerRepositoryPort;
-  private final WorkerExtractorPort workerExtractorPort;
   private final TestResultRepositoryPort testResultRepositoryPort;
-  private final TransactionManagerPort transactionManagerPort;
 
   private final EnvironmentService environmentService;
 

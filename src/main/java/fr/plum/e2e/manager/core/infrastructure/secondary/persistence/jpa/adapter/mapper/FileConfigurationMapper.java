@@ -1,5 +1,7 @@
 package fr.plum.e2e.manager.core.infrastructure.secondary.persistence.jpa.adapter.mapper;
 
+import static fr.plum.e2e.manager.core.domain.constant.BusinessConstant.NO_GROUP_NAME;
+
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.FileConfiguration;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.SuiteConfiguration;
@@ -130,7 +132,10 @@ public final class FileConfigurationMapper {
     return fileConfigurationEntities.stream()
         .collect(
             Collectors.groupingBy(
-                entity -> new GroupName(entity.getGroupName()),
+                entity ->
+                    entity.getGroupName() != null
+                        ? new GroupName(entity.getGroupName())
+                        : new GroupName(NO_GROUP_NAME),
                 Collectors.mapping(
                     entity -> new FileName(entity.getFileName()), Collectors.toList())));
   }

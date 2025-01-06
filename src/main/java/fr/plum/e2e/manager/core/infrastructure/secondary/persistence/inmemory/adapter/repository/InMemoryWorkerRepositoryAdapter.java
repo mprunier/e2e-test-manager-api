@@ -32,7 +32,6 @@ public class InMemoryWorkerRepositoryAdapter implements WorkerRepositoryPort {
     return workers.values().stream()
         .filter(worker -> worker.getEnvironmentId().equals(environmentId))
         .filter(worker -> worker.getType().equals(workerType))
-        .filter(worker -> !worker.isCompleted())
         .findFirst();
   }
 

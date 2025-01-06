@@ -1,5 +1,7 @@
 package fr.plum.e2e.manager.core.application.command.worker;
 
+import static fr.plum.e2e.manager.core.domain.constant.BusinessConstant.NO_GROUP_NAME;
+
 import fr.plum.e2e.manager.core.application.command.worker.dto.WorkerFiles;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.Environment;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.FileName;
@@ -137,15 +139,15 @@ public class RunWorkerCommandHandler implements CommandHandler<RunWorkerCommand>
 
   private void distributeGroupedFiles(
       Map<GroupName, List<FileName>> fileNamesMapByGroupName, List<WorkerFiles> workers) {
-    fileNamesMapByGroupName
-        .values()
-        .forEach(fileNames -> getSmallestBuildWorker(workers).addAll(fileNames));
+    fileNamesMapByGroupName.entrySet().stream()
+        .filter(entry -> !entry.getKey().equals(new GroupName(NO_GROUP_NAME)))
+        .forEach(entry -> getSmallestBuildWorker(workers).addAll(entry.getValue()));
   }
 
   private void distributeUngroupedFiles(
       Map<GroupName, List<FileName>> fileNamesMapByGroupName, List<WorkerFiles> workers) {
     fileNamesMapByGroupName
-        .get(null)
+        .get(new GroupName(NO_GROUP_NAME))
         .forEach(fileName -> getSmallestBuildWorker(workers).add(fileName));
   }
 

@@ -5,6 +5,7 @@ import fr.plum.e2e.manager.core.domain.model.projection.ConfigurationSuiteProjec
 import fr.plum.e2e.manager.core.domain.model.projection.ConfigurationTestProjection;
 import fr.plum.e2e.manager.core.infrastructure.secondary.persistence.jpa.entity.testconfiguration.JpaSuiteConfigurationEntity;
 import fr.plum.e2e.manager.core.infrastructure.secondary.persistence.jpa.entity.testconfiguration.JpaTestConfigurationEntity;
+import java.util.Comparator;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -19,7 +20,14 @@ public final class SuiteMapper {
         .status(entity.getStatus())
         .variables(entity.getVariables())
         .tags(entity.getTags())
-        .tests(entity.getTestConfigurations().stream().map(SuiteMapper::toTestResponse).toList())
+        .tests(
+            entity.getTestConfigurations().stream()
+                .sorted(
+                    Comparator.comparing(
+                        JpaTestConfigurationEntity::getPosition,
+                        Comparator.nullsLast(Comparator.naturalOrder())))
+                .map(SuiteMapper::toTestResponse)
+                .toList())
         .lastPlayedAt(entity.getLastPlayedAt())
         .hasNewTest(
             entity.getTestConfigurations().stream()

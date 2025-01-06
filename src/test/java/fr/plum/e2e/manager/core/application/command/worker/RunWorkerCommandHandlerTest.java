@@ -1,10 +1,10 @@
 package fr.plum.e2e.manager.core.application.command.worker;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.Environment;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentDescription;
@@ -25,214 +25,339 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.Test
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.TestTitle;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.Worker;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.WorkerType;
-import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerUnitId;
 import fr.plum.e2e.manager.core.domain.model.command.RunWorkerCommand;
 import fr.plum.e2e.manager.core.domain.model.event.WorkerInProgressEvent;
+import fr.plum.e2e.manager.core.domain.model.exception.ConcurrentWorkersReachedException;
+import fr.plum.e2e.manager.core.domain.model.exception.EnvironmentNotFoundException;
+import fr.plum.e2e.manager.core.domain.model.exception.FileNotFoundException;
 import fr.plum.e2e.manager.core.domain.model.exception.WorkerInTypeAllAlreadyInProgressException;
-import fr.plum.e2e.manager.core.domain.port.ConfigurationPort;
-import fr.plum.e2e.manager.core.domain.port.EventPublisherPort;
-import fr.plum.e2e.manager.core.domain.port.WorkerUnitPort;
-import fr.plum.e2e.manager.core.domain.port.repository.EnvironmentRepositoryPort;
-import fr.plum.e2e.manager.core.domain.port.repository.FileConfigurationRepositoryPort;
-import fr.plum.e2e.manager.core.domain.port.repository.WorkerRepositoryPort;
+import fr.plum.e2e.manager.core.infrastructure.secondary.clock.inmemory.adapter.InMemoryClockAdapter;
+import fr.plum.e2e.manager.core.infrastructure.secondary.configuration.inmemory.adapter.InMemoryConfigurationAdapter;
+import fr.plum.e2e.manager.core.infrastructure.secondary.external.inmemory.adapter.InMemoryWorkerUnitAdapter;
+import fr.plum.e2e.manager.core.infrastructure.secondary.messaging.inmemory.adapter.InMemoryEventPublisherAdapter;
+import fr.plum.e2e.manager.core.infrastructure.secondary.persistence.inmemory.adapter.repository.InMemoryEnvironmentRepositoryAdapter;
+import fr.plum.e2e.manager.core.infrastructure.secondary.persistence.inmemory.adapter.repository.InMemoryFileConfigurationRepositoryAdapter;
+import fr.plum.e2e.manager.core.infrastructure.secondary.persistence.inmemory.adapter.repository.InMemoryWorkerRepositoryAdapter;
 import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.ActionUsername;
 import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AuditInfo;
-import fr.plum.e2e.manager.sharedkernel.domain.port.ClockPort;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-@ExtendWith(MockitoExtension.class)
 class RunWorkerCommandHandlerTest {
 
-  @Mock private ClockPort clockPort;
-  @Mock private EventPublisherPort eventPublisher;
-  @Mock private WorkerUnitPort workerUnitPort;
-  @Mock private EnvironmentRepositoryPort environmentRepository;
-  @Mock private FileConfigurationRepositoryPort fileConfigurationRepository;
-  @Mock private WorkerRepositoryPort workerRepository;
-  @Mock private ConfigurationPort configurationPort;
+  private static final EnvironmentId ENVIRONMENT_ID = new EnvironmentId(UUID.randomUUID());
+  private static final EnvironmentId OTHER_ENVIRONMENT_ID = new EnvironmentId(UUID.randomUUID());
+  private static final ActionUsername ACTION_USERNAME = new ActionUsername("Test User");
+  private static final EnvironmentDescription ENVIRONMENT_DESCRIPTION =
+      new EnvironmentDescription("Test Environment");
+  private static final SourceCodeInformation SOURCE_CODE_INFO =
+      SourceCodeInformation.builder()
+          .projectId("project1")
+          .branch("main")
+          .token("token123")
+          .build();
+  public static final MaxParallelWorkers MAX_PARALLEL_WORKERS = new MaxParallelWorkers(2);
 
-  private RunWorkerCommandHandler commandHandler;
-
-  private final ZonedDateTime NOW = ZonedDateTime.now();
-  private final EnvironmentId ENV_ID = EnvironmentId.generate();
-  private final ActionUsername USERNAME = new ActionUsername("testUser");
+  private RunWorkerCommandHandler handler;
+  private InMemoryWorkerRepositoryAdapter workerRepository;
+  private InMemoryFileConfigurationRepositoryAdapter fileConfigurationRepository;
+  private InMemoryEnvironmentRepositoryAdapter environmentRepository;
+  private InMemoryWorkerUnitAdapter workerUnitAdapter;
+  private InMemoryEventPublisherAdapter eventPublisher;
+  private InMemoryClockAdapter clock;
+  private InMemoryConfigurationAdapter configuration;
 
   @BeforeEach
   void setUp() {
-    commandHandler =
+    workerRepository = new InMemoryWorkerRepositoryAdapter();
+    fileConfigurationRepository = new InMemoryFileConfigurationRepositoryAdapter();
+    environmentRepository = new InMemoryEnvironmentRepositoryAdapter();
+    workerUnitAdapter = new InMemoryWorkerUnitAdapter();
+    eventPublisher = new InMemoryEventPublisherAdapter();
+    clock = new InMemoryClockAdapter();
+    configuration = new InMemoryConfigurationAdapter();
+
+    handler =
         new RunWorkerCommandHandler(
-            clockPort,
+            clock,
             eventPublisher,
-            workerUnitPort,
+            workerUnitAdapter,
             environmentRepository,
             fileConfigurationRepository,
             workerRepository,
-            configurationPort);
+            configuration);
+
+    setupEnvironmentData();
   }
 
   @Test
-  void execute_SingleWorker_Success() {
+  void should_run_single_worker_for_file() {
     // Given
-    RunWorkerCommand command =
-        RunWorkerCommand.builder()
-            .environmentId(ENV_ID)
-            .username(USERNAME)
-            .fileName(new FileName("test.spec.js"))
-            .build();
+    var fileName = new FileName("test.spec.js");
+    var fileConfig = setUpFileConfiguration(fileName, null);
+    fileConfigurationRepository.save(List.of(fileConfig));
 
-    Environment environment = createTestEnvironment(1);
-    when(environmentRepository.find(ENV_ID)).thenReturn(Optional.of(environment));
-    when(clockPort.now()).thenReturn(NOW);
-    when(workerUnitPort.runWorker(any(), any(), any(), any()))
-        .thenReturn(new WorkerUnitId("worker-1"));
-    when(configurationPort.getMaxJobInParallel()).thenReturn(5);
+    var command =
+        RunWorkerCommand.builder()
+            .environmentId(ENVIRONMENT_ID)
+            .username(ACTION_USERNAME)
+            .fileName(fileName)
+            .variables(Collections.emptyList())
+            .build();
 
     // When
-    commandHandler.execute(command);
+    handler.execute(command);
 
     // Then
-    verify(workerRepository).save(any(Worker.class));
-    verify(eventPublisher).publishAsync(any(WorkerInProgressEvent.class));
+    var executions = workerUnitAdapter.getExecutions();
+    assertEquals(1, executions.size());
+    var execution = executions.getFirst();
+    assertEquals(List.of(fileName), execution.workerUnitFilter().fileNames());
+    assertFalse(execution.workerIsRecordVideo().value());
+
+    var events = eventPublisher.getPublishedEvents();
+    assertEquals(1, events.size());
+    var event = (WorkerInProgressEvent) events.getFirst();
+    assertEquals(ENVIRONMENT_ID, event.environmentId());
+    assertEquals(ACTION_USERNAME, event.username());
   }
 
   @Test
-  void execute_ParallelWorkers_Success() {
+  void should_run_single_worker_for_suite() {
     // Given
-    RunWorkerCommand command =
-        RunWorkerCommand.builder().environmentId(ENV_ID).username(USERNAME).build();
-
-    Environment environment = createTestEnvironment(3);
-    Map<GroupName, List<FileName>> fileMap = new HashMap<>();
-    fileMap.put(new GroupName("group1"), List.of(new FileName("test1.spec.js")));
-    fileMap.put(new GroupName("group2"), List.of(new FileName("test2.spec.js")));
-    fileMap.put(null, Collections.emptyList());
-
-    when(environmentRepository.find(ENV_ID)).thenReturn(Optional.of(environment));
-    when(fileConfigurationRepository.findAllFileNamesMapByGroupName(ENV_ID)).thenReturn(fileMap);
-    when(workerUnitPort.runWorker(any(), any(), any(), any()))
-        .thenReturn(new WorkerUnitId("worker-1"));
-    when(clockPort.now()).thenReturn(NOW);
-    when(workerRepository.assertNotWorkerInProgressByType(any(), any()))
-        .thenReturn(Optional.empty());
-    when(configurationPort.getMaxJobInParallel()).thenReturn(5);
-
-    // When
-    commandHandler.execute(command);
-
-    // Then
-    verify(workerRepository).save(any(Worker.class));
-    verify(eventPublisher).publishAsync(any(WorkerInProgressEvent.class));
-  }
-
-  @Test
-  void execute_WorkerTypeAll_AlreadyInProgress_ThrowsException() {
-    // Given
-    RunWorkerCommand command =
-        RunWorkerCommand.builder().environmentId(ENV_ID).username(USERNAME).build();
-
-    Worker existingWorker =
-        Worker.create(
-            ENV_ID,
-            AuditInfo.create(new ActionUsername("username"), ZonedDateTime.now()),
-            WorkerType.ALL,
-            new ArrayList<>());
-    when(workerRepository.assertNotWorkerInProgressByType(ENV_ID, WorkerType.ALL))
-        .thenReturn(Optional.of(existingWorker));
-
-    // Then
-    assertThrows(
-        WorkerInTypeAllAlreadyInProgressException.class,
-        () -> {
-          commandHandler.execute(command);
-        });
-  }
-
-  @Test
-  void execute_WithTestFilter_Success() {
-    // Given
-    TestConfigurationId testId = TestConfigurationId.generate();
-    RunWorkerCommand command =
-        RunWorkerCommand.builder()
-            .environmentId(ENV_ID)
-            .username(USERNAME)
-            .testConfigurationId(testId)
-            .build();
-
-    Environment environment = createTestEnvironment(1);
-    when(environmentRepository.find(ENV_ID)).thenReturn(Optional.of(environment));
-    when(workerUnitPort.runWorker(any(), any(), any(), any()))
-        .thenReturn(new WorkerUnitId("worker-1"));
-    when(clockPort.now()).thenReturn(NOW);
-    when(configurationPort.getMaxJobInParallel()).thenReturn(5);
-
-    var testConfiguration =
-        TestConfiguration.builder()
-            .testConfigurationId(testId)
-            .title(new TestTitle("title 1"))
-            .position(new Position(1))
-            .status(ConfigurationStatus.IN_PROGRESS)
-            .variables(new ArrayList<>())
-            .tags(new ArrayList<>())
-            .build();
-    var suiteConfiguration =
-        SuiteConfiguration.builder()
-            .suiteConfigurationId(SuiteConfigurationId.generate())
-            .title(new SuiteTitle("suite 1"))
-            .tests(List.of(testConfiguration))
-            .status(ConfigurationStatus.IN_PROGRESS)
-            .tags(new ArrayList<>())
-            .variables(new ArrayList<>())
-            .build();
-    FileConfiguration fileConfiguration =
+    var suiteId = SuiteConfigurationId.generate();
+    var suiteTitle = new SuiteTitle("Suite Title");
+    var fileName = new FileName("test.spec.js");
+    var fileConfig =
         FileConfiguration.builder()
-            .fileName(new FileName("test.spec.js"))
-            .suites(List.of(suiteConfiguration))
-            .environmentId(ENV_ID)
-            .auditInfo(AuditInfo.create(USERNAME, NOW))
-            .group(new GroupName("group1"))
+            .fileName(fileName)
+            .environmentId(ENVIRONMENT_ID)
+            .auditInfo(AuditInfo.create(ACTION_USERNAME, clock.now()))
+            .suites(
+                List.of(
+                    setUpSuiteConfiguration(
+                        suiteId,
+                        suiteTitle,
+                        setUpTestConfiguration(
+                            TestConfigurationId.generate(), new TestTitle("Test Title")))))
             .build();
-    when(fileConfigurationRepository.find(ENV_ID, testId))
-        .thenReturn(Optional.of(fileConfiguration));
+    fileConfigurationRepository.save(List.of(fileConfig));
+
+    var command =
+        RunWorkerCommand.builder()
+            .environmentId(ENVIRONMENT_ID)
+            .username(ACTION_USERNAME)
+            .suiteConfigurationId(suiteId)
+            .variables(Collections.emptyList())
+            .build();
 
     // When
-    commandHandler.execute(command);
+    handler.execute(command);
 
     // Then
-    ArgumentCaptor<Worker> workerCaptor = ArgumentCaptor.forClass(Worker.class);
-    verify(workerRepository).save(workerCaptor.capture());
-
-    Worker savedWorker = workerCaptor.getValue();
-    assertEquals(WorkerType.TEST, savedWorker.getType());
-    assertEquals(ENV_ID, savedWorker.getEnvironmentId());
+    var executions = workerUnitAdapter.getExecutions();
+    assertEquals(1, executions.size());
+    var execution = executions.getFirst();
+    assertEquals(List.of(fileName), execution.workerUnitFilter().fileNames());
+    assertNotNull(execution.workerUnitFilter().suiteFilter());
+    assertEquals(suiteId, execution.workerUnitFilter().suiteFilter().suiteConfigurationId());
+    assertEquals(suiteTitle, execution.workerUnitFilter().suiteFilter().suiteTitle());
+    assertFalse(execution.workerIsRecordVideo().value());
   }
 
-  private Environment createTestEnvironment(int maxParallelWorkers) {
-    SourceCodeInformation sourceCodeInfo =
-        SourceCodeInformation.builder()
-            .projectId("testProject")
-            .token("testToken")
-            .branch("main")
+  @Test
+  void should_run_single_worker_for_test() {
+    // Given
+
+    var testId = TestConfigurationId.generate();
+    var testTitle = new TestTitle("Test Case");
+    var fileName = new FileName("test.spec.js");
+    var fileConfig =
+        FileConfiguration.builder()
+            .fileName(fileName)
+            .environmentId(ENVIRONMENT_ID)
+            .auditInfo(AuditInfo.create(ACTION_USERNAME, clock.now()))
+            .suites(
+                List.of(
+                    setUpSuiteConfiguration(
+                        SuiteConfigurationId.generate(),
+                        new SuiteTitle("Suite"),
+                        setUpTestConfiguration(testId, testTitle))))
+            .build();
+    fileConfigurationRepository.save(List.of(fileConfig));
+
+    var command =
+        RunWorkerCommand.builder()
+            .environmentId(ENVIRONMENT_ID)
+            .username(ACTION_USERNAME)
+            .testConfigurationId(testId)
             .build();
 
-    return Environment.builder()
-        .environmentId(ENV_ID)
-        .environmentDescription(new EnvironmentDescription("Test Environment"))
-        .sourceCodeInformation(sourceCodeInfo)
-        .maxParallelWorkers(new MaxParallelWorkers(maxParallelWorkers))
-        .auditInfo(AuditInfo.create(USERNAME, NOW))
-        .isEnabled(new EnvironmentIsEnabled(true))
+    // When
+    handler.execute(command);
+
+    // Then
+    var executions = workerUnitAdapter.getExecutions();
+    assertEquals(1, executions.size());
+    var execution = executions.getFirst();
+    assertEquals(List.of(fileName), execution.workerUnitFilter().fileNames());
+    assertNotNull(execution.workerUnitFilter().testFilter());
+    assertEquals(testId, execution.workerUnitFilter().testFilter().testConfigurationId());
+    assertEquals(testTitle, execution.workerUnitFilter().testFilter().testTitle());
+    assertTrue(execution.workerIsRecordVideo().value());
+  }
+
+  @Test
+  void should_run_parallel_workers_when_max_parallel_greater_than_one() {
+    // Given
+    var fileName1 = new FileName("test1.spec.js");
+    var fileName2 = new FileName("test2.spec.js");
+    var fileName3 = new FileName("test3.spec.js");
+
+    var fileConfigs =
+        List.of(
+            setUpFileConfiguration(fileName1, new GroupName("group1")),
+            setUpFileConfiguration(fileName2, new GroupName("group1")),
+            setUpFileConfiguration(fileName3, null));
+    fileConfigurationRepository.save(fileConfigs);
+
+    var command =
+        RunWorkerCommand.builder().environmentId(ENVIRONMENT_ID).username(ACTION_USERNAME).build();
+
+    // When
+    handler.execute(command);
+
+    // Then
+    var executions = workerUnitAdapter.getExecutions();
+    assertTrue(executions.size() > 1);
+
+    var allFiles =
+        executions.stream().flatMap(exec -> exec.workerUnitFilter().fileNames().stream()).toList();
+    assertTrue(allFiles.containsAll(List.of(fileName1, fileName2, fileName3)));
+
+    executions.stream()
+        .filter(exec -> exec.workerUnitFilter().fileNames().contains(fileName1))
+        .forEach(exec -> assertTrue(exec.workerUnitFilter().fileNames().contains(fileName2)));
+
+    assertTrue(executions.stream().noneMatch(exec -> exec.workerIsRecordVideo().value()));
+  }
+
+  @Test
+  void should_throw_exception_when_max_concurrent_workers_reached() {
+    // Given
+    configuration.updateMaxJobInParallel(1);
+    workerRepository.save(
+        Worker.create(
+            ENVIRONMENT_ID,
+            AuditInfo.create(ACTION_USERNAME, clock.now()),
+            WorkerType.FILE,
+            Collections.emptyList()));
+
+    var command =
+        RunWorkerCommand.builder().environmentId(ENVIRONMENT_ID).username(ACTION_USERNAME).build();
+
+    // When & Then
+    assertThrows(ConcurrentWorkersReachedException.class, () -> handler.execute(command));
+  }
+
+  @Test
+  void should_throw_exception_when_all_type_worker_already_in_progress() {
+    // Given
+    workerRepository.save(
+        Worker.create(
+            ENVIRONMENT_ID,
+            AuditInfo.create(ACTION_USERNAME, clock.now()),
+            WorkerType.ALL,
+            Collections.emptyList()));
+
+    var command =
+        RunWorkerCommand.builder().environmentId(ENVIRONMENT_ID).username(ACTION_USERNAME).build();
+
+    // When & Then
+    assertThrows(WorkerInTypeAllAlreadyInProgressException.class, () -> handler.execute(command));
+  }
+
+  @Test
+  void should_throw_exception_when_environment_not_found() {
+    // Given
+    var command =
+        RunWorkerCommand.builder()
+            .environmentId(OTHER_ENVIRONMENT_ID)
+            .username(ACTION_USERNAME)
+            .build();
+
+    // When & Then
+    assertThrows(EnvironmentNotFoundException.class, () -> handler.execute(command));
+  }
+
+  @Test
+  void should_throw_exception_when_file_not_found() {
+    // Given
+    var command =
+        RunWorkerCommand.builder()
+            .environmentId(ENVIRONMENT_ID)
+            .username(ACTION_USERNAME)
+            .suiteConfigurationId(new SuiteConfigurationId(UUID.randomUUID()))
+            .build();
+
+    // When & Then
+    assertThrows(FileNotFoundException.class, () -> handler.execute(command));
+  }
+
+  private void setupEnvironmentData() {
+    var environment =
+        Environment.builder()
+            .environmentId(ENVIRONMENT_ID)
+            .environmentDescription(ENVIRONMENT_DESCRIPTION)
+            .sourceCodeInformation(SOURCE_CODE_INFO)
+            .auditInfo(AuditInfo.create(ACTION_USERNAME, clock.now()))
+            .maxParallelWorkers(MAX_PARALLEL_WORKERS)
+            .isEnabled(new EnvironmentIsEnabled(true))
+            .variables(new ArrayList<>())
+            .build();
+
+    environmentRepository.save(environment);
+  }
+
+  private FileConfiguration setUpFileConfiguration(FileName fileName1, GroupName groupName) {
+    return FileConfiguration.builder()
+        .fileName(fileName1)
+        .environmentId(ENVIRONMENT_ID)
+        .group(groupName)
+        .auditInfo(AuditInfo.create(ACTION_USERNAME, clock.now()))
+        .suites(
+            List.of(
+                setUpSuiteConfiguration(
+                    SuiteConfigurationId.generate(),
+                    new SuiteTitle("Suite"),
+                    setUpTestConfiguration(TestConfigurationId.generate(), new TestTitle("Test")))))
+        .build();
+  }
+
+  private static SuiteConfiguration setUpSuiteConfiguration(
+      SuiteConfigurationId suiteConfigurationId, SuiteTitle suiteTitle, TestConfiguration test) {
+    return SuiteConfiguration.builder()
+        .suiteConfigurationId(suiteConfigurationId)
+        .title(suiteTitle)
+        .status(ConfigurationStatus.defaultStatus())
+        .tags(new ArrayList<>())
+        .variables(new ArrayList<>())
+        .tests(List.of(test))
+        .build();
+  }
+
+  private static TestConfiguration setUpTestConfiguration(
+      TestConfigurationId testConfigurationId, TestTitle title) {
+    return TestConfiguration.builder()
+        .testConfigurationId(testConfigurationId)
+        .title(title)
+        .position(new Position(1))
+        .status(ConfigurationStatus.defaultStatus())
+        .tags(new ArrayList<>())
         .variables(new ArrayList<>())
         .build();
   }
