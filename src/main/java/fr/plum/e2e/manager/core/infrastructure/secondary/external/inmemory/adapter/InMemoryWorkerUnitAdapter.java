@@ -9,11 +9,16 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerUnitId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerVariable;
 import fr.plum.e2e.manager.core.domain.port.WorkerUnitPort;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import lombok.Getter;
 
 public class InMemoryWorkerUnitAdapter implements WorkerUnitPort {
-  
-  private final List<WorkerExecution> executions = new ArrayList<>();
+
+  @Getter private final List<WorkerExecution> executions = new ArrayList<>();
+  private final Map<WorkerUnitId, WorkerUnitStatus> statuses = new HashMap<>();
+  private final Map<WorkerUnitId, Object> reportArtifacts = new HashMap<>();
 
   @Override
   public WorkerUnitId runWorker(
@@ -24,28 +29,36 @@ public class InMemoryWorkerUnitAdapter implements WorkerUnitPort {
     var execution =
         new WorkerExecution(environment, workerUnitFilter, workerVariables, workerIsRecordVideo);
     executions.add(execution);
-    return new WorkerUnitId("worker-" + executions.size());
+    var id = new WorkerUnitId("worker-" + executions.size());
+    statuses.put(id, WorkerUnitStatus.IN_PROGRESS);
+    return id;
   }
 
   @Override
   public WorkerUnitStatus getWorkerStatus(
       SourceCodeInformation sourceCodeInformation, WorkerUnitId workerUnitId) {
-    return null;
+    return statuses.getOrDefault(workerUnitId, WorkerUnitStatus.IN_PROGRESS);
   }
 
   @Override
   public Object getWorkerReportArtifacts(
       SourceCodeInformation sourceCodeInformation, WorkerUnitId workerUnitId) {
-    return null;
+    return reportArtifacts.get(workerUnitId);
   }
 
   @Override
   public void cancel(SourceCodeInformation sourceCodeInformation, WorkerUnitId id) {
-    // No-op for tests
+    statuses.put(id, WorkerUnitStatus.CANCELED);
   }
 
-  public List<WorkerExecution> getExecutions() {
-    return executions;
+  public void setWorkerStatus(WorkerUnitId id, WorkerUnitStatus status) {
+    statuses.put(id, status);
+  }
+
+  public void clear() {
+    executions.clear();
+    statuses.clear();
+    reportArtifacts.clear();
   }
 
   public record WorkerExecution(

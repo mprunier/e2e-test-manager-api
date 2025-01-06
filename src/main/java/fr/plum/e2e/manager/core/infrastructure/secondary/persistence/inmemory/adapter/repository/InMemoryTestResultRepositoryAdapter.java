@@ -3,29 +3,29 @@ package fr.plum.e2e.manager.core.infrastructure.secondary.persistence.inmemory.a
 import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.TestResult;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerId;
 import fr.plum.e2e.manager.core.domain.port.repository.TestResultRepositoryPort;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public class InMemoryTestResultRepositoryAdapter implements TestResultRepositoryPort {
-  private static final Map<String, TestResult> testResults = new HashMap<>();
+  private final List<TestResult> results = new ArrayList<>();
 
   @Override
-  public void saveAll(List<TestResult> results) {
-    results.forEach(result -> testResults.put(result.getId().value().toString(), result));
+  public void saveAll(List<TestResult> testResults) {
+    results.addAll(testResults);
   }
 
   @Override
   public void clearAllWorkerId(WorkerId id) {
-    testResults.values().removeIf(result -> result.getWorkerId().equals(id));
+    // No-op for tests
   }
 
   @Override
   public void updateParentsConfigurationStatus(WorkerId workerId) {
-    // Done by infrastructure
+    // No-op for tests
   }
 
-  public static Map<String, TestResult> findAll() {
-    return testResults;
+  public List<TestResult> getResults() {
+    return Collections.unmodifiableList(results);
   }
 }
