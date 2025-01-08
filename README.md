@@ -1,25 +1,35 @@
 # E2E Test Manager
 
-A comprehensive end-to-end (E2E) test management application that integrates with Cypress and GitLab CI. It provides an intuitive user interface to organize, execute, and monitor E2E tests efficiently.
+E2E Test Manager est une application conçue pour orchestrer l'execution de tests E2E.
+Elle permet de centraliser les tests, de gérer les environnements, d'exécuter des tests individuels ou groupés, de planifier des tests, de visualiser des tableaux de bord en temps réel et de consulter l'historique des exécutions.
 
-## 🎯 Features
+## 👁️ Aperçu
 
-- Intuitive UI for test management
-- Test environments management
-- Individual or grouped test execution
-- Parallel execution support
-- Test scheduling with integrated calendar
-- Real-time dashboards and metrics
-- Detailed execution history
-- Native GitLab integration
+TODO : Add video
+
+## Compatibilité des outils
+
+| **E2E Test Tool** | **Disponible** |
+|-------------------|----------------|
+| Cypress           | ✅              |
+| Playwright        | ❌              |
+| Selenium          | ❌              |
+
+| **CI/CD Tool** | **Disponible** |
+|----------------|----------------|
+| GitLab         | ✅              |
+| GitHub         | ❌              |
+| Jenkins        | ❌              |
+
+L'architecture du projet a été faite de sorte à normalement pouvoir facilement implémenter les autres outils de tests E2E et CI/CD.
 
 ## 🔧 Prerequisites
 
-- JDK 17+
-- Maven
+- Docker
 - PostgreSQL
-- GitLab instance with API access
-- Cypress project (see configuration below)
+- OIDC Provider like Keycloak
+- Ton projet de test e2e sur un repo git.
+- Un outil de CI/CD permettant de lancer des pipelines et une API KEY pour l'utiliser.
 
 ## ⚙️ Setup
 
@@ -165,15 +175,4 @@ describe('Suite Example', { tags: ['@smoke', '@priority-1'] }, () => {
 
 The application will be available at `http://localhost:60000`
 
-## 📄 License
-
-This project is licensed under the GNU Affero General Public License with additional terms - see the [LICENSE.md](LICENSE.md) file for details.
-
-The AGPL license ensures that:
-
-- The software remains free and open source
-- Modifications must be shared with the community
-- Users have access to the source code
-- Original developers retain commercial support rights
-
-For commercial support or development services, please contact maxprunier@gmail.com
+## ❗Troobleshooting
