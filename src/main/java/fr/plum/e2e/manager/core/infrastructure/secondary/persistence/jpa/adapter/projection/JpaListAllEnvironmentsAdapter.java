@@ -1,4 +1,4 @@
-package fr.plum.e2e.manager.core.infrastructure.secondary.persistence.jpa.adapter.view;
+package fr.plum.e2e.manager.core.infrastructure.secondary.persistence.jpa.adapter.projection;
 
 import fr.plum.e2e.manager.core.domain.model.projection.EnvironmentProjection;
 import fr.plum.e2e.manager.core.domain.port.view.ListAllEnvironmentsPort;

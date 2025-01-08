@@ -15,6 +15,7 @@ public class JTATransactionManagerAdapter implements TransactionManagerPort {
 
   @Inject UserTransaction userTransaction;
 
+  // Keep Inject
   @Inject TransactionSynchronizationRegistry syncRegistry;
 
   @Override

@@ -37,13 +37,11 @@ public class JpaSuiteConfigurationEntity extends PanacheEntityBase {
   @Column(name = "title", nullable = false)
   private String title;
 
+  // Status update in SQL script after test result creation (JpaTestResultRepositoryAdapter)
   @Builder.Default
   @Enumerated(EnumType.STRING)
   @Column(name = "status", nullable = false)
-  private ConfigurationStatus status =
-      ConfigurationStatus.NEW; // Status update in SQL script after test result creation
-
-  // (JpaTestResultRepositoryAdapter)
+  private ConfigurationStatus status = ConfigurationStatus.NEW;
 
   @ManyToOne
   @JoinColumns({
@@ -63,8 +61,7 @@ public class JpaSuiteConfigurationEntity extends PanacheEntityBase {
   @Column(name = "variables", columnDefinition = "_varchar")
   private List<String> variables;
 
+  // Last Played At update in SQL script after test result creation (JpaTestResultRepositoryAdapter)
   @Column(name = "last_played_at")
-  private ZonedDateTime
-      lastPlayedAt; // Last Played At update in SQL script after test result creation
-  // (JpaTestResultRepositoryAdapter)
+  private ZonedDateTime lastPlayedAt;
 }

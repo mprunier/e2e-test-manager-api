@@ -1,4 +1,4 @@
-package fr.plum.e2e.manager.core.infrastructure.secondary.persistence.jpa.adapter.view;
+package fr.plum.e2e.manager.core.infrastructure.secondary.persistence.jpa.adapter.projection;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.ConfigurationStatus;
@@ -32,13 +32,40 @@ public class JpaSearchSuiteConfigurationAdapter implements SearchSuiteConfigurat
   public PaginatedProjection<ConfigurationSuiteProjection> search(
       SearchSuiteConfigurationQuery query) {
 
+    var queryComponents = buildQueryComponents(query);
+
+    var results = executeMainQuery(queryComponents.queryStr(), queryComponents.params(), query);
+    var content = results.stream().map(SuiteMapper::toSuiteResponse).toList();
+
+    long totalItems =
+        executeCountQuery(buildCountQuery(queryComponents.queryStr()), queryComponents.params());
+
+    return new PaginatedProjection<>(
+        content,
+        query.page(),
+        (int) Math.ceil((double) totalItems / query.size()),
+        query.size(),
+        totalItems);
+  }
+
+  private record QueryComponents(StringBuilder queryStr, Map<String, Object> params) {}
+
+  private QueryComponents buildQueryComponents(SearchSuiteConfigurationQuery query) {
     StringBuilder queryStr =
         new StringBuilder(
-            "SELECT DISTINCT s FROM JpaSuiteConfigurationEntity s "
-                + "WHERE s.fileConfiguration.environmentId = :environmentId");
+            "SELECT DISTINCT s FROM JpaSuiteConfigurationEntity s WHERE s.fileConfiguration.environmentId = :environmentId");
 
     Map<String, Object> params = new HashMap<>();
     params.put("environmentId", query.environmentId().value());
+
+    addFilterConditions(queryStr, params, query);
+    addOrderByClause(queryStr, query);
+
+    return new QueryComponents(queryStr, params);
+  }
+
+  private void addFilterConditions(
+          StringBuilder queryStr, Map<String, Object> params, SearchSuiteConfigurationQuery query) {
 
     if (query.suiteConfigurationId() != null) {
       queryStr.append(" AND s.id = :suiteId");
@@ -50,16 +77,15 @@ public class JpaSearchSuiteConfigurationAdapter implements SearchSuiteConfigurat
       params.put("testId", query.testConfigurationId().value());
     }
 
-    //    if (query.tag() != null) { TODO
-    //      var tagIds = findIdsWithTag(query.tag().value());
-    //      if (tagIds != null && !tagIds.isEmpty()) {
-    //        queryStr.append(" AND s.id IN :tagIds");
-    //        params.put("tagIds", tagIds);
-    //      }
-    //    }
+    if (query.tag() != null) {
+      var tagIds = findIdsWithTag(query.tag().value(), query.environmentId().value());
+      queryStr.append(" AND (s.id IN :tagIds OR s.fileConfiguration.groupName = :tag)");
+      params.put("tagIds", tagIds);
+      params.put("tag", query.tag().value());
+    }
 
     if (query.fileName() != null) {
-      queryStr.append(" AND s.fileConfiguration.value = :value");
+      queryStr.append(" AND s.fileConfiguration.fileName = :value");
       params.put("value", query.fileName().value());
     }
 
@@ -72,8 +98,10 @@ public class JpaSearchSuiteConfigurationAdapter implements SearchSuiteConfigurat
       queryStr.append(" AND s.status != :successStatus");
       params.put("successStatus", ConfigurationStatus.SUCCESS);
     }
+  }
 
-    String orderByClause =
+  private void addOrderByClause(StringBuilder queryStr, SearchSuiteConfigurationQuery query) {
+    String orderByField =
         switch (query.sortField()) {
           case "file" -> "s.fileConfiguration.fileName";
           case "lastPlayedAt" -> "s.lastPlayedAt";
@@ -84,59 +112,48 @@ public class JpaSearchSuiteConfigurationAdapter implements SearchSuiteConfigurat
 
     queryStr
         .append(" ORDER BY ")
-        .append(orderByClause)
+        .append(orderByField)
         .append(" ")
         .append("asc".equalsIgnoreCase(query.sortOrder()) ? "ASC" : "DESC");
+  }
 
-    TypedQuery<JpaSuiteConfigurationEntity> queryTyped =
+  private String buildCountQuery(StringBuilder baseQuery) {
+    return "SELECT COUNT(DISTINCT s.id) "
+        + baseQuery.substring(baseQuery.indexOf("FROM"), baseQuery.indexOf("ORDER BY"));
+  }
+
+  private List<JpaSuiteConfigurationEntity> executeMainQuery(
+      StringBuilder queryStr, Map<String, Object> params, SearchSuiteConfigurationQuery query) {
+    TypedQuery<JpaSuiteConfigurationEntity> typedQuery =
         entityManager.createQuery(queryStr.toString(), JpaSuiteConfigurationEntity.class);
 
-    params.forEach(queryTyped::setParameter);
+    params.forEach(typedQuery::setParameter);
+    typedQuery.setFirstResult(query.page() * query.size());
+    typedQuery.setMaxResults(query.size());
 
-    int pageSize = query.size();
-    int pageNumber = query.page();
+    return typedQuery.getResultList();
+  }
 
-    queryTyped.setFirstResult(pageNumber * pageSize);
-    queryTyped.setMaxResults(pageSize);
-
-    List<JpaSuiteConfigurationEntity> results = queryTyped.getResultList();
-
-    List<ConfigurationSuiteProjection> content =
-        results.stream().map(SuiteMapper::toSuiteResponse).toList();
-
-    long totalItems =
-        entityManager
-            .createQuery(
-                """
-                      SELECT COUNT(DISTINCT s.id)
-                      FROM JpaSuiteConfigurationEntity s
-                      WHERE s.fileConfiguration.environmentId = :environmentId
-                      """,
-                Long.class)
-            .setParameter("environmentId", query.environmentId().value())
-            .getSingleResult();
-
-    return new PaginatedProjection<>(
-        content,
-        query.page(),
-        (int) Math.ceil((double) totalItems / query.size()),
-        query.size(),
-        totalItems);
+  private long executeCountQuery(String countQuery, Map<String, Object> params) {
+    TypedQuery<Long> query = entityManager.createQuery(countQuery, Long.class);
+    params.forEach(query::setParameter);
+    return query.getSingleResult();
   }
 
   @SuppressWarnings("unchecked")
-  public List<UUID> findIdsWithTag(String tag, String environmentId) {
+  public List<UUID> findIdsWithTag(String tag, UUID environmentId) {
     return entityManager
         .createNativeQuery(
             """
-       SELECT DISTINCT sc.id
-       FROM suite_configuration sc
-       FULL OUTER JOIN test_configuration tc ON tc.suite_id = sc.id
-       WHERE :tag = ANY(tc.tags)
-       OR :tag = ANY(sc.tags)
-       """,
+                SELECT DISTINCT sc.id
+                FROM suite_configuration sc
+                FULL OUTER JOIN test_configuration tc ON tc.suite_id = sc.id
+                WHERE sc.file_configuration_environment_id = :environmentId
+                AND (:tag = ANY(tc.tags) OR :tag = ANY(sc.tags))
+                """,
             UUID.class)
         .setParameter("tag", tag)
+        .setParameter("environmentId", environmentId)
         .getResultList();
   }
 

@@ -35,11 +35,11 @@ public class JpaTestConfigurationEntity extends PanacheEntityBase {
   @Column(name = "title", nullable = false)
   private String title;
 
+  // Status update in SQL view after test result creation
   @Builder.Default
   @Enumerated(EnumType.STRING)
   @Column(name = "status", nullable = false)
-  private ConfigurationStatus status =
-      ConfigurationStatus.NEW; // Status update in SQL view after test result creation
+  private ConfigurationStatus status = ConfigurationStatus.NEW;
 
   @ManyToOne
   @JoinColumn(name = "suite_id")
