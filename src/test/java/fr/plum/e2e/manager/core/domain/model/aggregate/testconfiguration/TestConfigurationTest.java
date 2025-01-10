@@ -250,27 +250,6 @@ class TestConfigurationTest {
     }
 
     @Test
-    void should_detect_changes_in_status() {
-      // GIVEN
-      TestConfiguration other =
-          TestConfiguration.builder()
-              .testConfigurationId(test.getId())
-              .title(test.getTitle())
-              .position(test.getPosition())
-              .status(ConfigurationStatus.IN_PROGRESS)
-              .tags(test.getTags())
-              .variables(test.getVariables())
-              .lastPlayedAt(test.getLastPlayedAt())
-              .build();
-
-      // WHEN
-      boolean hasChanged = test.hasChanged(other);
-
-      // THEN
-      assertThat(hasChanged).isTrue();
-    }
-
-    @Test
     void should_detect_changes_in_tags() {
       // GIVEN
       List<Tag> differentTags = new ArrayList<>();

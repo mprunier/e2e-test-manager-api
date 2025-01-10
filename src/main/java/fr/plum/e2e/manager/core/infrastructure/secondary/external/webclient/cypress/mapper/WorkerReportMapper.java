@@ -7,9 +7,6 @@ import static fr.plum.e2e.manager.core.infrastructure.secondary.external.webclie
 import static fr.plum.e2e.manager.core.infrastructure.secondary.external.webclient.cypress.constant.CypressConstant.START_PATH;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import fr.plum.e2e.manager.core.domain.model.aggregate.report.Report;
-import fr.plum.e2e.manager.core.domain.model.aggregate.report.ReportSuite;
-import fr.plum.e2e.manager.core.domain.model.aggregate.report.ReportTest;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.FileName;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.SuiteTitle;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.TestTitle;
@@ -22,6 +19,9 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.vo.TestResultE
 import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.vo.TestResultReference;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.vo.TestResultScreenshotTitle;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.vo.TestResultUrlError;
+import fr.plum.e2e.manager.core.domain.model.dto.report.Report;
+import fr.plum.e2e.manager.core.domain.model.dto.report.ReportSuite;
+import fr.plum.e2e.manager.core.domain.model.dto.report.ReportTest;
 import fr.plum.e2e.manager.core.infrastructure.secondary.external.webclient.cypress.extractor.dto.MochaReportResultInternal;
 import fr.plum.e2e.manager.core.infrastructure.secondary.external.webclient.cypress.extractor.dto.MochaReportSuiteInternal;
 import fr.plum.e2e.manager.core.infrastructure.secondary.external.webclient.cypress.extractor.dto.MochaReportTestInternal;

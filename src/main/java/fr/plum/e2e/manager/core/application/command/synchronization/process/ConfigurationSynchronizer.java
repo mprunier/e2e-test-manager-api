@@ -72,18 +72,19 @@ public class ConfigurationSynchronizer {
                 .filter(old -> old.hasFile(entry.getKey().value()))
                 .findFirst();
 
-        var newConfig =
+        var configurationResult =
             buildConfiguration(
                 environmentId, entry.getKey(), entry.getValue(), oldConfig.orElse(null));
 
-        if (newConfig.isEmpty() || newConfig.hasOnlyDisabledConfigurations()) {
+        if (configurationResult.isEmpty()
+            || configurationResult.configuration().hasOnlyDisabledConfigurations()) {
           oldConfig.ifPresent(toDelete::add);
         } else if (oldConfig.isPresent()) {
-          if (oldConfig.get().hasChanged(newConfig)) {
-            toUpdate.add(newConfig);
+          if (configurationResult.hasChanges()) {
+            toUpdate.add(configurationResult.configuration());
           }
         } else {
-          toCreate.add(newConfig);
+          toCreate.add(configurationResult.configuration());
         }
       } catch (CustomException e) {
         errors.add(
@@ -128,7 +129,13 @@ public class ConfigurationSynchronizer {
     return isNotInNewFiles && isNotInErrors;
   }
 
-  private FileConfiguration buildConfiguration(
+  private record ConfigurationBuildResult(FileConfiguration configuration, boolean hasChanges) {
+    public boolean isEmpty() {
+      return configuration == null;
+    }
+  }
+
+  private ConfigurationBuildResult buildConfiguration(
       EnvironmentId environmentId,
       SynchronizationFileName fileName,
       SynchronizationFileContent content,
@@ -140,10 +147,13 @@ public class ConfigurationSynchronizer {
     newConfig.removeDisabledConfigurations();
 
     if (oldConfig != null) {
-      oldConfig.update(newConfig);
-      return oldConfig;
-    } else {
-      return newConfig;
+      boolean hasChanges = oldConfig.hasChanged(newConfig);
+      if (hasChanges) {
+        oldConfig.update(newConfig);
+      }
+      return new ConfigurationBuildResult(oldConfig, hasChanges);
     }
+
+    return new ConfigurationBuildResult(newConfig, true);
   }
 }

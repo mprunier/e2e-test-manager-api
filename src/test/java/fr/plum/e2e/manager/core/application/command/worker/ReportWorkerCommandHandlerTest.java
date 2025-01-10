@@ -8,8 +8,6 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.Environmen
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentIsEnabled;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.MaxParallelWorkers;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.SourceCodeInformation;
-import fr.plum.e2e.manager.core.domain.model.aggregate.report.Report;
-import fr.plum.e2e.manager.core.domain.model.aggregate.report.ReportTest;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.FileName;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.SuiteConfigurationId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.SuiteTitle;
@@ -25,6 +23,8 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerUnitFilte
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerUnitFilterTest;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerUnitId;
 import fr.plum.e2e.manager.core.domain.model.command.ReportWorkerCommand;
+import fr.plum.e2e.manager.core.domain.model.dto.report.Report;
+import fr.plum.e2e.manager.core.domain.model.dto.report.ReportTest;
 import fr.plum.e2e.manager.core.domain.model.event.WorkerCompletedEvent;
 import fr.plum.e2e.manager.core.infrastructure.secondary.clock.inmemory.adapter.InMemoryClockAdapter;
 import fr.plum.e2e.manager.core.infrastructure.secondary.external.inmemory.adapter.InMemoryWorkerExtractorAdapter;

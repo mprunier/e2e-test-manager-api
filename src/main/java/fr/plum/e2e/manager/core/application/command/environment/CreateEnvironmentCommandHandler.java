@@ -2,7 +2,6 @@ package fr.plum.e2e.manager.core.application.command.environment;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.Environment;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.EnvironmentVariable;
-import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.schedulerconfiguration.SchedulerConfiguration;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.Synchronization;
 import fr.plum.e2e.manager.core.domain.model.command.CreateEnvironmentCommand;
@@ -17,7 +16,6 @@ import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AuditInfo;
 import fr.plum.e2e.manager.sharedkernel.domain.port.ClockPort;
 import fr.plum.e2e.manager.sharedkernel.domain.port.TransactionManagerPort;
 import jakarta.enterprise.context.ApplicationScoped;
-import java.util.concurrent.atomic.AtomicReference;
 
 @ApplicationScoped
 public class CreateEnvironmentCommandHandler implements CommandHandler<CreateEnvironmentCommand> {
@@ -52,17 +50,17 @@ public class CreateEnvironmentCommandHandler implements CommandHandler<CreateEnv
   public void execute(CreateEnvironmentCommand environmentCommand) {
     environmentService.assertEnvironmentDescriptionNotExist(environmentCommand.description());
 
-    AtomicReference<EnvironmentId> environmentId = new AtomicReference<>();
     transactionManagerPort.executeInTransaction(
         () -> {
           var environment = createEnvironment(environmentCommand);
           createSynchronization(environmentCommand, environment);
           createScheduler(environmentCommand, environment);
-          environmentId.set(environment.getId());
+          transactionManagerPort.registerAfterCommit(
+              () ->
+                  eventPublisherPort.publishAsync(
+                      new EnvironmentCreatedEvent(
+                          environment.getId(), environmentCommand.actionUsername())));
         });
-
-    eventPublisherPort.publishAsync(
-        new EnvironmentCreatedEvent(environmentId.get(), environmentCommand.actionUsername()));
   }
 
   private void createScheduler(

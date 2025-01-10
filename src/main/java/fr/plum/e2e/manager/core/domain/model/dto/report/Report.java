@@ -1,4 +1,4 @@
-package fr.plum.e2e.manager.core.domain.model.aggregate.report;
+package fr.plum.e2e.manager.core.domain.model.dto.report;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.FileName;
 import java.util.List;

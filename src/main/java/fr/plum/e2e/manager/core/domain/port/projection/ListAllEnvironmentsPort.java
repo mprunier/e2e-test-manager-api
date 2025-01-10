@@ -1,4 +1,4 @@
-package fr.plum.e2e.manager.core.domain.port.view;
+package fr.plum.e2e.manager.core.domain.port.projection;
 
 import fr.plum.e2e.manager.core.domain.model.projection.EnvironmentProjection;
 import java.util.List;

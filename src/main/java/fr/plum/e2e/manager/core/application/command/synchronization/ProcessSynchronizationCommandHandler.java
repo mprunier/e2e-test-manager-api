@@ -6,6 +6,8 @@ import fr.plum.e2e.manager.core.application.command.synchronization.process.fact
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SourceCodeProject;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationError;
+import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationFileContent;
+import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SynchronizationFileName;
 import fr.plum.e2e.manager.core.domain.model.command.CommonCommand;
 import fr.plum.e2e.manager.core.domain.model.event.EnvironmentSynchronizedEvent;
 import fr.plum.e2e.manager.core.domain.port.EventPublisherPort;
@@ -24,8 +26,37 @@ import fr.plum.e2e.manager.sharedkernel.domain.port.ClockPort;
 import fr.plum.e2e.manager.sharedkernel.domain.port.TransactionManagerPort;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.ArrayList;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Handles the synchronization process between source code repositories and test configurations.
+ * This handler orchestrates a multi-step synchronization workflow:
+ *
+ * <p>1. Source Code Synchronization:
+ *
+ * <p>- Clones the repository from the environment's source control
+ *
+ * <p>- Processes TypeScript/JavaScript files (transpilation and conversion)
+ *
+ * <p>2. Configuration Synchronization:
+ *
+ * <p>- Analyzes differences between existing and new test configurations
+ *
+ * <p>- Handles creation, updates, and deletion of test configurations
+ *
+ * <p>3. Error Management:
+ *
+ * <p>- Collects and tracks synchronization errors at both file and global levels
+ *
+ * <p>- Ensures proper error reporting even in case of partial synchronization
+ *
+ * <p>- Maintains synchronization state for error recovery
+ *
+ * <p>The handler ensures proper cleanup of temporary resources and publishes synchronization
+ * completion events regardless of the synchronization outcome. All operations are performed within
+ * appropriate transaction boundaries to maintain data consistency.
+ */
 @Slf4j
 @ApplicationScoped
 public class ProcessSynchronizationCommandHandler implements CommandHandler<CommonCommand> {
@@ -73,7 +104,8 @@ public class ProcessSynchronizationCommandHandler implements CommandHandler<Comm
 
     try {
       sourceCodeProject = sourceCodeSynchronizer.cloneRepository(environment);
-      var processedFiles = sourceCodeSynchronizer.processFiles(sourceCodeProject, errors);
+      Map<SynchronizationFileName, SynchronizationFileContent> processedFiles =
+          sourceCodeSynchronizer.processFiles(sourceCodeProject, errors);
 
       // Specific transaction for configuration synchronization for not saving partial data
       transactionManagerPort.executeInTransaction(

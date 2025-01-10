@@ -3,7 +3,7 @@ package fr.plum.e2e.manager.core.infrastructure.secondary.persistence.jpa.adapte
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.projection.EnvironmentDetailsProjection;
 import fr.plum.e2e.manager.core.domain.model.projection.EnvironmentDetailsVariableProjection;
-import fr.plum.e2e.manager.core.domain.port.view.GetEnvironmentDetailsPort;
+import fr.plum.e2e.manager.core.domain.port.projection.GetEnvironmentDetailsPort;
 import fr.plum.e2e.manager.core.infrastructure.secondary.persistence.jpa.entity.environment.JpaEnvironmentEntity;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;

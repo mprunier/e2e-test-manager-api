@@ -2,7 +2,7 @@ package fr.plum.e2e.manager.core.infrastructure.secondary.external.webclient.cyp
 
 import static fr.plum.e2e.manager.core.infrastructure.secondary.external.webclient.cypress.extractor.CypressArtifactsExtractor.extractArtifact;
 
-import fr.plum.e2e.manager.core.domain.model.aggregate.report.Report;
+import fr.plum.e2e.manager.core.domain.model.dto.report.Report;
 import fr.plum.e2e.manager.core.domain.model.exception.ArtifactReportException;
 import fr.plum.e2e.manager.core.domain.port.WorkerExtractorPort;
 import fr.plum.e2e.manager.core.infrastructure.secondary.external.webclient.cypress.mapper.WorkerReportMapper;

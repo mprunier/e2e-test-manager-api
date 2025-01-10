@@ -7,7 +7,7 @@ import fr.plum.e2e.manager.core.domain.model.projection.CriteriaOptionProjection
 import fr.plum.e2e.manager.core.domain.model.projection.PaginatedProjection;
 import fr.plum.e2e.manager.core.domain.model.projection.SearchCriteriaProjection;
 import fr.plum.e2e.manager.core.domain.model.query.SearchSuiteConfigurationQuery;
-import fr.plum.e2e.manager.core.domain.port.view.SearchSuiteConfigurationPort;
+import fr.plum.e2e.manager.core.domain.port.projection.SearchSuiteConfigurationPort;
 import fr.plum.e2e.manager.core.infrastructure.secondary.persistence.jpa.adapter.mapper.SuiteMapper;
 import fr.plum.e2e.manager.core.infrastructure.secondary.persistence.jpa.entity.testconfiguration.JpaSuiteConfigurationEntity;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -65,7 +65,7 @@ public class JpaSearchSuiteConfigurationAdapter implements SearchSuiteConfigurat
   }
 
   private void addFilterConditions(
-          StringBuilder queryStr, Map<String, Object> params, SearchSuiteConfigurationQuery query) {
+      StringBuilder queryStr, Map<String, Object> params, SearchSuiteConfigurationQuery query) {
 
     if (query.suiteConfigurationId() != null) {
       queryStr.append(" AND s.id = :suiteId");

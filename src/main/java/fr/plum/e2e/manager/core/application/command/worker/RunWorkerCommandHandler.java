@@ -36,6 +36,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
+/**
+ * Handles the execution of worker commands for test automation, supporting both parallel and single
+ * worker execution modes. This handler is responsible for:
+ *
+ * <p>- Validating worker execution conditions and constraints.
+ *
+ * <p>- Managing parallel worker distribution when running all tests with multiple workers.
+ *
+ * <p>- Handling different worker types (ALL, GROUP, FILE, SUITE, TEST) with appropriate filtering.
+ *
+ * <p>- Creating and configuring worker units based on the execution context.
+ *
+ * <p>The handler ensures proper distribution of test files among available workers and maintains
+ * execution rules like preventing multiple ALL-type workers from running simultaneously. For
+ * parallel execution, it intelligently distributes grouped and ungrouped test files across
+ * available worker instances to optimize resource utilization.
+ */
 @ApplicationScoped
 public class RunWorkerCommandHandler implements CommandHandler<RunWorkerCommand> {
 

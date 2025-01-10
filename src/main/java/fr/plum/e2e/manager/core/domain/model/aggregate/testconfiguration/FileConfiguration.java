@@ -135,10 +135,20 @@ public class FileConfiguration extends AggregateRoot<FileName> {
   }
 
   public void removeDisabledConfigurations() {
-    suites.removeIf(this::isDisabled);
+    List<SuiteConfiguration> modifiableSuites = new ArrayList<>(suites);
 
-    suites.forEach(suiteConfiguration -> suiteConfiguration.getTests().removeIf(this::isDisabled));
-    suites.removeIf(suite -> suite.getTests().isEmpty());
+    modifiableSuites.removeIf(this::isDisabled);
+
+    modifiableSuites.forEach(
+        suiteConfiguration -> {
+          List<TestConfiguration> modifiableTests = new ArrayList<>(suiteConfiguration.getTests());
+          modifiableTests.removeIf(this::isDisabled);
+          suiteConfiguration.updateTests(modifiableTests);
+        });
+
+    modifiableSuites.removeIf(suite -> suite.getTests().isEmpty());
+
+    this.suites = modifiableSuites;
   }
 
   private boolean isDisabled(TestConfiguration test) {

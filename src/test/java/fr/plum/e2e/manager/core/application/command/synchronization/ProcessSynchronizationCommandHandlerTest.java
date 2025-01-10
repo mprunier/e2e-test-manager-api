@@ -336,7 +336,7 @@ class ProcessSynchronizationCommandHandlerTest {
   }
 
   @Test
-  void should_update_existing_file_configuration() { // TODO Update non testé pour de vrai
+  void should_update_existing_file_configuration() { // TODO To review: update not tested
     // Given
     var existingConfig = createFileConfiguration("test.js", "Original content");
     fileConfigurationRepository.save(List.of(existingConfig));
@@ -389,7 +389,7 @@ class ProcessSynchronizationCommandHandlerTest {
   }
 
   @Test
-  void should_handle_multiple_changes() { // TODO Update non testé pour de vrai
+  void should_handle_multiple_changes() { // TODO To review: update not tested
     // Given - Initial state with 3 files
     var existingConfig1 = createFileConfiguration("stay.js", "Stay content");
     var existingConfig2 = createFileConfiguration("update.js", "Old content");

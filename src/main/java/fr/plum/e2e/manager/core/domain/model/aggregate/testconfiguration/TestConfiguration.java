@@ -68,7 +68,6 @@ public class TestConfiguration extends Entity<TestConfigurationId> {
 
   public boolean hasChanged(TestConfiguration other) {
     return !title.equals(other.title)
-        || !status.equals(other.status)
         || !position.equals(other.position)
         || !tags.equals(other.tags)
         || !variables.equals(other.variables);

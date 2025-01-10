@@ -1,6 +1,5 @@
 package fr.plum.e2e.manager.core.domain.model.aggregate.testresult;
 
-import fr.plum.e2e.manager.core.domain.model.aggregate.report.ReportTest;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.TestConfigurationId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.vo.TestResultCode;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.vo.TestResultDuration;
@@ -12,6 +11,7 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.vo.TestResultU
 import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.vo.TestResultVariable;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.Worker;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerId;
+import fr.plum.e2e.manager.core.domain.model.dto.report.ReportTest;
 import fr.plum.e2e.manager.sharedkernel.domain.assertion.Assert;
 import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AggregateRoot;
 import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AuditInfo;

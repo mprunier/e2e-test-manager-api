@@ -1,4 +1,4 @@
-package fr.plum.e2e.manager.core.domain.port.view;
+package fr.plum.e2e.manager.core.domain.port.projection;
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.projection.ConfigurationSuiteProjection;

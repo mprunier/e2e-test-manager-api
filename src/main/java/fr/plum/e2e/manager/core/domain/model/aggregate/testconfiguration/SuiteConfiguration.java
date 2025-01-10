@@ -68,7 +68,6 @@ public class SuiteConfiguration extends Entity<SuiteConfigurationId> {
 
   public boolean hasChanged(SuiteConfiguration newSuiteConfiguration) {
     if (!title.equals(newSuiteConfiguration.title)
-        || !status.equals(newSuiteConfiguration.status)
         || !tags.equals(newSuiteConfiguration.tags)
         || !variables.equals(newSuiteConfiguration.variables)) {
       return true;
@@ -88,5 +87,9 @@ public class SuiteConfiguration extends Entity<SuiteConfigurationId> {
               TestConfiguration thisTest = thisTests.get(otherTest.getTitle().value());
               return thisTest == null || thisTest.hasChanged(otherTest);
             });
+  }
+
+  public void updateTests(List<TestConfiguration> newTests) {
+    this.tests = newTests;
   }
 }

@@ -2,8 +2,6 @@ package fr.plum.e2e.manager.core.application.command.worker;
 
 import fr.plum.e2e.manager.core.application.shared.locker.CommandLock;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.Environment;
-import fr.plum.e2e.manager.core.domain.model.aggregate.report.Report;
-import fr.plum.e2e.manager.core.domain.model.aggregate.report.ReportTest;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.SuiteTitle;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.TestConfigurationId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.TestResult;
@@ -12,6 +10,8 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.worker.Worker;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.WorkerUnitStatus;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.vo.WorkerUnitId;
 import fr.plum.e2e.manager.core.domain.model.command.ReportWorkerCommand;
+import fr.plum.e2e.manager.core.domain.model.dto.report.Report;
+import fr.plum.e2e.manager.core.domain.model.dto.report.ReportTest;
 import fr.plum.e2e.manager.core.domain.model.event.WorkerCompletedEvent;
 import fr.plum.e2e.manager.core.domain.model.event.WorkerUnitCompletedEvent;
 import fr.plum.e2e.manager.core.domain.model.exception.ArtifactReportException;
@@ -32,6 +32,23 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Handles the reporting and processing of worker execution results for test automation. This
+ * handler is responsible for:
+ *
+ * <p>- Processing test execution results from completed worker units
+ *
+ * <p>- Handling report artifacts extraction and processing
+ *
+ * <p>- Managing test result statuses (SUCCESS, FAILED, CANCELED, etc.)
+ *
+ * <p>The handler ensures proper transaction management and event publishing for worker unit
+ * completion and overall worker completion states. It also handles various error scenarios such as
+ * missing reports or system errors, creating appropriate test results for each case.
+ *
+ * <p>This component is thread-safe through the @CommandLock annotation to prevent concurrent
+ * processing of the same worker results.
+ */
 @Slf4j
 @ApplicationScoped
 public class ReportWorkerCommandHandler implements CommandHandler<ReportWorkerCommand> {
