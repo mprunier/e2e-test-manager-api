@@ -1,5 +1,5 @@
 -- liquibase formatted sql
--- changeset mprunier:1.2.0-060-create_metrics_table.sql
+-- changeset mprunier:1.0.0-060-create_metrics_table.sql
 
 CREATE TABLE metrics
 (

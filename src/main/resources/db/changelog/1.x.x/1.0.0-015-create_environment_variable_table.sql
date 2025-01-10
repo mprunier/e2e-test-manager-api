@@ -1,5 +1,5 @@
 -- liquibase formatted sql
--- changeset mprunier:1.2.0-015-create_environment_variable_table.sql
+-- changeset mprunier:1.0.0-015-create_environment_variable_table.sql
 
 CREATE TABLE environment_variable
 (

@@ -1,5 +1,5 @@
 -- liquibase formatted sql
--- changeset mprunier:1.2.0-160-create_prune_test_result_trigger.sql endDelimiter:go
+-- changeset mprunier:1.0.0-160-create_prune_test_result_trigger.sql endDelimiter:go
 
 CREATE TRIGGER prune_test_result_trigger
     AFTER INSERT

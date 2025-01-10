@@ -1,5 +1,5 @@
 -- liquibase formatted sql
--- changeset mprunier:1.2.0-080-create_test_result_table.sql
+-- changeset mprunier:1.0.0-080-create_test_result_table.sql
 
 CREATE TABLE test_result
 (

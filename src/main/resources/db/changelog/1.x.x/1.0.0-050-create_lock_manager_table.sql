@@ -1,5 +1,5 @@
 -- liquibase formatted sql
--- changeset mprunier:1.2.0-050-create_lock_manager_table.sql
+-- changeset mprunier:1.0.0-050-create_lock_manager_table.sql
 
 CREATE TABLE lock_manager
 (

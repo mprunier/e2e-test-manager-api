@@ -1,5 +1,5 @@
 -- liquibase formatted sql
--- changeset mprunier:1.2.0-040-create_test_configuration_table.sql
+-- changeset mprunier:1.0.0-040-create_test_configuration_table.sql
 
 CREATE TABLE test_configuration
 (

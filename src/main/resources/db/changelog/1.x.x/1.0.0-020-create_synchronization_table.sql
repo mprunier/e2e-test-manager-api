@@ -1,5 +1,5 @@
 -- liquibase formatted sql
--- changeset mprunier:1.2.0-020-create_synchronization_table.sql
+-- changeset mprunier:1.0.0-020-create_synchronization_table.sql
 
 CREATE TABLE synchronization
 (

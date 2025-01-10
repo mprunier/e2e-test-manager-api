@@ -1,5 +1,5 @@
 -- liquibase formatted sql
--- changeset mprunier:1.2.0-120-create_worker_unit_table.sql
+-- changeset mprunier:1.0.0-120-create_worker_unit_table.sql
 
 CREATE TABLE worker_unit
 (

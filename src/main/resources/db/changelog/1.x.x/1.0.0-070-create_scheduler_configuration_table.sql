@@ -1,5 +1,5 @@
 -- liquibase formatted sql
--- changeset mprunier:1.2.0-070-create_scheduler_configuration_table.sql
+-- changeset mprunier:1.0.0-070-create_scheduler_configuration_table.sql
 
 CREATE TABLE scheduler_configuration
 (

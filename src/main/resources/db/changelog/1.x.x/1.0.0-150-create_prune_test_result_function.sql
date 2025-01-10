@@ -1,5 +1,5 @@
 -- liquibase formatted sql
--- changeset mprunier:1.2.0-150-create_prune_test_result_function.sql endDelimiter:go
+-- changeset mprunier:1.0.0-150-create_prune_test_result_function.sql endDelimiter:go
 
 CREATE OR REPLACE FUNCTION prune_test_result()
     RETURNS TRIGGER AS
