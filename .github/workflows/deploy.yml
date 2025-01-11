@@ -17,9 +17,6 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Package with Maven
-        run: mvn package
-
       - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
