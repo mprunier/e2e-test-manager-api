@@ -1,6 +1,7 @@
 # E2E Test Manager API
 
 E2E Test Manager is an application designed to orchestrate the execution of E2E tests.
+
 It enables centralized test management, environment configuration, individual or group test execution, test scheduling, real-time dashboard visualization, and execution history tracking.
 
 ## 👁️ Overview
@@ -146,7 +147,7 @@ Check documentation to configure these dependencies in your project.
 
 ### 3. GitLab CI Configuration
 
-Add and adapt the following `.gitlab-ci.yml` to your Cypress project. (Maintain the rules in the main script)
+Add and adapt the following `.gitlab-ci.yml` to your Cypress project. (Keep the rules in the main script)
 
 ```yaml
 stages:
@@ -233,6 +234,31 @@ describe('Suite Example', { tags: ['tag1', 'tag2'], variables: ["variable1", "va
 });
 ```
 
+### 5. Add report command
+
+In you Cypress project, add the following command to report an id or any other information:
+
+```javascript
+Cypress.Commands.add("addToReport", (context) => {
+    cy.once("test:after:run", (test) => addContext({ test }, context));
+});
+```
+
+And use this command in your tests:
+
+```javascript
+describe('Suite Example', () => {
+  it('Test Example', () => {
+    ...
+    cy.addToReport({
+        title: "orderId",
+        value: "AZERTY",
+    });
+    ...
+  });
+});
+```
+
 ## 🔄 Cypress + GitHub
 
 Not implemented yet
@@ -291,3 +317,5 @@ afterEach(function () {
     }
 });
 ```
+
+(You need to add the command "addToReport" in your Cypress commands)
