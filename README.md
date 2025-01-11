@@ -6,7 +6,7 @@ It enables centralized test management, environment configuration, individual or
 
 ## 👁️ Overview
 
-![](demo/demo.mp4)
+<video src="https://github.com/mprunier/e2e-test-manager-api/blob/clean-archi/demo/demo.mp4" width="400"></video>
 
 ## 🔄 Tool Compatibility
 
@@ -109,14 +109,11 @@ In this example, the second test depends on the first test. However, the tool al
 
 While this approach might not always follow best practices (as tests should ideally be independent), it can be useful in certain cases to avoid creating excessive test data.
 
-```javascript
-
 ## 🔌 Cypress + GitLab Integration
 
 ### 1. Required Structure
 
 ```
-
 your-cypress-project/
 ├── cypress/
 │ ├── e2e/
@@ -130,7 +127,6 @@ your-cypress-project/
 │ ├── videos/
 │ └── results/
 └── .gitlab-ci.yml
-
 ```
 
 The application does not support nested suites within a file's suite.
