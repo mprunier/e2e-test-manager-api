@@ -6,7 +6,7 @@ It enables centralized test management, environment configuration, individual or
 
 ## 👁️ Overview
 
-[overview.mov](overview/overview.mov)
+![](demo/demo.mp4)
 
 ## 🔄 Tool Compatibility
 
