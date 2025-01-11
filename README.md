@@ -6,7 +6,8 @@ It enables centralized test management, environment configuration, individual or
 
 ## 👁️ Overview
 
-<video src="https://github.com/mprunier/e2e-test-manager-api/blob/clean-archi/demo/demo.mp4" width="400"></video>
+<video src="demo/demo.mp4" controls="controls" style="max-width: 730px;">
+</video>
 
 ## 🔄 Tool Compatibility
 
