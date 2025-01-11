@@ -6,7 +6,7 @@ It enables centralized test management, environment configuration, individual or
 
 ## 👁️ Overview
 
-TODO: Add video
+[overview.mov](overview/overview.mov)
 
 ## 🔄 Tool Compatibility
 
@@ -109,31 +109,32 @@ In this example, the second test depends on the first test. However, the tool al
 
 While this approach might not always follow best practices (as tests should ideally be independent), it can be useful in certain cases to avoid creating excessive test data.
 
-### 4. Reporting an ID
-
-TODO: This feature allows reporting an ID in the test report.
+```javascript
 
 ## 🔌 Cypress + GitLab Integration
 
 ### 1. Required Structure
 
 ```
+
 your-cypress-project/
 ├── cypress/
-│   ├── e2e/
-│   │   └── .../
-│   │       ├── .../
-│   │       │   └── test1.cy.ts
-│   │       ├── .../
-│   │       │   └── test2.cy.ts
-│   │       └ ...
-│   ├── screenshots/
-│   ├── videos/
-│   └── results/
+│ ├── e2e/
+│ │ └── .../
+│ │ ├── .../
+│ │ │ └── test1.cy.ts
+│ │ ├── .../
+│ │ │ └── test2.cy.ts
+│ │ └ ...
+│ ├── screenshots/
+│ ├── videos/
+│ └── results/
 └── .gitlab-ci.yml
+
 ```
 
 The application does not support nested suites within a file's suite.
+Test files must finish with cy.ts or cy.js.
 
 ### 2. Required Cypress Dependencies
 
@@ -251,13 +252,17 @@ describe('Suite Example', () => {
   it('Test Example', () => {
     ...
     cy.addToReport({
-        title: "orderId",
+        title: "reference",
         value: "AZERTY",
     });
     ...
   });
 });
 ```
+
+This reference will be report in the E2E Test Manager.
+
+This allows you to follow a test for more manual analysis for example
 
 ## 🔄 Cypress + GitHub
 
