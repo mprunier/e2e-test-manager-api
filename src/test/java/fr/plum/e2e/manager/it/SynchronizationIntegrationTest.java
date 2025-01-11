@@ -2,9 +2,11 @@ package fr.plum.e2e.manager.it;
 
 import fr.plum.e2e.manager.core.application.command.synchronization.ProcessSynchronizationCommandHandler;
 import fr.plum.e2e.manager.core.application.query.suite.SearchSuiteQueryHandler;
+import fr.plum.e2e.manager.core.application.query.synchronization.ListAllSynchronizationErrorsQueryHandler;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.synchronization.vo.SourceCodeProject;
 import fr.plum.e2e.manager.core.domain.model.command.CommonCommand;
+import fr.plum.e2e.manager.core.domain.model.query.CommonQuery;
 import fr.plum.e2e.manager.core.domain.model.query.SearchSuiteConfigurationQuery;
 import fr.plum.e2e.manager.core.domain.port.SourceCodePort;
 import fr.plum.e2e.manager.it.resource.JSConverterTestResource;
@@ -35,6 +37,7 @@ class SynchronizationIntegrationTest {
 
   @Inject ProcessSynchronizationCommandHandler processSynchronizationCommandHandler;
   @Inject SearchSuiteQueryHandler searchSuiteQueryHandler;
+  @Inject ListAllSynchronizationErrorsQueryHandler listAllSynchronizationErrorsQueryHandler;
 
   @InjectMock SourceCodePort sourceCodePort;
 
@@ -62,7 +65,7 @@ class SynchronizationIntegrationTest {
     processSynchronizationCommandHandler.execute(command);
 
     // Then
-    var results =
+    var searchSuiteResults =
         searchSuiteQueryHandler.execute(
             SearchSuiteConfigurationQuery.builder()
                 .environmentId(environmentId)
@@ -72,8 +75,8 @@ class SynchronizationIntegrationTest {
                 .sortField("file")
                 .sortOrder("ASC")
                 .build());
-    Assertions.assertEquals(2, results.getContent().size());
-    var suite1 = results.getContent().getFirst();
+    Assertions.assertEquals(2, searchSuiteResults.getContent().size());
+    var suite1 = searchSuiteResults.getContent().getFirst();
     Assertions.assertEquals("Suite 1", suite1.title());
     Assertions.assertEquals(2, suite1.tags().size());
     Assertions.assertEquals(2, suite1.variables().size());
@@ -82,7 +85,7 @@ class SynchronizationIntegrationTest {
     Assertions.assertEquals(2, suite1test3.tags().size());
     Assertions.assertEquals(2, suite1test3.variables().size());
 
-    var suite3 = results.getContent().getLast();
+    var suite3 = searchSuiteResults.getContent().getLast();
     Assertions.assertEquals("Suite 3", suite3.title());
     Assertions.assertEquals(2, suite3.tags().size());
     Assertions.assertEquals(2, suite3.variables().size());
@@ -90,5 +93,8 @@ class SynchronizationIntegrationTest {
     var suite3test1 = suite3.tests().getFirst();
     Assertions.assertEquals(2, suite3test1.tags().size());
     Assertions.assertEquals(2, suite3test1.variables().size());
+
+    var errors = listAllSynchronizationErrorsQueryHandler.execute(new CommonQuery(environmentId));
+    Assertions.assertEquals(2, errors.size());
   }
 }
