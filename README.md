@@ -6,7 +6,7 @@ It enables centralized test management, environment configuration, individual or
 
 ## 👁️ Overview
 
-<video src="demo/demo.mp4" controls="controls" style="max-width: 730px;">
+<video src="demo/demo.mov" controls="controls" style="max-width: 730px;">
 </video>
 
 ## 🔄 Tool Compatibility
