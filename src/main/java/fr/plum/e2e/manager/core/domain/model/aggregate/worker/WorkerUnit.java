@@ -34,6 +34,10 @@ public class WorkerUnit extends Entity<WorkerUnitId> {
     return status != WorkerUnitStatus.IN_PROGRESS;
   }
 
+  public boolean isInProgress() {
+    return status == WorkerUnitStatus.IN_PROGRESS;
+  }
+
   public void updateStatus(WorkerUnitStatus status) {
     this.status = status;
   }

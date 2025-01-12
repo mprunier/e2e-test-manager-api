@@ -35,6 +35,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Handles the execution of worker commands for test automation, supporting both parallel and single
@@ -53,6 +54,7 @@ import java.util.stream.IntStream;
  * parallel execution, it intelligently distributes grouped and ungrouped test files across
  * available worker instances to optimize resource utilization.
  */
+@Slf4j
 @ApplicationScoped
 public class RunWorkerCommandHandler implements CommandHandler<RunWorkerCommand> {
 
@@ -86,6 +88,9 @@ public class RunWorkerCommandHandler implements CommandHandler<RunWorkerCommand>
 
   @Override
   public void execute(RunWorkerCommand command) {
+    log.info(
+        "[{}] ran worker on Environment id [{}].", command.username().value(), command.environmentId().value());
+
     assertWorkerInTypeAll(command);
     workerService.assertWorkerNotReached();
 

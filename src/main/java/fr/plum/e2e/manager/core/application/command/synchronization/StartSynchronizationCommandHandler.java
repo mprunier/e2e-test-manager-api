@@ -7,7 +7,9 @@ import fr.plum.e2e.manager.core.domain.port.repository.SynchronizationRepository
 import fr.plum.e2e.manager.core.domain.service.SynchronizationService;
 import fr.plum.e2e.manager.sharedkernel.application.command.CommandHandler;
 import jakarta.enterprise.context.ApplicationScoped;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @ApplicationScoped
 public class StartSynchronizationCommandHandler implements CommandHandler<CommonCommand> {
 
@@ -26,6 +28,11 @@ public class StartSynchronizationCommandHandler implements CommandHandler<Common
 
   @Override
   public void execute(CommonCommand command) {
+    log.info(
+        "[{}] ran synchronization on Environment id [{}].",
+        command.username().value(),
+        command.environmentId().value());
+
     var synchronization = synchronizationService.getSynchronization(command.environmentId());
     synchronization.assertIsNotInProgress();
     synchronization.start();

@@ -8,7 +8,9 @@ import fr.plum.e2e.manager.core.domain.service.EnvironmentService;
 import fr.plum.e2e.manager.sharedkernel.application.command.CommandHandler;
 import fr.plum.e2e.manager.sharedkernel.domain.port.ClockPort;
 import jakarta.enterprise.context.ApplicationScoped;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @ApplicationScoped
 public class UpdateEnvironmentCommandHandler implements CommandHandler<UpdateEnvironmentCommand> {
 
@@ -30,6 +32,11 @@ public class UpdateEnvironmentCommandHandler implements CommandHandler<UpdateEnv
 
   @Override
   public void execute(UpdateEnvironmentCommand environmentCommand) {
+    log.info(
+        "[{}] updated environment id [{}].",
+        environmentCommand.actionUsername().value(),
+        environmentCommand.environmentId().value());
+
     var environment = environmentService.getEnvironment(environmentCommand.environmentId());
 
     if (!environment.getEnvironmentDescription().equals(environmentCommand.description())) {

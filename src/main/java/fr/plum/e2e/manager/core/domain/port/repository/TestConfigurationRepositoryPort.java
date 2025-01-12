@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface TestConfigurationRepositoryPort {
 
   Optional<TestConfigurationId> findId(
-      FileName fileName, SuiteTitle suiteTitle, TestTitle testTitle);
+      EnvironmentId environmentId, FileName fileName, SuiteTitle suiteTitle, TestTitle testTitle);
 
   List<TestConfigurationId> findAllIds(EnvironmentId environmentId, List<FileName> fileNames);
 
