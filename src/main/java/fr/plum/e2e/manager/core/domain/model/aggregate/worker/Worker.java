@@ -81,6 +81,10 @@ public class Worker extends AggregateRoot<WorkerId> {
     return workerUnits.stream().allMatch(WorkerUnit::isFinish);
   }
 
+  public long countInProgressWorkerUnits() {
+    return workerUnits.stream().filter(WorkerUnit::isInProgress).count();
+  }
+
   public WorkerUnit findWorkerUnit(WorkerUnitId workerUnitId) {
     return workerUnits.stream()
         .filter(workerUnit -> workerUnit.getId().equals(workerUnitId))

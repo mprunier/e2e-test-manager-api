@@ -39,7 +39,6 @@ public class SynchronizeResource {
   @POST
   public void synchronize(@NotNull @QueryParam("environmentId") UUID environmentId) {
     var username = extractUsername(identity);
-    log.info("[{}] ran synchronization on Environment id [{}].", username, environmentId);
     var command =
         CommonCommand.builder()
             .environmentId(new EnvironmentId(environmentId))

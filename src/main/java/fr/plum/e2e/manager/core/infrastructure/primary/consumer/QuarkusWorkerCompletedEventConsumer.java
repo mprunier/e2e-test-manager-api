@@ -27,6 +27,7 @@ public class QuarkusWorkerCompletedEventConsumer {
   public void workerCompleted(@ObservesAsync WorkerCompletedEvent event) {
     try {
       addMetrics(event);
+      log.info("Worker id [{}] completed", event.worker().getId().value());
       workerNotificationHelper.sendWorkerUpdatedNotification(
           event.environmentId(), event.worker(), WorkerNotificationStatus.COMPLETED);
     } catch (Exception e) {

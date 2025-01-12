@@ -67,7 +67,6 @@ public class EnvironmentResource {
   @POST
   public void create(@Valid @RequestBody CreateUpdateEnvironmentRequest request) {
     var username = extractUsername(identity);
-    log.info("[{}] created a new environment [{}].", username, request.description());
     var command = request.toCommand(username);
     createEnvironmentCommandHandler.execute(command);
   }
@@ -79,7 +78,6 @@ public class EnvironmentResource {
       @PathParam("id") UUID environmentId,
       @Valid @RequestBody CreateUpdateEnvironmentRequest request) {
     var username = extractUsername(identity);
-    log.info("[{}] updated environment id [{}].", username, environmentId);
     var command = request.toCommand(environmentId, username);
     updateEnvironmentCommandHandler.execute(command);
   }

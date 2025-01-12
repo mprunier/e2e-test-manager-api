@@ -10,7 +10,9 @@ import fr.plum.e2e.manager.core.domain.port.repository.WorkerRepositoryPort;
 import fr.plum.e2e.manager.core.domain.service.EnvironmentService;
 import fr.plum.e2e.manager.sharedkernel.application.command.CommandHandler;
 import jakarta.enterprise.context.ApplicationScoped;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @ApplicationScoped
 public class CancelWorkerCommandHandler implements CommandHandler<CancelWorkerCommand> {
 
@@ -33,6 +35,11 @@ public class CancelWorkerCommandHandler implements CommandHandler<CancelWorkerCo
   @Override
   @CommandLock
   public void execute(CancelWorkerCommand command) {
+    log.info(
+        "[{}] cancel worker id [{}].",
+        command.actionUsername().value(),
+        command.workerId().value());
+
     var optionalWorker = workerRepositoryPort.find(command.workerId());
     if (optionalWorker.isPresent()) {
       var sourceCodeInformation =

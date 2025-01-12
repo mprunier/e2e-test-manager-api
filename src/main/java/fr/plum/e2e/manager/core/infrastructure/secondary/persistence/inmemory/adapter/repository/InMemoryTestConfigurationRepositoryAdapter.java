@@ -50,7 +50,7 @@ public class InMemoryTestConfigurationRepositoryAdapter implements TestConfigura
 
   @Override
   public Optional<TestConfigurationId> findId(
-      FileName fileName, SuiteTitle suiteTitle, TestTitle testTitle) {
+      EnvironmentId environmentId, FileName fileName, SuiteTitle suiteTitle, TestTitle testTitle) {
     return Optional.ofNullable(
         configurations.get(new TestConfigKey(fileName, suiteTitle, testTitle)));
   }

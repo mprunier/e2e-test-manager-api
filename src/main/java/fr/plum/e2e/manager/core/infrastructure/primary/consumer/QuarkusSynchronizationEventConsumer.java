@@ -54,6 +54,7 @@ public class QuarkusSynchronizationEventConsumer {
               .syncErrors(syncErrors)
               .build();
       environmentNotifier.notifySubscribers(externalEvent);
+      log.info("Environment id [{}] synchronization completed.", event.environmentId().value());
     } catch (CustomException exception) {
       logError("finish", event.environmentId(), exception.getDescription());
     } catch (Exception exception) {

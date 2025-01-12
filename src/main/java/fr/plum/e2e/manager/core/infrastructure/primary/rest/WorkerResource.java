@@ -51,7 +51,6 @@ public class WorkerResource {
       @NotNull @QueryParam("environmentId") UUID environmentId,
       @Nullable @RequestBody RunRequest request) {
     var username = extractUsername(identity);
-    log.info("[{}] ran worker on Environment id [{}].", username, environmentId);
     if (request == null) {
       runWorkerCommandHandler.execute(
           RunWorkerCommand.builder()
@@ -68,7 +67,6 @@ public class WorkerResource {
   @Path("/{worker_id}/cancel")
   public void cancel(@PathParam("worker_id") UUID workerId) {
     var username = extractUsername(identity);
-    log.info("[{}] cancel worker.", username);
     cancelWorkerCommandHandler.execute(
         new CancelWorkerCommand(new ActionUsername(username), new WorkerId(workerId)));
   }
