@@ -2,6 +2,7 @@ package fr.plum.e2e.manager.core.application.command.worker;
 
 import fr.plum.e2e.manager.core.application.shared.locker.CommandLock;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.Environment;
+import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.SuiteTitle;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.TestConfigurationId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testresult.TestResult;
@@ -105,6 +106,11 @@ public class ReportWorkerCommandHandler implements CommandHandler<ReportWorkerCo
       return;
     }
 
+    log.info(
+        "Processing worker unit report [{}] with status [{}]",
+        command.workerUnitId(),
+        workerUnitStatus);
+
     var testConfigurationsToRun = getTestConfigurationsToRun(worker, command.workerUnitId());
     var testResults =
         processWorkerResults(
@@ -124,7 +130,7 @@ public class ReportWorkerCommandHandler implements CommandHandler<ReportWorkerCo
           if (worker.isCompleted()) {
             finalizeWorker(worker);
           } else {
-            workerRepositoryPort.save(worker);
+            workerRepositoryPort.update(worker);
           }
         });
   }
@@ -185,8 +191,8 @@ public class ReportWorkerCommandHandler implements CommandHandler<ReportWorkerCo
 
     reports.forEach(
         report -> {
-          processTestsWithoutSuite(report, worker, results, testConfIdFilter);
-          processSuiteTests(report, worker, results, testConfIdFilter);
+          processTestsWithoutSuite(environment.getId(), report, worker, results, testConfIdFilter);
+          processSuiteTests(environment.getId(), report, worker, results, testConfIdFilter);
         });
 
     return results;
@@ -208,6 +214,7 @@ public class ReportWorkerCommandHandler implements CommandHandler<ReportWorkerCo
   }
 
   private void processTestsWithoutSuite(
+      EnvironmentId environmentId,
       Report report,
       Worker worker,
       List<TestResult> results,
@@ -217,7 +224,8 @@ public class ReportWorkerCommandHandler implements CommandHandler<ReportWorkerCo
         .forEach(
             reportTest ->
                 testConfigurationRepositoryPort
-                    .findId(report.fileName(), SuiteTitle.noSuite(), reportTest.title())
+                    .findId(
+                        environmentId, report.fileName(), SuiteTitle.noSuite(), reportTest.title())
                     .ifPresent(
                         configId -> {
                           if (testConfIdFilter.isEmpty() || testConfIdFilter.contains(configId)) {
@@ -227,6 +235,7 @@ public class ReportWorkerCommandHandler implements CommandHandler<ReportWorkerCo
   }
 
   private void processSuiteTests(
+      EnvironmentId environmentId,
       Report report,
       Worker worker,
       List<TestResult> results,
@@ -240,7 +249,8 @@ public class ReportWorkerCommandHandler implements CommandHandler<ReportWorkerCo
                     .forEach(
                         test ->
                             testConfigurationRepositoryPort
-                                .findId(report.fileName(), suite.title(), test.title())
+                                .findId(
+                                    environmentId, report.fileName(), suite.title(), test.title())
                                 .ifPresent(
                                     configId -> {
                                       if (testConfIdFilter.isEmpty()

@@ -28,6 +28,12 @@ public class JpaWorkerRepositoryAdapter implements WorkerRepositoryPort {
   }
 
   @Override
+  public void update(Worker worker) {
+    var entity = WorkerMapper.toEntity(worker);
+    repository.getEntityManager().merge(entity);
+  }
+
+  @Override
   public void delete(WorkerId workerId) {
     repository.deleteById(workerId.value());
   }

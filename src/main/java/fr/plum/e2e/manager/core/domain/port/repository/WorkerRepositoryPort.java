@@ -12,6 +12,8 @@ public interface WorkerRepositoryPort {
 
   void save(Worker worker);
 
+  void update(Worker worker);
+
   void delete(WorkerId workerId);
 
   Optional<Worker> assertNotWorkerInProgressByType(

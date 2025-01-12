@@ -55,7 +55,7 @@ public class RunWorkerScheduler {
 
   public void updateSchedule() {
     if (!enabled) {
-      log.debug("Scheduler is disabled, ignoring update request.");
+      log.info("Scheduler is disabled, ignoring update request.");
       return;
     }
 
@@ -123,7 +123,7 @@ public class RunWorkerScheduler {
         (envId, future) -> {
           long delayInMillis = future.getDelay(TimeUnit.MILLISECONDS);
           LocalDateTime scheduledTime = LocalDateTime.now().plus(Duration.ofMillis(delayInMillis));
-          log.info("Environment [{}] scheduled for: {}.", envId.value(), scheduledTime);
+          log.info(" • Environment [{}] scheduled for: {}.", envId.value(), scheduledTime);
         });
   }
 

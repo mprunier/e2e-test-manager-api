@@ -16,7 +16,9 @@ import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.AuditInfo;
 import fr.plum.e2e.manager.sharedkernel.domain.port.ClockPort;
 import fr.plum.e2e.manager.sharedkernel.domain.port.TransactionManagerPort;
 import jakarta.enterprise.context.ApplicationScoped;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @ApplicationScoped
 public class CreateEnvironmentCommandHandler implements CommandHandler<CreateEnvironmentCommand> {
 
@@ -48,6 +50,11 @@ public class CreateEnvironmentCommandHandler implements CommandHandler<CreateEnv
 
   @Override
   public void execute(CreateEnvironmentCommand environmentCommand) {
+    log.info(
+        "[{}] created a new environment [{}].",
+        environmentCommand.actionUsername().value(),
+        environmentCommand.description().value());
+
     environmentService.assertEnvironmentDescriptionNotExist(environmentCommand.description());
 
     transactionManagerPort.executeInTransaction(

@@ -25,7 +25,7 @@ public class JpaTestConfigurationRepositoryAdapter implements TestConfigurationR
 
   @Override
   public Optional<TestConfigurationId> findId(
-      FileName fileName, SuiteTitle suiteTitle, TestTitle testTitle) {
+      EnvironmentId environmentId, FileName fileName, SuiteTitle suiteTitle, TestTitle testTitle) {
     var query =
         entityManager.createQuery(
             """
@@ -34,12 +34,14 @@ public class JpaTestConfigurationRepositoryAdapter implements TestConfigurationR
             JOIN t.suiteConfiguration s
             JOIN s.fileConfiguration f
             WHERE f.fileName = :fileName
+            AND f.environmentId = :environmentId
             AND s.title = :suiteTitle
             AND t.title = :testTitle
             """,
             UUID.class);
 
     query.setParameter("fileName", fileName.value());
+    query.setParameter("environmentId", environmentId.value());
     query.setParameter("suiteTitle", suiteTitle.value());
     query.setParameter("testTitle", testTitle.value());
 

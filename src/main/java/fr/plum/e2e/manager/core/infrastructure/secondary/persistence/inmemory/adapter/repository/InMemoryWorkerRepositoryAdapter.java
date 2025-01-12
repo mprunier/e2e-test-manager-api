@@ -22,6 +22,11 @@ public class InMemoryWorkerRepositoryAdapter implements WorkerRepositoryPort {
   }
 
   @Override
+  public void update(Worker worker) {
+    workers.put(worker.getId(), worker);
+  }
+
+  @Override
   public void delete(WorkerId workerId) {
     workers.remove(workerId);
   }
