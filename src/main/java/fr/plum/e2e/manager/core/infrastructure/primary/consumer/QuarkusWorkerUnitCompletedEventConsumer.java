@@ -17,9 +17,7 @@ public class QuarkusWorkerUnitCompletedEventConsumer {
   public void workerUnitCompleted(@ObservesAsync WorkerUnitCompletedEvent event) {
     try {
       log.info(
-          "One of the worker unit completed is completed for worker id [{}]. There are still [{}] worker units in progress.",
-          event.worker().getId().value(),
-          event.worker().countInProgressWorkerUnits());
+          "One of the worker unit is completed for worker id [{}]", event.worker().getId().value());
       workerNotificationHelper.sendWorkerUnitUpdatedNotification(
           event.environmentId(), event.worker());
     } catch (Exception e) {

@@ -151,7 +151,7 @@ public class JpaMetricsRepositoryAdapter implements MetricsRepositoryPort {
                 FROM JpaMetricsEntity m
                 WHERE m.environmentId = :envId
                 AND m.createdAt >= :since
-                ORDER BY m.createdAt DESC
+                ORDER BY m.createdAt ASC
                 """,
             JpaMetricsEntity.class)
         .setParameter("envId", environmentId.value())
