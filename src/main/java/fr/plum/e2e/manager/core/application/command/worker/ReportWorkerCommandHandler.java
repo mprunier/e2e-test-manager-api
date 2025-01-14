@@ -93,7 +93,12 @@ public class ReportWorkerCommandHandler implements CommandHandler<ReportWorkerCo
     var worker = workerRepositoryPort.find(command.workerUnitId()).orElse(null);
 
     if (worker == null) {
-      log.trace("Worker Unit {} not found", command.workerUnitId());
+      log.trace("Worker not found with worker unit id {}", command.workerUnitId());
+      return;
+    }
+
+    var workerUnit = worker.findWorkerUnit(command.workerUnitId());
+    if (workerUnit.isFinish()) {
       return;
     }
 
@@ -118,7 +123,6 @@ public class ReportWorkerCommandHandler implements CommandHandler<ReportWorkerCo
 
     handleMissingTests(testConfigurationsToRun, testResults, worker);
 
-    var workerUnit = worker.findWorkerUnit(command.workerUnitId());
     workerUnit.updateStatus(workerUnitStatus);
 
     transactionManagerPort.executeInTransaction(

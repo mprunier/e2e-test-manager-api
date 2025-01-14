@@ -222,7 +222,11 @@ public final class WorkerReportMapper {
   }
 
   private static String removeScreenshotPrefixAndExtension(String screenshotName) {
-    return screenshotName.replace(SCREENSHOT_PATH, "").replace(SCREENSHOT_EXTENSION, "");
+    int index = screenshotName.indexOf(SCREENSHOT_PATH);
+    if (index != -1) {
+      screenshotName = screenshotName.substring(index + SCREENSHOT_PATH.length());
+    }
+    return screenshotName.replace(SCREENSHOT_EXTENSION, "");
   }
 
   private static String removeVideoPrefixAndExtension(String screenshotName) {

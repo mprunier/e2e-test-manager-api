@@ -1,0 +1,2 @@
+INSERT INTO synchronization (environment_id, is_in_progress, created_by, updated_by, created_at, updated_at)
+VALUES ('a13aae1b-385a-4d3b-85b9-e0a4f62386fd', FALSE, 'Init System', 'Gitlab Webhook', '2025-01-12 10:40:28.133396 +00:00', '2025-01-14 08:41:41.260799 +00:00');

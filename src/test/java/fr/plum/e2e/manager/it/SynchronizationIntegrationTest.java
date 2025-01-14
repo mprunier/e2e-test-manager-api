@@ -11,6 +11,7 @@ import fr.plum.e2e.manager.core.domain.model.query.SearchSuiteConfigurationQuery
 import fr.plum.e2e.manager.core.domain.port.SourceCodePort;
 import fr.plum.e2e.manager.it.resource.JSConverterTestResource;
 import fr.plum.e2e.manager.it.resource.PostgresTestResource;
+import fr.plum.e2e.manager.it.utils.SqlTestService;
 import fr.plum.e2e.manager.sharedkernel.domain.model.aggregate.ActionUsername;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.common.QuarkusTestResource;
@@ -20,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
 import org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,10 +32,12 @@ import org.mockito.Mockito;
 @QuarkusTestResource(JSConverterTestResource.class)
 class SynchronizationIntegrationTest {
 
-  public static final UUID DEFAULT_ENVIRONMENT_UUID =
-      UUID.fromString("8d8ea7dd-6115-4437-94f3-67c4999d9468");
+  public static final UUID ENVIRONMENT_UUID =
+      UUID.fromString("a13aae1b-385a-4d3b-85b9-e0a4f62386fd");
   private static final String TEST_RESOURCES_PATH = "src/test/resources/cypress/gitrepo";
   private static final String TEST_REPO_DIR = "target/test-repositories";
+
+  @Inject SqlTestService sqlTestService;
 
   @Inject ProcessSynchronizationCommandHandler processSynchronizationCommandHandler;
   @Inject SearchSuiteQueryHandler searchSuiteQueryHandler;
@@ -45,16 +49,24 @@ class SynchronizationIntegrationTest {
 
   @BeforeEach
   void setUp() throws IOException {
+    sqlTestService.executeSqlScript("sql/environment.sql");
+    sqlTestService.executeSqlScript("sql/synchronization.sql");
+
     File baseDir = new File(TEST_REPO_DIR);
     baseDir.mkdirs();
     tempProjectDir = new File(baseDir, "git-repo-" + System.currentTimeMillis());
     FileUtils.copyDirectory(new File(TEST_RESOURCES_PATH), tempProjectDir);
   }
 
+  @AfterEach
+  void tearDown() {
+    sqlTestService.executeSqlScript("sql/clean.sql");
+  }
+
   @Test
   void shouldSynchronizeSuccessfully() {
     // Given
-    var environmentId = new EnvironmentId(DEFAULT_ENVIRONMENT_UUID);
+    var environmentId = new EnvironmentId(ENVIRONMENT_UUID);
     var username = new ActionUsername("test-user");
     var command = new CommonCommand(environmentId, username);
 
