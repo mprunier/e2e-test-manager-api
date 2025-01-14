@@ -1,0 +1,13 @@
+INSERT INTO worker (id, environment_id, type, variables, created_at, created_by, updated_at, updated_by)
+VALUES ('d61d2ea9-2e42-4a09-90cc-4e6ad6a07e0e', 'a13aae1b-385a-4d3b-85b9-e0a4f62386fd', 'ALL', '', '2025-01-14 10:32:14.591405 +00:00', 'xxxx', '2025-01-14 10:32:14.591405 +00:00', 'xxxx');
+
+INSERT INTO worker_unit (id, worker_id, status, filter)
+VALUES ('468061', 'd61d2ea9-2e42-4a09-90cc-4e6ad6a07e0e', 'IN_PROGRESS', '{"fileNames":["1031_sale_telesales_postpay_acquisition_fixed_complete_flow.cy.js","1040_sale_telesales_postpay_acquisition_mobile_complete_flow_with_extras.cy.js","2070_dashboard_manage_subscription_mobile_manage_equipment.cy.js"]}');
+INSERT INTO worker_unit (id, worker_id, status, filter)
+VALUES ('468062', 'd61d2ea9-2e42-4a09-90cc-4e6ad6a07e0e', 'IN_PROGRESS',
+        '{"fileNames":["1020_sale_retails_postpay_acquisition_mobile_complete_flow.cy.js","2010_dashboard_account_details_profile.cy.js","2011_dashboard_account_details_payment_and_billing.cy.js","2012_dashboard_account_details_documents.cy.js","2012_dashboard_account_details_transactions.cy.js","2020_dashboard_account_details_authorized_users.cy.js","2030_dashboard_account_details_manage_addons.cy.js","2040_dashboard_manage_subscription_mobile_swap_number.cy.js","2050_dashboard_manage_subscription_mobile_manage_sim.cy.js","2060_dashboard_manage_subscription_mobile_barrings.cy.js","2080_dashboard_manage_subscription_mobile_manage_addons.cy.js","2090_dashboard_manage_subscription_mobile_manage_discounts.cy.js","2100_dashboard_manage_subscription_mobile_porting.cy.js","2900_dashboard_manage_subscription_mobile_cancel_subscription.cy.js"]}');
+INSERT INTO worker_unit (id, worker_id, status, filter)
+VALUES ('468063', 'd61d2ea9-2e42-4a09-90cc-4e6ad6a07e0e', 'IN_PROGRESS', '{"fileNames":["1041_sale_retails_postpay_acquisition_mobile_and_fixed_complete_flow_with_extras.cy.js","0000_generic_select_channel.cy.js","1010_sale_telesales_postpay_acquisition_mobile_cancel_flow.cy.js"]}');
+INSERT INTO worker_unit (id, worker_id, status, filter)
+VALUES ('468064', 'd61d2ea9-2e42-4a09-90cc-4e6ad6a07e0e', 'IN_PROGRESS',
+        '{"fileNames":["1030_sale_telesales_postpay_acquisition_mobile_complete_flow.cy.js","1045_sale_telesales_postpay_crosssell_mobile_cancel_flow.cy.js","1050_sale_retails_postpay_crosssell_mobile_complete_flow.cy.js","1060_sale_telesales_postpay_crosssell_mobile_complete_flow_with_extra.cy.js","1065_sale_telesales_changeoffer_mobile_cancel_flow.cy.js","1070_sale_retails_changeoffer_mobile_complete_flow.cy.js","1080_sale_telesales_changeoffer_mobile_complete_flow_with_extra.cy.js","1090_sale_retails_pedsl_mobile_complete_flow.cy.js","1100_sale_telesales_pedsl_mobile_complete_flow.cy.js"]}');
