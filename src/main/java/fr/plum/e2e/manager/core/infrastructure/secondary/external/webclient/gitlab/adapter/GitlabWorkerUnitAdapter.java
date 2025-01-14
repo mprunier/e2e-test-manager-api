@@ -88,7 +88,6 @@ public class GitlabWorkerUnitAdapter implements WorkerUnitPort {
           sourceCodeInformation.token(), sourceCodeInformation.projectId(), id.value());
     } catch (CustomException e) {
       log.error("Error during canceling pipeline in Gitlab.");
-      throw e;
     }
   }
 }
