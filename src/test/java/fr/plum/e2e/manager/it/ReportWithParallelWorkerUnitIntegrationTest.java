@@ -99,7 +99,11 @@ class ReportWithParallelWorkerUnitIntegrationTest {
 
   @AfterEach
   void tearDown() {
-    sqlTestService.executeSqlScript("sql/clean.sql");
+    try {
+      sqlTestService.executeSqlScript("sql/clean.sql");
+    } catch (Exception e) {
+      System.err.println("Error while cleaning database: " + e.getMessage());
+    }
   }
 
   @Test

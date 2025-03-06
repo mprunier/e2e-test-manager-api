@@ -2,9 +2,9 @@ name: E2E Test Manager API - Continuous Integration
 
 on:
   push:
-    branches: [ "develop" ]
+    branches: [ "develop", "hotfix/*" ]
   pull_request:
-    branches: [ "develop" ]
+    branches: [ "develop", "hotfix/*" ]
 
 jobs:
   test:
