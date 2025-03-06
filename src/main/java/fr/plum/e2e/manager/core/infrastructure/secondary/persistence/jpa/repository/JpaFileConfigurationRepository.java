@@ -16,7 +16,7 @@ public class JpaFileConfigurationRepository
     implements PanacheRepositoryBase<JpaFileConfigurationEntity, JpaFileConfigurationId> {
 
   public List<JpaFileConfigurationEntity> findAll(EnvironmentId environmentId) {
-    return list("environmentId = ?1", environmentId.value());
+    return list("environmentId = ?1 ORDER BY fileName ASC", environmentId.value());
   }
 
   public void deleteAll(List<JpaFileConfigurationEntity> entities) {
@@ -29,7 +29,10 @@ public class JpaFileConfigurationRepository
 
   public List<JpaFileConfigurationEntity> findAll(
       EnvironmentId environmentId, GroupName groupName) {
-    return list("environmentId = ?1 AND groupName = ?2", environmentId.value(), groupName.value());
+    return list(
+        "environmentId = ?1 AND groupName = ?2 ORDER BY fileName ASC",
+        environmentId.value(),
+        groupName.value());
   }
 
   public Optional<JpaFileConfigurationEntity> find(

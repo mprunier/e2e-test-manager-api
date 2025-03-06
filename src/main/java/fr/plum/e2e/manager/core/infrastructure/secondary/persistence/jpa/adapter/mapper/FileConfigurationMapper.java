@@ -137,7 +137,8 @@ public final class FileConfigurationMapper {
                         ? new GroupName(entity.getGroupName())
                         : new GroupName(NO_GROUP_NAME),
                 Collectors.mapping(
-                    entity -> new FileName(entity.getFileName()), Collectors.toList())));
+                    entity -> new FileName(entity.getFileName()),
+                    Collectors.toCollection(ArrayList::new))));
   }
 
   public static FileName toDomainFileName(JpaFileConfigurationEntity jpaFileConfigurationEntity) {
