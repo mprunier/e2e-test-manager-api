@@ -6,6 +6,7 @@ import fr.plum.e2e.manager.core.application.command.worker.dto.WorkerFiles;
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.Environment;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.FileName;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.GroupName;
+import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.Tag;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.Worker;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.WorkerType;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.WorkerUnit;
@@ -188,7 +189,7 @@ public class RunWorkerCommandHandler implements CommandHandler<RunWorkerCommand>
     }
 
     var workerFilter =
-        new WorkerUnitFilter(fileNamesFilter, command.tag(), suiteFilter, testFilter);
+        new WorkerUnitFilter(fileNamesFilter, new Tag(command.groupName().value()), suiteFilter, testFilter);
     var workerIsRecordVideo = getWorkerIsRecordVideo(workerFilter);
     runWorker(environment, workerFilter, command.variables(), workerIsRecordVideo, worker);
   }

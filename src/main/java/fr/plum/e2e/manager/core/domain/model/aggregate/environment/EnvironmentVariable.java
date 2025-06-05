@@ -13,9 +13,9 @@ import lombok.Getter;
 @Getter
 public class EnvironmentVariable extends Entity<EnvironmentVariableId> {
 
-  private VariableValue value;
-  private VariableDescription description; // Not the name which is the id
-  private VariableIsHidden isHidden;
+  private final VariableValue value;
+  private final VariableDescription description; // Not the name which is the id
+  private final VariableIsHidden isHidden;
 
   @Builder
   public EnvironmentVariable(

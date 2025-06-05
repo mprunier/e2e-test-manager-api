@@ -63,38 +63,49 @@ public class WorkerNotificationHelper {
   private ConfigurationSuiteWithWorkerProjection getConfigurationSuiteWithWorkerView(
       Worker worker) {
     ConfigurationSuiteWithWorkerProjection suiteWithWorker = null;
-    if (WorkerType.SUITE.equals(worker.getType()) || WorkerType.TEST.equals(worker.getType())) {
-      var searchSuiteQuery =
-          SearchSuiteConfigurationQuery.builder()
-              .environmentId(worker.getEnvironmentId())
-              .sortField("file")
-              .sortOrder("asc")
-              .page(0)
-              .size(1)
-              .suiteConfigurationId(
-                  WorkerType.SUITE.equals(worker.getType())
-                      ? worker
-                          .getWorkerUnits()
-                          .getFirst()
-                          .getFilter()
-                          .suiteFilter()
-                          .suiteConfigurationId()
-                      : null)
-              .testConfigurationId(
-                  WorkerType.TEST.equals(worker.getType())
-                      ? worker
-                          .getWorkerUnits()
-                          .getFirst()
-                          .getFilter()
-                          .testFilter()
-                          .testConfigurationId()
-                      : null)
-              .build();
+    if (WorkerType.SUITE.equals(worker.getType()) || WorkerType.TEST.equals(worker.getType()) || WorkerType.GROUP.equals(worker.getType())) {
+      var searchSuiteQuery = buildSearchQuery(worker);
       var suitesPaginated = searchSuiteQueryHandler.execute(searchSuiteQuery);
       if (suitesPaginated != null && !suitesPaginated.getContent().isEmpty()) {
         suiteWithWorker = suitesPaginated.getContent().getFirst();
       }
     }
     return suiteWithWorker;
+  }
+
+  private static SearchSuiteConfigurationQuery buildSearchQuery(Worker worker) {
+    return SearchSuiteConfigurationQuery.builder()
+            .environmentId(worker.getEnvironmentId())
+            .sortField("file")
+            .sortOrder("asc")
+            .page(0)
+            .size(1)
+            .suiteConfigurationId(
+                    WorkerType.SUITE.equals(worker.getType())
+                            ? worker
+                            .getWorkerUnits()
+                            .getFirst()
+                            .getFilter()
+                            .suiteFilter()
+                            .suiteConfigurationId()
+                            : null)
+            .testConfigurationId(
+                    WorkerType.TEST.equals(worker.getType())
+                            ? worker
+                            .getWorkerUnits()
+                            .getFirst()
+                            .getFilter()
+                            .testFilter()
+                            .testConfigurationId()
+                            : null)
+            .tag(
+                    WorkerType.GROUP.equals(worker.getType())
+                            ? worker
+                            .getWorkerUnits()
+                            .getFirst()
+                            .getFilter()
+                            .tag()
+                            : null)
+            .build();
   }
 }
