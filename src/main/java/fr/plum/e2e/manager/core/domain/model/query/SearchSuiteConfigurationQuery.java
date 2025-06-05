@@ -6,6 +6,7 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.File
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.SuiteConfigurationId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.Tag;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.TestConfigurationId;
+import java.util.List;
 import lombok.Builder;
 
 @Builder
@@ -14,9 +15,9 @@ public record SearchSuiteConfigurationQuery(
     SuiteConfigurationId suiteConfigurationId,
     TestConfigurationId testConfigurationId,
     Tag tag,
-    FileName fileName,
+    List<FileName> fileNames,
     ConfigurationStatus status,
-    boolean allNotSuccess,
+    Boolean allNotSuccess,
     int page,
     int size,
     String sortField,

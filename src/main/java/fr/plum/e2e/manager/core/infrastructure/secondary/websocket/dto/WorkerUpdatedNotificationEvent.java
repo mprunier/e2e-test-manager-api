@@ -35,16 +35,19 @@ public class WorkerUpdatedNotificationEvent extends AbstractNotificationEvent {
   }
 
   private void assertSuiteWithWorkerValidity() {
-    if ((workerType == WorkerType.SUITE || workerType == WorkerType.TEST)
+    if ((workerType == WorkerType.SUITE
+            || workerType == WorkerType.TEST
+            || workerType == WorkerType.GROUP)
         && configurationSuiteWithWorker == null) {
       throw new DomainAssertException(
-          "suiteWithWorker must be provided when workerType is SUITE or TEST");
+          "suiteWithWorker must be provided when workerType is SUITE, TEST, or GROUP");
     }
     if (workerType != WorkerType.SUITE
         && workerType != WorkerType.TEST
+        && workerType != WorkerType.GROUP
         && configurationSuiteWithWorker != null) {
       throw new DomainAssertException(
-          "suiteWithWorker must not be provided when workerType is not SUITE or TEST");
+          "suiteWithWorker must not be provided when workerType is not SUITE, TEST, or GROUP");
     }
   }
 }

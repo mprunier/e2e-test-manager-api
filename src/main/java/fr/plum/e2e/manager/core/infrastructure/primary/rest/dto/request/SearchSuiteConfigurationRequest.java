@@ -11,6 +11,7 @@ import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.enumeration.Sear
 import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.enumeration.SearchSuiteConfigurationSortOrder;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.QueryParam;
+import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -61,7 +62,7 @@ public class SearchSuiteConfigurationRequest {
         .testConfigurationId(
             configurationTestId != null ? new TestConfigurationId(configurationTestId) : null)
         .tag(tag != null ? new Tag(tag) : null)
-        .fileName(file != null ? new FileName(file) : null)
+        .fileNames(file != null ? List.of(new FileName(file)) : null)
         .status(status)
         .allNotSuccess(allNotSuccess != null ? allNotSuccess : false)
         .page(page)
