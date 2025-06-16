@@ -2,6 +2,7 @@ package fr.plum.e2e.manager.core.infrastructure.secondary.persistence.jpa.adapte
 
 import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.EnvironmentId;
 import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.ConfigurationStatus;
+import fr.plum.e2e.manager.core.domain.model.aggregate.testconfiguration.vo.FileName;
 import fr.plum.e2e.manager.core.domain.model.projection.ConfigurationSuiteProjection;
 import fr.plum.e2e.manager.core.domain.model.projection.CriteriaOptionProjection;
 import fr.plum.e2e.manager.core.domain.model.projection.PaginatedProjection;
@@ -84,9 +85,11 @@ public class JpaSearchSuiteConfigurationAdapter implements SearchSuiteConfigurat
       params.put("tag", query.tag().value());
     }
 
-    if (query.fileName() != null) {
-      queryStr.append(" AND s.fileConfiguration.fileName = :value");
-      params.put("value", query.fileName().value());
+    if (query.fileNames() != null && !query.fileNames().isEmpty()) {
+      //      queryStr.append(" AND s.fileConfiguration.fileName = :value");
+      //      params.put("value", query.fileName().value());
+      queryStr.append(" AND s.fileConfiguration.fileName IN :fileNames");
+      params.put("fileNames", query.fileNames().stream().map(FileName::value).toList());
     }
 
     if (query.status() != null) {

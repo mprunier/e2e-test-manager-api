@@ -6,6 +6,7 @@ import fr.plum.e2e.manager.core.domain.model.aggregate.environment.vo.Environmen
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.Worker;
 import fr.plum.e2e.manager.core.domain.model.aggregate.worker.WorkerType;
 import fr.plum.e2e.manager.core.domain.model.projection.ConfigurationSuiteWithWorkerProjection;
+import fr.plum.e2e.manager.core.domain.model.projection.PaginatedProjection;
 import fr.plum.e2e.manager.core.domain.model.query.CommonQuery;
 import fr.plum.e2e.manager.core.domain.model.query.SearchSuiteConfigurationQuery;
 import fr.plum.e2e.manager.core.infrastructure.primary.rest.dto.response.ConfigurationSuiteWithWorkerResponse;
@@ -15,6 +16,8 @@ import fr.plum.e2e.manager.core.infrastructure.secondary.websocket.dto.TypeAllWo
 import fr.plum.e2e.manager.core.infrastructure.secondary.websocket.dto.WorkerNotificationStatus;
 import fr.plum.e2e.manager.core.infrastructure.secondary.websocket.dto.WorkerUpdatedNotificationEvent;
 import jakarta.enterprise.context.ApplicationScoped;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -62,39 +65,41 @@ public class WorkerNotificationHelper {
 
   private ConfigurationSuiteWithWorkerProjection getConfigurationSuiteWithWorkerView(
       Worker worker) {
-    ConfigurationSuiteWithWorkerProjection suiteWithWorker = null;
-    if (WorkerType.SUITE.equals(worker.getType()) || WorkerType.TEST.equals(worker.getType())) {
-      var searchSuiteQuery =
-          SearchSuiteConfigurationQuery.builder()
-              .environmentId(worker.getEnvironmentId())
-              .sortField("file")
-              .sortOrder("asc")
-              .page(0)
-              .size(1)
-              .suiteConfigurationId(
-                  WorkerType.SUITE.equals(worker.getType())
-                      ? worker
-                          .getWorkerUnits()
-                          .getFirst()
-                          .getFilter()
-                          .suiteFilter()
-                          .suiteConfigurationId()
-                      : null)
-              .testConfigurationId(
-                  WorkerType.TEST.equals(worker.getType())
-                      ? worker
-                          .getWorkerUnits()
-                          .getFirst()
-                          .getFilter()
-                          .testFilter()
-                          .testConfigurationId()
-                      : null)
-              .build();
-      var suitesPaginated = searchSuiteQueryHandler.execute(searchSuiteQuery);
-      if (suitesPaginated != null && !suitesPaginated.getContent().isEmpty()) {
-        suiteWithWorker = suitesPaginated.getContent().getFirst();
-      }
+    if (!isValidWorkerType(worker.getType())) {
+      return null;
     }
-    return suiteWithWorker;
+
+    var firstWorkerUnit = worker.getWorkerUnits().getFirst();
+    var filter = firstWorkerUnit.getFilter();
+
+    var searchQuery =
+        SearchSuiteConfigurationQuery.builder()
+            .environmentId(worker.getEnvironmentId())
+            .sortField("file")
+            .sortOrder("asc")
+            .page(0)
+            .size(1)
+            .suiteConfigurationId(
+                WorkerType.SUITE.equals(worker.getType())
+                    ? filter.suiteFilter().suiteConfigurationId()
+                    : null)
+            .testConfigurationId(
+                WorkerType.TEST.equals(worker.getType())
+                    ? filter.testFilter().testConfigurationId()
+                    : null)
+            .fileNames(WorkerType.GROUP.equals(worker.getType()) ? filter.fileNames() : null)
+            .build();
+
+    return Optional.ofNullable(searchSuiteQueryHandler.execute(searchQuery))
+        .map(PaginatedProjection::getContent)
+        .filter(content -> !content.isEmpty())
+        .map(List::getFirst)
+        .orElse(null);
+  }
+
+  private boolean isValidWorkerType(WorkerType type) {
+    return WorkerType.SUITE.equals(type)
+        || WorkerType.TEST.equals(type)
+        || WorkerType.GROUP.equals(type);
   }
 }
