@@ -12,6 +12,7 @@ import fr.plum.e2e.manager.core.domain.port.repository.FileConfigurationReposito
 import fr.plum.e2e.manager.sharedkernel.domain.exception.CustomException;
 import fr.plum.e2e.manager.sharedkernel.domain.port.ClockPort;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -60,7 +61,8 @@ public class ConfigurationSynchronizer {
 
     var oldConfigurations = fileConfigurationRepositoryPort.findAll(environmentId);
     var newFileNames = extractNewFileNames(processedFiles);
-    var toDelete = findConfigurationsToDelete(oldConfigurations, newFileNames, errors);
+    var toDelete =
+        new HashSet<>(findConfigurationsToDelete(oldConfigurations, newFileNames, errors));
 
     var toCreate = new ArrayList<FileConfiguration>();
     var toUpdate = new ArrayList<FileConfiguration>();
@@ -97,7 +99,7 @@ public class ConfigurationSynchronizer {
       }
     }
 
-    return new ConfigurationChanges(toDelete, toCreate, toUpdate);
+    return new ConfigurationChanges(new ArrayList<>(toDelete), toCreate, toUpdate);
   }
 
   private Set<String> extractNewFileNames(
