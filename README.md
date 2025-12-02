@@ -43,9 +43,12 @@ The project architecture has been designed to facilitate easy integration of add
 | `QUARKUS_OIDC_CLIENT_ID`                                           | OIDC client ID                                                         | `e2e-testing-manager-api`                          |
 | `QUARKUS_OIDC_CREDENTIALS_SECRET`                                  | OIDC authentication secret                                             | `E9SgMpWOvq0iS9gT5ZNnBIA82kgIgLQM`                 |
 | `QUARKUS_REST_CLIENT_CONVERTER_URL`                                | Conversion service REST URL                                            | `http://localhost:3000`                            |
+| `QUARKUS_REST_CLIENT_GITLAB_URL`                                   | GitLab API base URL                                                    | `https://your_gitlab_instance/api/v4`              |
 | `BUSINESS_SCHEDULER_WORKER_REPORT_VERIFICATION_CRON_EXPR`          | CRON expression for worker report verification                         | `0 0/5 * * * ?`                                    |
 | `BUSINESS_SCHEDULER_WORKER_REPORT_CANCEL_TIMEOUT_INTERVAL_MINUTES` | Timeout interval (in minutes) before canceling a worker without report | `60`                                               |
 | `BUSINESS_WORKER_MAX_UNIT_IN_PARALLEL`                             | Maximum number of work units that can be executed in parallel          | `10`                                               |
+| `SCHEDULER_ENABLED`                                                | Enable or disable the scheduler                                        | `true`                                             |
+| `QUARKUS_CACHE_CAFFEINE_GITLAB_JOB_EXPIRE_AFTER_WRITE`             | GitLab job cache expiration time                                       | `3H`                                               |
 
 ## 📋 Business Rules
 
